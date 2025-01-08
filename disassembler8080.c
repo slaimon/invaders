@@ -39,7 +39,7 @@ void printline(disassembler8080_instruction_t dt, FILE* ofp) {
             else fputc('$',ofp);                                            // i primi due byte successivi all'opcode
         fprintf(ofp, "%02X", abs(dt.inputValues[dt.num_inputValues-2]));    // compongono un unico parametro da 16 bit
         fprintf(ofp, "%02X\t", abs(dt.inputValues[dt.num_inputValues-1]));  // DA RIGUARDARE perché al momento non
-        #endif                                                              // supporta altri valori di MAXARGS
+        #endif                                                              // supporta altri valori di MAX_INSTRUCTION_PARAMETERS
     }            
     else if(dt.num_inputValues > 0){
         if(dt.inputValues[dt.num_inputValues-1] >= 0) fputc('#',ofp);
@@ -58,10 +58,10 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
     
     dt.opcode = (unsigned char) mem[addr];
     
-    dt.position= addr;
-    dt.num_inputRegisters= 0;        //
-    dt.num_inputValues= 0;        //
-    dt.instructionLength= 1;        // default values
+    dt.position = addr;
+    dt.num_inputRegisters = 0;     //
+    dt.num_inputValues = 0;        //
+    dt.instructionLength = 1;      // default values
     
     switch (dt.opcode) {
         case 0x00: {
@@ -76,41 +76,41 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = + (int) mem[addr+1];
             dt.inputValues[1] = + (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 2;
             break;
         }
         case 0x02: {
             strcpy(dt.mnemonic, "STAX");
             strcpy(dt.inputRegisters, "B");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x03: {
             strcpy(dt.mnemonic, "INX");
             strcpy(dt.inputRegisters, "B");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x04: {
             strcpy(dt.mnemonic, "INR");
             strcpy(dt.inputRegisters, "B");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x05: {
             strcpy(dt.mnemonic, "DCR");
             strcpy(dt.inputRegisters, "B");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x06: {
@@ -119,9 +119,9 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 1;
             break;
         }
         case 0x07: {
@@ -138,40 +138,40 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             strcpy(dt.mnemonic, "DAD");
             strcpy(dt.inputRegisters, "B");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x0A: {
             strcpy(dt.mnemonic, "LDAX");
             strcpy(dt.inputRegisters, "B");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x0B: {
             strcpy(dt.mnemonic, "DCX");
             strcpy(dt.inputRegisters, "B");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x0C: {
             strcpy(dt.mnemonic, "INR");
             strcpy(dt.inputRegisters, "C");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x0D: {
             strcpy(dt.mnemonic, "DCR");
             strcpy(dt.inputRegisters, "C");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x0E: {
@@ -180,21 +180,21 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 1;
             break;
         }
         case 0x0F: {
             strcpy(dt.mnemonic, "RRC");
             
-            dt.instructionLength= 1;
+            dt.instructionLength = 1;
             break;
         }
         case 0x10: {
             strcpy(dt.mnemonic, "NOP");
             
-            dt.instructionLength= 1;
+            dt.instructionLength = 1;
             break;
         }
         case 0x11: {
@@ -204,41 +204,41 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = + (int) mem[addr+1];
             dt.inputValues[1] = + (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 2;
             break;
         }
         case 0x12: {
             strcpy(dt.mnemonic, "STAX");
             strcpy(dt.inputRegisters, "D");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x13: {
             strcpy(dt.mnemonic, "INX");
             strcpy(dt.inputRegisters, "D");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x14: {
             strcpy(dt.mnemonic, "INR");
             strcpy(dt.inputRegisters, "D");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x15: {
             strcpy(dt.mnemonic, "DCR");
             strcpy(dt.inputRegisters, "D");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x16: {
@@ -247,9 +247,9 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 1;
             break;
         }
         case 0x17: {
@@ -266,40 +266,40 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             strcpy(dt.mnemonic, "DAD");
             strcpy(dt.inputRegisters, "D");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x1A: {
             strcpy(dt.mnemonic, "LDAX");
             strcpy(dt.inputRegisters, "D");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x1B: {
             strcpy(dt.mnemonic, "DCX");
             strcpy(dt.inputRegisters, "E");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x1C: {
             strcpy(dt.mnemonic, "INR");
             strcpy(dt.inputRegisters, "E");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x1D: {
             strcpy(dt.mnemonic, "DCR");
             strcpy(dt.inputRegisters, "E");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x1E: {
@@ -308,21 +308,21 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 1;
             break;
         }
         case 0x1F: {
             strcpy(dt.mnemonic, "RAR");
             
-            dt.instructionLength= 1;
+            dt.instructionLength = 1;
             break;
         }
         case 0x20: {
             strcpy(dt.mnemonic, "NOP");
             
-            dt.instructionLength= 1;
+            dt.instructionLength = 1;
             break;
         }
         case 0x21: {
@@ -332,9 +332,9 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = + (int) mem[addr+1];
             dt.inputValues[1] = + (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 2;
             break;
         }
         case 0x22: {
@@ -343,33 +343,33 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputRegisters= 0;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputRegisters = 0;
+            dt.num_inputValues = 2;
             break;
         }
         case 0x23: {
             strcpy(dt.mnemonic, "INX");
             strcpy(dt.inputRegisters, "H");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x24: {
             strcpy(dt.mnemonic, "INR");
             strcpy(dt.inputRegisters, "H");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x25: {
             strcpy(dt.mnemonic, "DCR");
             strcpy(dt.inputRegisters, "H");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x26: {
@@ -378,9 +378,9 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 1;
             break;
         }
         case 0x27: {
@@ -397,8 +397,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             strcpy(dt.mnemonic, "DAD");
             strcpy(dt.inputRegisters, "H");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x2A: {
@@ -407,33 +407,33 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+1];
             
-            dt.instructionLength= 3;
-            dt.num_inputRegisters= 0;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputRegisters = 0;
+            dt.num_inputValues = 2;
             break;
         }
         case 0x2B: {
             strcpy(dt.mnemonic, "DCX");
             strcpy(dt.inputRegisters, "H");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x2C: {
             strcpy(dt.mnemonic, "INR");
             strcpy(dt.inputRegisters, "L");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x2D: {
             strcpy(dt.mnemonic, "DCR");
             strcpy(dt.inputRegisters, "L");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x2E: {
@@ -442,21 +442,21 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 1;
             break;
         }
         case 0x2F: {
             strcpy(dt.mnemonic, "CMA");
             
-            dt.instructionLength= 1;
+            dt.instructionLength = 1;
             break;
         }
         case 0x30: {
             strcpy(dt.mnemonic, "NOP");
             
-            dt.instructionLength= 1;
+            dt.instructionLength = 1;
             break;
         }
         case 0x31: {
@@ -466,9 +466,9 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = + (int) mem[addr+1];
             dt.inputValues[1] = + (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 2;
             break;
         }
         case 0x32: {
@@ -477,33 +477,33 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputRegisters= 0;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputRegisters = 0;
+            dt.num_inputValues = 2;
             break;
         }
         case 0x33: {
             strcpy(dt.mnemonic, "INX");
             strcpy(dt.inputRegisters, "SP");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x34: {
             strcpy(dt.mnemonic, "INR");
             strcpy(dt.inputRegisters, "M");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x35: {
             strcpy(dt.mnemonic, "DCR");
             strcpy(dt.inputRegisters, "M");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x36: {
@@ -512,9 +512,9 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 1;
             break;
         }
         case 0x37: {
@@ -533,8 +533,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             strcpy(dt.mnemonic, "DAD");
             strcpy(dt.inputRegisters, "SP");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x3A: {
@@ -543,33 +543,33 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputRegisters= 0;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputRegisters = 0;
+            dt.num_inputValues = 2;
             break;
         }
         case 0x3B: {
             strcpy(dt.mnemonic, "DCX");
             strcpy(dt.inputRegisters, "SP");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x3C: {
             strcpy(dt.mnemonic, "INR");
             strcpy(dt.inputRegisters, "A");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x3D: {
             strcpy(dt.mnemonic, "DCR");
             strcpy(dt.inputRegisters, "A");
             
-            dt.instructionLength= 1;
-            dt.num_inputRegisters= 1;
+            dt.instructionLength = 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x3E: {
@@ -578,910 +578,910 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 1;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 1;
+            dt.num_inputValues = 1;
             break;
         }
         case 0x3F: {
             strcpy(dt.mnemonic, "CMC");
             
-            dt.instructionLength= 1;
+            dt.instructionLength = 1;
             break;
         }
         case 0x40: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "B,B");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x41: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "B,C");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x42: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "B,D");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x43: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "B,E");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x44: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "B,H");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x45: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "B,L");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x46: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "B,M");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x47: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "B,A");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x48: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "C,B");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x49: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "C,C");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x4A: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "C,D");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x4B: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "C,E");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x4C: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "C,H");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x4D: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "C,L");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x4E: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "C,M");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x4F: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "C,A");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x50: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "D,B");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x51: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "D,C");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x52: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "D,D");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x53: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "D,E");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x54: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "D,H");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x55: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "D,L");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x56: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "D,M");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x57: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "D,A");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x58: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "E,B");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x59: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "E,C");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x5A: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "E,D");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x5B: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "E,E");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x5C: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "E,H");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x5D: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "E,L");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x5E: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "E,M");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x5F: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "E,A");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x60: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "H,B");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x61: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "H,C");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x62: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "H,D");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x63: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "H,E");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x64: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "H,H");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x65: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "H,L");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x66: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "H,M");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x67: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "H,A");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x68: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "L,B");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x69: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "L,C");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x6A: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "L,D");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x6B: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "L,E");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x6C: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "L,H");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x6D: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "L,L");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x6E: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "L,M");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x6F: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "L,A");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x70: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "M,B");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x71: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "M,C");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x72: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "M,D");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x73: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "M,E");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x74: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "M,H");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x75: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "M,L");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x76: {
             strcpy(dt.mnemonic, "HLT");
             
-            dt.instructionLength= 1;
+            dt.instructionLength = 1;
             break;
         }
         case 0x77: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "M,A");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x78: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "A,B");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x79: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "A,C");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x7A: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "A,D");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x7B: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "A,E");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x7C: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "A,H");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x7D: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "A,L");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x7E: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "A,M");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x7F: {
             strcpy(dt.mnemonic, "MOV");
             strcpy(dt.inputRegisters, "A,A");
             
-            dt.num_inputRegisters= 2;
+            dt.num_inputRegisters = 2;
             break;
         }
         case 0x80: {
             strcpy(dt.mnemonic, "ADD");
             strcpy(dt.inputRegisters, "B");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x81: {
             strcpy(dt.mnemonic, "ADD");
             strcpy(dt.inputRegisters, "C");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x82: {
             strcpy(dt.mnemonic, "ADD");
             strcpy(dt.inputRegisters, "D");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x83: {
             strcpy(dt.mnemonic, "ADD");
             strcpy(dt.inputRegisters, "E");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x84: {
             strcpy(dt.mnemonic, "ADD");
             strcpy(dt.inputRegisters, "H");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x85: {
             strcpy(dt.mnemonic, "ADD");
             strcpy(dt.inputRegisters, "L");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x86: {
             strcpy(dt.mnemonic, "ADD");
             strcpy(dt.inputRegisters, "M");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x87: {
             strcpy(dt.mnemonic, "ADD");
             strcpy(dt.inputRegisters, "A");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x88: {
             strcpy(dt.mnemonic, "ADC");
             strcpy(dt.inputRegisters, "B");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x89: {
             strcpy(dt.mnemonic, "ADC");
             strcpy(dt.inputRegisters, "C");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x8A: {
             strcpy(dt.mnemonic, "ADC");
             strcpy(dt.inputRegisters, "D");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x8B: {
             strcpy(dt.mnemonic, "ADC");
             strcpy(dt.inputRegisters, "E");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x8C: {
             strcpy(dt.mnemonic, "ADC");
             strcpy(dt.inputRegisters, "H");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x8D: {
             strcpy(dt.mnemonic, "ADC");
             strcpy(dt.inputRegisters, "L");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x8E: {
             strcpy(dt.mnemonic, "ADC");
             strcpy(dt.inputRegisters, "M");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x8F: {
             strcpy(dt.mnemonic, "ADC");
             strcpy(dt.inputRegisters, "A");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x90: {
             strcpy(dt.mnemonic, "SUB");
             strcpy(dt.inputRegisters, "B");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x91: {
             strcpy(dt.mnemonic, "SUB");
             strcpy(dt.inputRegisters, "C");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x92: {
             strcpy(dt.mnemonic, "SUB");
             strcpy(dt.inputRegisters, "D");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x93: {
             strcpy(dt.mnemonic, "SUB");
             strcpy(dt.inputRegisters, "E");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x94: {
             strcpy(dt.mnemonic, "SUB");
             strcpy(dt.inputRegisters, "H");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x95: {
             strcpy(dt.mnemonic, "SUB");
             strcpy(dt.inputRegisters, "L");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x96: {
             strcpy(dt.mnemonic, "SUB");
             strcpy(dt.inputRegisters, "M");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x97: {
             strcpy(dt.mnemonic, "SUB");
             strcpy(dt.inputRegisters, "A");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x98: {
             strcpy(dt.mnemonic, "SBB");
             strcpy(dt.inputRegisters, "B");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x99: {
             strcpy(dt.mnemonic, "SBB");
             strcpy(dt.inputRegisters, "C");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x9A: {
             strcpy(dt.mnemonic, "SBB");
             strcpy(dt.inputRegisters, "D");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x9B: {
             strcpy(dt.mnemonic, "SBB");
             strcpy(dt.inputRegisters, "E");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x9C: {
             strcpy(dt.mnemonic, "SBB");
             strcpy(dt.inputRegisters, "H");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x9D: {
             strcpy(dt.mnemonic, "SBB");
             strcpy(dt.inputRegisters, "L");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x9E: {
             strcpy(dt.mnemonic, "SBB");
             strcpy(dt.inputRegisters, "M");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0x9F: {
             strcpy(dt.mnemonic, "SBB");
             strcpy(dt.inputRegisters, "A");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xA0: {
             strcpy(dt.mnemonic, "ANA");
             strcpy(dt.inputRegisters, "B");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xA1: {
             strcpy(dt.mnemonic, "ANA");
             strcpy(dt.inputRegisters, "C");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xA2: {
             strcpy(dt.mnemonic, "ANA");
             strcpy(dt.inputRegisters, "D");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xA3: {
             strcpy(dt.mnemonic, "ANA");
             strcpy(dt.inputRegisters, "E");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xA4: {
             strcpy(dt.mnemonic, "ANA");
             strcpy(dt.inputRegisters, "H");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xA5: {
             strcpy(dt.mnemonic, "ANA");
             strcpy(dt.inputRegisters, "L");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xA6: {
             strcpy(dt.mnemonic, "ANA");
             strcpy(dt.inputRegisters, "M");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xA7: {
             strcpy(dt.mnemonic, "ANA");
             strcpy(dt.inputRegisters, "A");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xA8: {
             strcpy(dt.mnemonic, "XRA");
             strcpy(dt.inputRegisters, "B");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xA9: {
             strcpy(dt.mnemonic, "XRA");
             strcpy(dt.inputRegisters, "C");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xAA: {
             strcpy(dt.mnemonic, "XRA");
             strcpy(dt.inputRegisters, "D");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xAB: {
             strcpy(dt.mnemonic, "XRA");
             strcpy(dt.inputRegisters, "E");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xAC: {
             strcpy(dt.mnemonic, "XRA");
             strcpy(dt.inputRegisters, "H");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xAD: {
             strcpy(dt.mnemonic, "XRA");
             strcpy(dt.inputRegisters, "L");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xAE: {
             strcpy(dt.mnemonic, "XRA");
             strcpy(dt.inputRegisters, "M");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xAF: {
             strcpy(dt.mnemonic, "XRA");
             strcpy(dt.inputRegisters, "A");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xB0: {
             strcpy(dt.mnemonic, "ORA");
             strcpy(dt.inputRegisters, "B");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xB1: {
             strcpy(dt.mnemonic, "ORA");
             strcpy(dt.inputRegisters, "C");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xB2: {
             strcpy(dt.mnemonic, "ORA");
             strcpy(dt.inputRegisters, "D");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xB3: {
             strcpy(dt.mnemonic, "ORA");
             strcpy(dt.inputRegisters, "E");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xB4: {
             strcpy(dt.mnemonic, "ORA");
             strcpy(dt.inputRegisters, "H");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xB5: {
             strcpy(dt.mnemonic, "ORA");
             strcpy(dt.inputRegisters, "L");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xB6: {
             strcpy(dt.mnemonic, "ORA");
             strcpy(dt.inputRegisters, "M");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xB7: {
             strcpy(dt.mnemonic, "ORA");
             strcpy(dt.inputRegisters, "A");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xB8: {
             strcpy(dt.mnemonic, "CMP");
             strcpy(dt.inputRegisters, "B");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xB9: {
             strcpy(dt.mnemonic, "CMP");
             strcpy(dt.inputRegisters, "C");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xBA: {
             strcpy(dt.mnemonic, "CMP");
             strcpy(dt.inputRegisters, "D");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xBB: {
             strcpy(dt.mnemonic, "CMP");
             strcpy(dt.inputRegisters, "E");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xBC: {
             strcpy(dt.mnemonic, "CMP");
             strcpy(dt.inputRegisters, "H");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xBD: {
             strcpy(dt.mnemonic, "CMP");
             strcpy(dt.inputRegisters, "L");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xBE: {
             strcpy(dt.mnemonic, "CMP");
             strcpy(dt.inputRegisters, "M");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xBF: {
             strcpy(dt.mnemonic, "CMP");
             strcpy(dt.inputRegisters, "A");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xC0: {
@@ -1493,7 +1493,7 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             strcpy(dt.mnemonic, "POP");
             strcpy(dt.inputRegisters, "B");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xC2: {
@@ -1502,8 +1502,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xC3: {
@@ -1512,8 +1512,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xC4: {
@@ -1522,15 +1522,15 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xC5: {
             strcpy(dt.mnemonic, "PUSH");
             strcpy(dt.inputRegisters, "B");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xC6: {
@@ -1538,16 +1538,16 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 0;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 0;
+            dt.num_inputValues = 1;
             break;
         }
         case 0xC7: {
             strcpy(dt.mnemonic, "RST");
             strcpy(dt.inputRegisters, "0");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xC8: {
@@ -1566,8 +1566,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xCB: {
@@ -1576,8 +1576,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xCC: {
@@ -1586,8 +1586,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xCD: {
@@ -1596,8 +1596,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xCE: {
@@ -1605,15 +1605,15 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputValues = 1;
             break;
         }
         case 0xCF: {
             strcpy(dt.mnemonic, "RST");
             strcpy(dt.inputRegisters, "1");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xD0: {
@@ -1625,7 +1625,7 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             strcpy(dt.mnemonic, "POP");
             strcpy(dt.inputRegisters, "D");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xD2: {
@@ -1634,8 +1634,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xD3: {
@@ -1643,8 +1643,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputValues = 1;
             break;
         }
         case 0xD4: {
@@ -1653,15 +1653,15 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xD5: {
             strcpy(dt.mnemonic, "PUSH");
             strcpy(dt.inputRegisters, "D");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xD6: {
@@ -1669,16 +1669,16 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 0;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 0;
+            dt.num_inputValues = 1;
             break;
         }
         case 0xD7: {
             strcpy(dt.mnemonic, "RST");
             strcpy(dt.inputRegisters, "2");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xD8: {
@@ -1697,8 +1697,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xDB: {
@@ -1706,8 +1706,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputValues = 1;
             break;
         }
         case 0xDC: {
@@ -1716,8 +1716,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xDD: {
@@ -1726,8 +1726,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xDE: {
@@ -1735,15 +1735,15 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputValues = 1;
             break;
         }
         case 0xDF: {
             strcpy(dt.mnemonic, "RST");
             strcpy(dt.inputRegisters, "3");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xE0: {
@@ -1755,7 +1755,7 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             strcpy(dt.mnemonic, "POP");
             strcpy(dt.inputRegisters, "H");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xE2: {
@@ -1764,8 +1764,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xE3: {
@@ -1779,15 +1779,15 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xE5: {
             strcpy(dt.mnemonic, "PUSH");
             strcpy(dt.inputRegisters, "H");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xE6: {
@@ -1795,16 +1795,16 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 0;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 0;
+            dt.num_inputValues = 1;
             break;
         }
         case 0xE7: {
             strcpy(dt.mnemonic, "RST");
             strcpy(dt.inputRegisters, "4");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xE8: {
@@ -1823,8 +1823,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xEB: {
@@ -1838,8 +1838,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xED: {
@@ -1848,8 +1848,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xEE: {
@@ -1857,15 +1857,15 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputValues = 1;
             break;
         }
         case 0xEF: {
             strcpy(dt.mnemonic, "RST");
             strcpy(dt.inputRegisters, "5");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xF0: {
@@ -1877,7 +1877,7 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             strcpy(dt.mnemonic, "POP");
             strcpy(dt.inputRegisters, "PSW");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xF2: {
@@ -1886,8 +1886,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xF3: {
@@ -1901,8 +1901,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xF5: {
@@ -1917,16 +1917,16 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputRegisters= 0;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputRegisters = 0;
+            dt.num_inputValues = 1;
             break;
         }
         case 0xF7: {
             strcpy(dt.mnemonic, "RST");
             strcpy(dt.inputRegisters, "6");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
         case 0xF8: {
@@ -1945,8 +1945,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xFB: {
@@ -1960,8 +1960,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xFD: {
@@ -1970,8 +1970,8 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             dt.inputValues[0] = - (int) mem[addr+1];
             dt.inputValues[1] = - (int) mem[addr+2];
             
-            dt.instructionLength= 3;
-            dt.num_inputValues= 2;
+            dt.instructionLength = 3;
+            dt.num_inputValues = 2;
             break;
         }
         case 0xFE: {
@@ -1979,54 +1979,18 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
             
             dt.inputValues[0] = + (int) mem[addr+1];
             
-            dt.instructionLength= 2;
-            dt.num_inputValues= 1;
+            dt.instructionLength = 2;
+            dt.num_inputValues = 1;
             break;
         }
         case 0xFF: {
             strcpy(dt.mnemonic, "RST");
             strcpy(dt.inputRegisters, "7");
             
-            dt.num_inputRegisters= 1;
+            dt.num_inputRegisters = 1;
             break;
         }
     }
     
     return dt ;
 }
-
-
-/*
-int main(void) {
-    FILE *ofp,*ifp;
-    //char infile[MAXFILE]= {0};
-    //char outfile[MAXFILE]= {0};
-    unsigned long size;
-    #if 0
-    do{
-        printf("in: ");
-        scanf("%s", infile);
-        ifp= fopen(infile,"r");
-        if (ifp == NULL) printf("invalid file name. please try again.\n");
-    } while(ifp != NULL);
-    do{
-        printf("out: ");
-        scanf("%s", outfile);
-        ofp= fopen(outfile,"r");
-        if (ofp == NULL) printf("invalid file name. please try again.\n");
-    } while(ofp != NULL);
-    #endif
-    ifp= fopen("./INVADERS.H", "rb");
-    ofp= fopen("./INVADERS.H.TXT", "w");
-    
-    size= fsize(ifp);
-    while(ftell(ifp)<size) {
-        disassemble(ifp,ofp);
-    }
-    
-    fclose(ofp);
-    fclose(ifp);
-    
-    return 0;
-}
-*/
