@@ -2579,11 +2579,11 @@ int cpu8080_execute( cpu8080_state_t* state ) {
         case 0xD3: {
             #if 0
             // TODO !!!!! (anche IN)
-            strcpy(dt.mnemonic, "OUT");
+            strcpy(data.mnemonic, "OUT");
             
-            dt.inputValues[0] = + (int) fgetc(ifp);
+            data.inputValues[0] = + (int) fgetc(ifp);
             
-            dt.num_inputValues= 1;
+            data.num_inputValues= 1;
             #endif
             
             instructionLength = 2 ;
