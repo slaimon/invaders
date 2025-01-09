@@ -27,7 +27,7 @@
 typedef struct {
     uint8_t opcode;
     char mnemonic[I8080_MNEMONIC_NAME_LENGTH + 1];
-    size_t position;   // posizione nel file
+    uint16_t position;   // posizione nel file
     unsigned short instructionLength;    // lunghezza dell'istruzione in byte (nel nostro caso coincide con num_inputValues+1)
     
     char inputRegisters[I8080_REGISTER_NAME_LENGTH + 1];    // nome dei registri letti
@@ -39,7 +39,7 @@ typedef struct {
 } instruction8080_t;
 
 typedef struct {
-    char string[LINE_SIZE + 1]
+    char string[LINE_SIZE + 1];
 } i8080_line_t;
 
 // prints one instruction to a fixed-width string

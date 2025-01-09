@@ -1,17 +1,18 @@
+#include <stdlib.h>
 #include "instruction8080.h"
 
 #define MATH_ABS(x) \
             (((x) >= 0) ? (x) : (-(x)))
 
 i8080_line_t instruction8080_toString(instruction8080_t instruction) {
-    char result[LINE_SIZE + 1];
+    i8080_line_t line;
+    char* result = line.string;
     size_t pointer = 0;
 
     // print the address gutter on the left
     pointer += sprintf(&result[pointer], "%04X:\t", instruction.position);
 
     // print the binary representation of the instruction
-    char* opcode[OPCODE_LENGTH + 1];
     pointer += sprintf(&result[pointer], "%02X", instruction.opcode);
     for(int i = 0; i < instruction.num_inputValues; ++i)
         pointer += sprintf(&result[pointer], " %02X", MATH_ABS(instruction.inputValues[i]));
@@ -21,7 +22,7 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
         result[pointer] = '\t';
         ++pointer;
     }
-    pointer += sprintf(result[pointer], "\t%s\t", instruction.mnemonic);
+    pointer += sprintf(&result[pointer], "\t%s\t", instruction.mnemonic);
 
     // print the instruction's register arguments, if any
     if (instruction.num_inputRegisters > 0) {
@@ -35,7 +36,6 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
     // immediate arguments are prefixed with '#'
     // while addresses are prefixed with '$'
     if (instruction.num_inputValues == 2) {
-        char arguments[ARGUMENTS_LENGTH + 1];
         char prefix = instruction.immediate ? '#' : '$';
         #if I8080_LITTLE_ENDIAN
             uint8_t first = abs(instruction.inputValues[1]);
@@ -55,5 +55,5 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
         exit(-1);
     }
 
-    return (i8080_line_t) { .string = result };
+    return line;
 }
