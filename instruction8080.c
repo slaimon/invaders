@@ -19,14 +19,18 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
         result[pointer] = '\t';
         ++pointer;
     }
-    pointer += sprintf(&result[pointer], "\t%s\t", instruction.mnemonic);
+    pointer += sprintf(&result[pointer], "\t%s", instruction.mnemonic);
 
     // print the instruction's register arguments, if any
     if (instruction.num_inputRegisters > 0) {
         if (instruction.num_inputValues == 0)
-            pointer += sprintf(&result[pointer], "%s", instruction.inputRegisters);
+            pointer += sprintf(&result[pointer], "\t%s", instruction.inputRegisters);
         else
-            pointer += sprintf(&result[pointer], "%s, ", instruction.inputRegisters);
+            pointer += sprintf(&result[pointer], "\t%s, ", instruction.inputRegisters);
+    }
+    else {
+        result[pointer] = '\t';
+        ++pointer;
     }
     
     // print the instruction's numerical arguments
@@ -41,17 +45,17 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
             uint8_t first = abs(instruction.inputValues[0]);
             uint8_t second = abs(instruction.inputValues[1]);
         #endif
-        pointer += sprintf(&result[pointer], "%c%02X%02X\t", prefix, first, second);
+        pointer += sprintf(&result[pointer], "%c%02X%02X", prefix, first, second);
     }
     else if (instruction.num_inputValues == 1) {
         char prefix = instruction.immediate ? '#' : '$';
-        pointer += sprintf(&result[pointer], "%c%02X\t", prefix, abs(instruction.inputValues[0]));
+        pointer += sprintf(&result[pointer], "%c%02X", prefix, abs(instruction.inputValues[0]));
     }
 
     result[pointer++] = '\n';
     result[pointer] = '\0';
 
-    if (pointer > LINE_SIZE) {
+    if (pointer > I8080_LINE_LENGTH) {
         fprintf(stderr, "ERROR: buffer overrun while converting instruction to string\n");
         exit(-1);
     }

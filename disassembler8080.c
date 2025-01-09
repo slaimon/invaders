@@ -1972,7 +1972,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
 }
 
 void disassemble_program(bytestream_t program, FILE* ofp) {
-    char result[LINE_SIZE * program.size];
+    char result[I8080_LINE_LENGTH * program.size];
 
     size_t programPointer = 0;
     size_t stringPointer = 0;
