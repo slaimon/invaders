@@ -545,378 +545,378 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         }
         case 0x40: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "B,B");
+            strcpy(data.inputRegisters, "B, B");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x41: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "B,C");
+            strcpy(data.inputRegisters, "B, C");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x42: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "B,D");
+            strcpy(data.inputRegisters, "B, D");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x43: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "B,E");
+            strcpy(data.inputRegisters, "B, E");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x44: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "B,H");
+            strcpy(data.inputRegisters, "B, H");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x45: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "B,L");
+            strcpy(data.inputRegisters, "B, L");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x46: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "B,M");
+            strcpy(data.inputRegisters, "B, M");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x47: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "B,A");
+            strcpy(data.inputRegisters, "B, A");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x48: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "C,B");
+            strcpy(data.inputRegisters, "C, B");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x49: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "C,C");
+            strcpy(data.inputRegisters, "C, C");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x4A: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "C,D");
+            strcpy(data.inputRegisters, "C, D");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x4B: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "C,E");
+            strcpy(data.inputRegisters, "C, E");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x4C: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "C,H");
+            strcpy(data.inputRegisters, "C, H");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x4D: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "C,L");
+            strcpy(data.inputRegisters, "C, L");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x4E: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "C,M");
+            strcpy(data.inputRegisters, "C, M");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x4F: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "C,A");
+            strcpy(data.inputRegisters, "C, A");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x50: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "D,B");
+            strcpy(data.inputRegisters, "D, B");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x51: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "D,C");
+            strcpy(data.inputRegisters, "D, C");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x52: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "D,D");
+            strcpy(data.inputRegisters, "D, D");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x53: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "D,E");
+            strcpy(data.inputRegisters, "D, E");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x54: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "D,H");
+            strcpy(data.inputRegisters, "D, H");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x55: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "D,L");
+            strcpy(data.inputRegisters, "D, L");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x56: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "D,M");
+            strcpy(data.inputRegisters, "D, M");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x57: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "D,A");
+            strcpy(data.inputRegisters, "D, A");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x58: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "E,B");
+            strcpy(data.inputRegisters, "E, B");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x59: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "E,C");
+            strcpy(data.inputRegisters, "E, C");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x5A: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "E,D");
+            strcpy(data.inputRegisters, "E, D");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x5B: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "E,E");
+            strcpy(data.inputRegisters, "E, E");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x5C: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "E,H");
+            strcpy(data.inputRegisters, "E, H");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x5D: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "E,L");
+            strcpy(data.inputRegisters, "E, L");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x5E: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "E,M");
+            strcpy(data.inputRegisters, "E, M");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x5F: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "E,A");
+            strcpy(data.inputRegisters, "E, A");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x60: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "H,B");
+            strcpy(data.inputRegisters, "H, B");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x61: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "H,C");
+            strcpy(data.inputRegisters, "H, C");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x62: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "H,D");
+            strcpy(data.inputRegisters, "H, D");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x63: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "H,E");
+            strcpy(data.inputRegisters, "H, E");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x64: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "H,H");
+            strcpy(data.inputRegisters, "H, H");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x65: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "H,L");
+            strcpy(data.inputRegisters, "H, L");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x66: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "H,M");
+            strcpy(data.inputRegisters, "H, M");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x67: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "H,A");
+            strcpy(data.inputRegisters, "H, A");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x68: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "L,B");
+            strcpy(data.inputRegisters, "L, B");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x69: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "L,C");
+            strcpy(data.inputRegisters, "L, C");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x6A: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "L,D");
+            strcpy(data.inputRegisters, "L, D");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x6B: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "L,E");
+            strcpy(data.inputRegisters, "L, E");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x6C: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "L,H");
+            strcpy(data.inputRegisters, "L, H");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x6D: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "L,L");
+            strcpy(data.inputRegisters, "L, L");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x6E: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "L,M");
+            strcpy(data.inputRegisters, "L, M");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x6F: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "L,A");
+            strcpy(data.inputRegisters, "L, A");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x70: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "M,B");
+            strcpy(data.inputRegisters, "M, B");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x71: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "M,C");
+            strcpy(data.inputRegisters, "M, C");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x72: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "M,D");
+            strcpy(data.inputRegisters, "M, D");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x73: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "M,E");
+            strcpy(data.inputRegisters, "M, E");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x74: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "M,H");
+            strcpy(data.inputRegisters, "M, H");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x75: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "M,L");
+            strcpy(data.inputRegisters, "M, L");
             
             data.num_inputRegisters = 2;
             break;
@@ -929,63 +929,63 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         }
         case 0x77: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "M,A");
+            strcpy(data.inputRegisters, "M, A");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x78: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "A,B");
+            strcpy(data.inputRegisters, "A, B");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x79: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "A,C");
+            strcpy(data.inputRegisters, "A, C");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x7A: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "A,D");
+            strcpy(data.inputRegisters, "A, D");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x7B: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "A,E");
+            strcpy(data.inputRegisters, "A, E");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x7C: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "A,H");
+            strcpy(data.inputRegisters, "A, H");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x7D: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "A,L");
+            strcpy(data.inputRegisters, "A, L");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x7E: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "A,M");
+            strcpy(data.inputRegisters, "A, M");
             
             data.num_inputRegisters = 2;
             break;
         }
         case 0x7F: {
             strcpy(data.mnemonic, "MOV");
-            strcpy(data.inputRegisters, "A,A");
+            strcpy(data.inputRegisters, "A, A");
             
             data.num_inputRegisters = 2;
             break;
