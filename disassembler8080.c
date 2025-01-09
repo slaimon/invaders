@@ -60,6 +60,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
     data.num_inputRegisters = 0;     //
     data.num_inputValues = 0;        //
     data.instructionLength = 1;      // default values
+    data.immediate = true;           //
     
     switch (data.opcode) {
         case 0x00: {
@@ -71,8 +72,8 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "LXI");
             strcpy(data.inputRegisters, "B");
             
-            data.inputValues[0] = + (int) mem[addr+1];
-            data.inputValues[1] = + (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
             
             data.instructionLength = 3;
             data.num_inputRegisters = 1;
@@ -115,7 +116,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "MVI");
             strcpy(data.inputRegisters, "B");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
@@ -176,7 +177,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "MVI");
             strcpy(data.inputRegisters, "C");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
@@ -199,8 +200,8 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "LXI");
             strcpy(data.inputRegisters, "D");
             
-            data.inputValues[0] = + (int) mem[addr+1];
-            data.inputValues[1] = + (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
             
             data.instructionLength = 3;
             data.num_inputRegisters = 1;
@@ -243,7 +244,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "MVI");
             strcpy(data.inputRegisters, "D");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
@@ -304,7 +305,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "MVI");
             strcpy(data.inputRegisters, "E");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
@@ -327,8 +328,8 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "LXI");
             strcpy(data.inputRegisters, "H");
             
-            data.inputValues[0] = + (int) mem[addr+1];
-            data.inputValues[1] = + (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
             
             data.instructionLength = 3;
             data.num_inputRegisters = 1;
@@ -338,8 +339,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0x22: {
             strcpy(data.mnemonic, "SHLD");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputRegisters = 0;
@@ -374,7 +376,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "MVI");
             strcpy(data.inputRegisters, "H");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
@@ -402,8 +404,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0x2A: {
             strcpy(data.mnemonic, "LHLD");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+1];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputRegisters = 0;
@@ -438,7 +441,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "MVI");
             strcpy(data.inputRegisters, "L");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
@@ -461,8 +464,8 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "LXI");
             strcpy(data.inputRegisters, "SP");
             
-            data.inputValues[0] = + (int) mem[addr+1];
-            data.inputValues[1] = + (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
             
             data.instructionLength = 3;
             data.num_inputRegisters = 1;
@@ -472,8 +475,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0x32: {
             strcpy(data.mnemonic, "STA");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputRegisters = 0;
@@ -508,7 +512,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "MVI");
             strcpy(data.inputRegisters, "M");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
@@ -538,8 +542,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0x3A: {
             strcpy(data.mnemonic, "LDA");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputRegisters = 0;
@@ -574,7 +579,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
             strcpy(data.mnemonic, "MVI");
             strcpy(data.inputRegisters, "A");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
@@ -1497,8 +1502,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xC2: {
             strcpy(data.mnemonic, "JNZ");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1507,8 +1513,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xC3: {
             strcpy(data.mnemonic, "JMP");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1517,8 +1524,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xC4: {
             strcpy(data.mnemonic, "CNZ");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1534,7 +1542,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xC6: {
             strcpy(data.mnemonic, "ADI");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 0;
@@ -1561,8 +1569,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xCA: {
             strcpy(data.mnemonic, "JZ");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1571,8 +1580,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xCB: {
             strcpy(data.mnemonic, "JMP");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1581,8 +1591,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xCC: {
             strcpy(data.mnemonic, "CZ");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1591,8 +1602,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xCD: {
             strcpy(data.mnemonic, "CALL");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1601,7 +1613,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xCE: {
             strcpy(data.mnemonic, "ACI");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputValues = 1;
@@ -1629,8 +1641,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xD2: {
             strcpy(data.mnemonic, "JNC");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1639,7 +1652,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xD3: {
             strcpy(data.mnemonic, "OUT");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputValues = 1;
@@ -1648,8 +1661,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xD4: {
             strcpy(data.mnemonic, "CNC");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1665,7 +1679,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xD6: {
             strcpy(data.mnemonic, "SUI");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 0;
@@ -1692,8 +1706,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xDA: {
             strcpy(data.mnemonic, "JC");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1702,7 +1717,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xDB: {
             strcpy(data.mnemonic, "IN");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputValues = 1;
@@ -1711,8 +1726,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xDC: {
             strcpy(data.mnemonic, "CC");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1721,8 +1737,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xDD: {
             strcpy(data.mnemonic, "CALL");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1731,7 +1748,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xDE: {
             strcpy(data.mnemonic, "SBI");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputValues = 1;
@@ -1759,8 +1776,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xE2: {
             strcpy(data.mnemonic, "JPO");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1774,8 +1792,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xE4: {
             strcpy(data.mnemonic, "CPO");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1791,7 +1810,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xE6: {
             strcpy(data.mnemonic, "ANI");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 0;
@@ -1818,8 +1837,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xEA: {
             strcpy(data.mnemonic, "JPE");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1833,8 +1853,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xEC: {
             strcpy(data.mnemonic, "CPE");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1843,8 +1864,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xED: {
             strcpy(data.mnemonic, "CALL");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1853,7 +1875,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xEE: {
             strcpy(data.mnemonic, "XRI");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputValues = 1;
@@ -1881,8 +1903,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xF2: {
             strcpy(data.mnemonic, "JP");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1896,8 +1919,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xF4: {
             strcpy(data.mnemonic, "CP");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1913,7 +1937,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xF6: {
             strcpy(data.mnemonic, "ORI");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 0;
@@ -1940,8 +1964,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xFA: {
             strcpy(data.mnemonic, "JM");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1955,8 +1980,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xFC: {
             strcpy(data.mnemonic, "CM");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1965,8 +1991,9 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xFD: {
             strcpy(data.mnemonic, "CALL");
             
-            data.inputValues[0] = - (int) mem[addr+1];
-            data.inputValues[1] = - (int) mem[addr+2];
+            data.inputValues[0] = mem[addr+1];
+            data.inputValues[1] = mem[addr+2];
+            data.immediate = false;
             
             data.instructionLength = 3;
             data.num_inputValues = 2;
@@ -1975,7 +2002,7 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
         case 0xFE: {
             strcpy(data.mnemonic, "CPI");
             
-            data.inputValues[0] = + (int) mem[addr+1];
+            data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputValues = 1;
