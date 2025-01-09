@@ -12,9 +12,6 @@
 instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr );
 
 // returns a string containing the text disassembly of the given program
-char* disassemble_program(bytestream_t program);
-
-// prints the given disassembly to a file
-void printline(instruction8080_t disassembly, FILE* ofp);
+void disassemble_program(bytestream_t program, FILE* ofp);
 
 #endif

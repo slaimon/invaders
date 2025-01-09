@@ -1971,19 +1971,18 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
     return data ;
 }
 
-#define AVERAGE_CHARS_PER_PROGRAM_BYTE  15
-
-#include "vstring.h"
-
-char* disassemble_program(bytestream_t program) {
-    vstring_t* result = vstring_new(AVERAGE_CHARS_PER_PROGRAM_BYTE * program.size * sizeof(char));
+void disassemble_program(bytestream_t program, FILE* ofp) {
+    char result[LINE_SIZE * program.size];
 
     size_t programPointer = 0;
+    size_t stringPointer = 0;
     while (programPointer < program.size) {
         instruction8080_t instruction = disassemble_instruction(program.data, programPointer);
-        char* line = instruction_toString(instruction);
+        i8080_line_t line = instruction8080_toString(instruction);
 
-        vstring_concat(result, line);
+        stringPointer += sprintf(&result[stringPointer], line.string);
         programPointer += instruction.instructionLength;
     }
+
+    fprintf(ofp, result);
 }

@@ -42,4 +42,7 @@ typedef struct {
     char string[LINE_SIZE + 1]
 } i8080_line_t;
 
+// prints one instruction to a fixed-width string
+i8080_line_t instruction8080_toString(instruction8080_t instruction);
+
 #endif
