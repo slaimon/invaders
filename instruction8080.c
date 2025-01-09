@@ -28,7 +28,7 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
         else
             pointer += sprintf(&result[pointer], "\t%s, ", instruction.inputRegisters);
     }
-    else {
+    else if (instruction.num_inputValues > 0) {
         result[pointer] = '\t';
         ++pointer;
     }
