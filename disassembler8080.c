@@ -8,7 +8,7 @@ int abs(int x) {
         return -x;
 }
 
-void printline(disassembler8080_instruction_t data, FILE* ofp) {
+void printline(instruction8080_t data, FILE* ofp) {
     fprintf(ofp, "%04X:\t", data.position);
     fprintf(ofp, "%02X", (unsigned int)data.opcode);
     
@@ -51,8 +51,8 @@ void printline(disassembler8080_instruction_t data, FILE* ofp) {
 
 
 // raccoglie tutte le info sulla istruzione fornita e le restituisce senza stamparle
-disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
-    disassembler8080_instruction_t data;
+instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
+    instruction8080_t data;
     
     data.opcode = mem[addr];
     
@@ -1995,18 +1995,17 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
 
 #define AVERAGE_CHARS_PER_PROGRAM_BYTE  15
 
+#include "vstring.h"
+
 char* disassemble_program(bytestream_t program) {
-    size_t minResultSize = AVERAGE_CHARS_PER_PROGRAM_BYTE * program.size * sizeof(char);
-    char* result = malloc( minResultSize + 1);
+    vstring_t* result = vstring_new(AVERAGE_CHARS_PER_PROGRAM_BYTE * program.size * sizeof(char));
 
     size_t programPointer = 0;
-    size_t stringPointer = 0;
     while (programPointer < program.size) {
-        disassembler8080_instruction_t instruction = disassemble_instruction(program.data, programPointer);
+        instruction8080_t instruction = disassemble_instruction(program.data, programPointer);
         char* line = instruction_toString(instruction);
 
-        if (sizeof(line) + stringPointer >= sizeof(result)) {
-
-        }
+        vstring_concat(result, line);
+        programPointer += instruction.instructionLength;
     }
 }
