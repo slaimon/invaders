@@ -1,9 +1,6 @@
 #include <stdlib.h>
 #include "instruction8080.h"
 
-#define MATH_ABS(x) \
-            (((x) >= 0) ? (x) : (-(x)))
-
 i8080_line_t instruction8080_toString(instruction8080_t instruction) {
     i8080_line_t line;
     char* result = line.string;
@@ -15,7 +12,7 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
     // print the binary representation of the instruction
     pointer += sprintf(&result[pointer], "%02X", instruction.opcode);
     for(int i = 0; i < instruction.num_inputValues; ++i)
-        pointer += sprintf(&result[pointer], " %02X", MATH_ABS(instruction.inputValues[i]));
+        pointer += sprintf(&result[pointer], " %02X", abs(instruction.inputValues[i]));
 
     // print the instruction's mnemonic
     if (instruction.num_inputValues < 2) {
@@ -45,6 +42,10 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
             uint8_t second = abs(instruction.inputValues[1]);
         #endif
         pointer += sprintf(&result[pointer], "%c%02X%02X\t", prefix, first, second);
+    }
+    else if (instruction.num_inputValues == 1) {
+        char prefix = instruction.immediate ? '#' : '$';
+        pointer += sprintf(&result[pointer], "%c%02X\t", prefix, abs(instruction.inputValues[0]));
     }
 
     result[pointer++] = '\n';
