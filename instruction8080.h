@@ -9,25 +9,38 @@
 
 #define I8080_MNEMONIC_NAME_LENGTH  4
 #define I8080_REGISTER_NAME_LENGTH  4
-#define I8080_MAX_INSTRUCTION_PARAMETERS     2    // massimo numero di parametri espliciti per una istruzione (in pratica questo codice ne supporta al max. 3)
 
 #define I8080_LINE_LENGTH 40
 
+/*
+    instruction8080_t describes an intel8080 instruction as found in a program, along with some
+    information to facilitate human reading.
 
+    An intel8080 instruction is composed of either one, two or three bytes of machine code.
+    The first byte is always the opcode, possibly followed by either:
+       - one byte representing an 8-bit numeric literal, or
+       - two bytes representing a 16-bit numeric literal, or
+       - two bytes representing a 16-bit memory address
+
+    The first two kinds of instruction are called immediate, the other indirect.
+*/
 typedef struct {
     uint8_t opcode;
     char mnemonic[I8080_MNEMONIC_NAME_LENGTH + 1];
-    uint16_t position;   // posizione nel file
-    unsigned short instructionLength;    // lunghezza dell'istruzione in byte (nel nostro caso coincide con num_inputValues+1)
+    uint16_t position;                   // address where the instruction is found
+    unsigned short instructionLength;    // length of instruction in bytes (== num_inputValues + 1)
     
-    char inputRegisters[I8080_REGISTER_NAME_LENGTH + 1];    // nome dei registri letti
-    unsigned short num_inputRegisters;    // # registri letti come parametri impliciti (serve per capire se utilizzare inputRegisters)
+    // registers affected by instruction
+    char inputRegisters[I8080_REGISTER_NAME_LENGTH + 1];
+    unsigned short num_inputRegisters;    // number of registers affected by instruction
     
-    int inputValues[I8080_MAX_INSTRUCTION_PARAMETERS];    // parametri dell'operatore: positivo se valore numerico, negativo se indirizzo
-    unsigned short num_inputValues;    // # parametri espliciti (serve per capire se utilizzare inputValues)
-    bool immediate;
+    // numerical arguments of the instruction (at most 2 bytes)
+    uint8_t inputValues[2];
+    unsigned short num_inputValues;      // number of numerical arguments of the instruction
+    bool immediate;                      // true if the value is a literal, false if it's an address
 } instruction8080_t;
 
+// a fixed-width string containing a single line of i8080 assembly listing
 typedef struct {
     char string[I8080_LINE_LENGTH + 1];
 } i8080_line_t;
