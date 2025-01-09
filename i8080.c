@@ -1,9 +1,10 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdbool.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
 
-#include "cpu8080.h"
+#include "i8080.h"
 
 /* ------------- BYTE PARITY LOOKUP TABLE ----------- */
 
@@ -44,7 +45,16 @@
 uint8_t table[256] = { LOOK_UP };
 
 
-int cpu8080_execute( cpu8080_state_t* state ) {
+// initializes a blank i8080 state
+void i8080_init(i8080_state_t* state) {	
+    // set all to zero except stack pointer
+    memset(state, 0, sizeof(i8080_state_t));
+	state->stackPointer = I8080_MEMSIZE-1 ;
+	
+	return state ;
+}
+
+int i8080_execute(i8080_state_t* state ) {
     uint16_t currentProgramCounter;
     uint16_t memoryAddressRegister;
     uint16_t tmp1, tmp2;
@@ -55,15 +65,13 @@ int cpu8080_execute( cpu8080_state_t* state ) {
     bool haltSignal = false;
     
     if ( state == NULL )
-        return CPU8080_FAIL;
+        return I8080_FAIL;
     
     currentProgramCounter = state->programCounter ;
     instruction = state->mem[currentProgramCounter] ;
     memoryAddressRegister = (state->H << 8) + state->L;        // memory address "virtual register" [HL]
     
     instructionLength = 1 ;        // default value
-    
-    // printf("instruction: %02X\n", instruction);
     
     switch (instruction) {
         case 0x00: {
@@ -2344,7 +2352,7 @@ int cpu8080_execute( cpu8080_state_t* state ) {
             #if SUPPORT_CPM_CALLS
             
             if (state->programCounter == 0x0000)        // in CP/M saltare a 0x0000 equivale a
-                return CPU8080_HALT ;            // riavviare il S.O. (warm boot)
+                return I8080_HALT ;            // riavviare il S.O. (warm boot)
             
             #endif
             
@@ -2508,7 +2516,7 @@ int cpu8080_execute( cpu8080_state_t* state ) {
                 instructionLength = 0 ;
             }
             else if (tmp1 == 0x0000)    // haltSignal to CP/M warm boot
-                return CPU8080_HALT ;
+                return I8080_HALT ;
             else
             #endif
             
@@ -3058,5 +3066,5 @@ int cpu8080_execute( cpu8080_state_t* state ) {
     
     state->programCounter += instructionLength ;
     
-    return (haltSignal) ? (CPU8080_HALT) : (instructionLength) ;
+    return (haltSignal) ? (I8080_HALT) : (instructionLength) ;
 }
