@@ -7,30 +7,31 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
     size_t pointer = 0;
 
     // address gutter on the left
-    pointer += sprintf(&result[pointer], "%04X:\t", instruction.position);
+    pointer += sprintf(&result[pointer], "%04X: ", instruction.position);
 
-    // binary representation of the instruction
+    // binary representation of the instruction (or padding if needed)
     pointer += sprintf(&result[pointer], "%02X", instruction.opcode);
-    for(int i = 0; i < instruction.num_inputValues; ++i)
-        pointer += sprintf(&result[pointer], " %02X", abs(instruction.inputValues[i]));
+    for(int i = 0; i < 3; ++i) {
+        if (i < instruction.num_inputValues)
+            pointer += sprintf(&result[pointer], " %02X", abs(instruction.inputValues[i]));
+        else {
+            pointer += sprintf(&result[pointer], "   ");
+        }
+    }
 
     // the instruction's mnemonic
-    if (instruction.num_inputValues < 2) {
-        result[pointer] = '\t';
-        ++pointer;
-    }
-    pointer += sprintf(&result[pointer], "\t%s", instruction.mnemonic);
+    pointer += sprintf(&result[pointer], "   %s", instruction.mnemonic);
 
     // register arguments, if any
     if (instruction.num_inputRegisters > 0) {
         if (instruction.num_inputValues == 0)
-            pointer += sprintf(&result[pointer], "\t%s", instruction.inputRegisters);
+            pointer += sprintf(&result[pointer], "  %s", instruction.inputRegisters);
         else
-            pointer += sprintf(&result[pointer], "\t%s, ", instruction.inputRegisters);
+            pointer += sprintf(&result[pointer], "  %s, ", instruction.inputRegisters);
     }
     else if (instruction.num_inputValues > 0) {
-        result[pointer] = '\t';
-        ++pointer;
+        result[pointer++] = ' ';
+        result[pointer++] = ' ';
     }
     
     // numerical arguments, if any

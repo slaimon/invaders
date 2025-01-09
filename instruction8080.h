@@ -10,7 +10,7 @@
 #define I8080_MNEMONIC_NAME_LENGTH  4
 #define I8080_REGISTER_NAME_LENGTH  4
 
-#define I8080_LINE_LENGTH 40
+#define I8080_LINE_LENGTH 50
 
 /*
     instruction8080_t describes an intel8080 instruction as found in a program, along with some
