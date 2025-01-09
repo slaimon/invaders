@@ -5,11 +5,11 @@
 
 /*
    A vstring is a string that can grow in length adaptively
-   like a vector and supports concatenation.
+   like a vector and supports concatenation of strings.
 */
 
 typedef struct {
-   char* v;
+   char* string;
    size_t length;
    size_t maxsize;
 } vstring_t;

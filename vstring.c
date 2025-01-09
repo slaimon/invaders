@@ -10,7 +10,7 @@ vstring_t* vstring_new(size_t length) {
    
    v->length = 0;
    v->maxsize = length + length/2;
-   v->v = safe_malloc(sizeof(char) * v->maxsize);
+   v->string = safe_malloc(sizeof(char) * v->maxsize);
    
    return v;
 }
@@ -21,7 +21,7 @@ char vstring_get(vstring_t* v, size_t i) {
       exit(EXIT_FAILURE);
    }
    
-   return v->v[i];
+   return v->string[i];
 }
 
 void vstring_set(vstring_t* v, size_t i, char element) {
@@ -30,7 +30,7 @@ void vstring_set(vstring_t* v, size_t i, char element) {
       exit(EXIT_FAILURE);
    }
    
-   v->v[i] = element;
+   v->string[i] = element;
 }
 
 void vstring_append(vstring_t* v, char element) {
@@ -38,10 +38,10 @@ void vstring_append(vstring_t* v, char element) {
       // se il vettore deve essere riallocato, la sua maxsize viene incrementata di 1.5 volte
       // (fattore di crescita = 1.5)
       v->maxsize += v->maxsize/2;
-      v->v = safe_realloc(v->v, sizeof(char), v->maxsize);
+      v->string = safe_realloc(v->string, sizeof(char), v->maxsize);
    }
    
-   v->v[v->length] = element;
+   v->string[v->length] = element;
    v->length++;
    return;
 }
@@ -52,15 +52,15 @@ void vstring_concat(vstring_t* v, char* string) {
 
    if (new_length >= v->maxsize) {
       v->maxsize = new_length + new_length/2;
-      v->v = safe_realloc(v->v, sizeof(char), v->maxsize);
+      v->string = safe_realloc(v->string, sizeof(char), v->maxsize);
    }
 
-   memcpy(&v->v[v->length], string, str_length);
+   memcpy(&v->string[v->length], string, str_length);
    v->length = new_length;
    return;
 }
 
 void vstring_free(vstring_t* v) {
-   free(v->v);
+   free(v->string);
    free(v);
 }
