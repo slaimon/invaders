@@ -20,7 +20,7 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
     }
 
     // the instruction's mnemonic
-    pointer += sprintf(&result[pointer], "   %s", instruction.mnemonic);
+    pointer += sprintf(&result[pointer], instruction.mnemonic);
 
     // register arguments, if any
     if (instruction.num_inputRegisters > 0) {
