@@ -3,6 +3,7 @@
 
 
 #include <stdint.h>
+#include "bytestream.h"
 
 #define I8080_MEMSIZE 0x10000
 
@@ -39,7 +40,9 @@ typedef struct {
 // point to the last addressable block of memory (I8080_MEMSIZE - 1)
 void i8080_init(i8080_state_t* state);
 
-
+// copy the given bytestream to the state's memory at the specified offset.
+// fails with exit() if there is insufficient memory
+void i8080_setMemory(i8080_state_t* state, bytestream_t src, uint16_t offset);
 
 // executes one instruction and returns either the length in bytes of the executed instruction or
 // one of the following values:

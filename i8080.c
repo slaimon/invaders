@@ -45,13 +45,21 @@
 uint8_t table[256] = { LOOK_UP };
 
 
-// initializes a blank i8080 state
 void i8080_init(i8080_state_t* state) {	
     // set all to zero except stack pointer
     memset(state, 0, sizeof(i8080_state_t));
 	state->stackPointer = I8080_MEMSIZE-1 ;
 	
 	return state ;
+}
+
+void i8080_setMemory(i8080_state_t* state, bytestream_t* src, uint16_t offset) {
+    if (src->size + offset > I8080_MEMSIZE) {
+        fprintf(stderr, "ERROR: i8080_setMemory: not enough memory.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    memcpy(&state->mem[offset], src->data, src->size);
 }
 
 int i8080_execute(i8080_state_t* state ) {
