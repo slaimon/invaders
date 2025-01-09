@@ -1,55 +1,6 @@
 #include <string.h>
 #include "disassembler8080.h"
 
-int abs(int x) {
-    if(x >= 0)
-        return x;
-    else
-        return -x;
-}
-
-void printline(instruction8080_t data, FILE* ofp) {
-    fprintf(ofp, "%04X:\t", data.position);
-    fprintf(ofp, "%02X", (unsigned int)data.opcode);
-    
-    for(int i = 0; i < data.num_inputValues; ++i) {
-        fputc(' ', ofp);
-        fprintf(ofp, "%02X", abs(data.inputValues[i]));
-    }
-    fputc('\t', ofp);
-    if(data.num_inputValues < 2)
-        fputc('\t', ofp);
-    fprintf(ofp, "%s\t", data.mnemonic);
-    
-    if(data.num_inputRegisters > 0) {
-        fprintf(ofp, "%s", data.inputRegisters);
-        if(data.num_inputValues > 0) fputc(',',ofp);
-            else fprintf(ofp, "\t");
-    }
-    if(data.num_inputValues > 1){
-        #if DISASSEMBLER8080_LITTLE_ENDIAN
-        if(data.inputValues[data.num_inputValues-1] > 0) fputc('#',ofp);        //
-            else fputc('$',ofp);                                                //
-        fprintf(ofp, "%02X", abs(data.inputValues[data.num_inputValues-1]));    //
-        fprintf(ofp, "%02X\t", abs(data.inputValues[data.num_inputValues-2]));  //
-        #else
-        if(data.inputValues[data.num_inputValues-1] > 0) fputc('#',ofp);        // assunzione implicita:
-            else fputc('$',ofp);                                                // i primi due byte successivi all'opcode
-        fprintf(ofp, "%02X", abs(data.inputValues[data.num_inputValues-2]));    // compongono un unico parametro da 16 bit
-        fprintf(ofp, "%02X\t", abs(data.inputValues[data.num_inputValues-1]));  // DA RIGUARDARE perché al momento non
-        #endif                                                                  // supporta altri valori di MAX_INSTRUCTION_PARAMETERS
-    }            
-    else if(data.num_inputValues > 0){
-        if(data.inputValues[data.num_inputValues-1] >= 0) fputc('#',ofp);
-            else fputc('$',ofp);
-        fprintf(ofp, "%02X\t", abs(data.inputValues[data.num_inputValues-1]));    
-    }
-    
-    fprintf(ofp, "\n");
-    return;
-}
-
-
 // raccoglie tutte le info sulla istruzione fornita e le restituisce senza stamparle
 instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
     instruction8080_t data;
