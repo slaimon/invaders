@@ -4,6 +4,15 @@
 #include "bytestream.h"
 #include "safe.h"
 
+size_t fsize(FILE* ifp) {
+    int tmp = fseek(ifp, 0, SEEK_CUR);
+    fseek(ifp, 0, SEEK_END);
+    int size = ftell(ifp);
+
+    fseek(ifp, tmp, SEEK_SET);
+    return size;
+}
+
 bytestream_t* bytestream_new(size_t size) {
     if (size == 0)
         return NULL;
@@ -46,12 +55,12 @@ bytestream_t* bytestream_read(FILE* ifp) {
         return NULL;
     }
 
-    size_t size = safe_fsize(ifp);
+    size_t size = fsize(ifp);
     bytestream_t* stream = bytestream_new(size);
 
     size_t read = fread(stream->data, sizeof(uint8_t), size, ifp);
     if (read != size) {
-        fprintf(stderr,"BYTESTREAM_READ WARNING: only read %llu bytes out of %llu\n", read, size);
+        fprintf(stderr,"BYTESTREAM_READ WARNING: only read %lu bytes out of %lu\n", read, size);
     }
 
     return stream;
@@ -65,7 +74,7 @@ int bytestream_write(bytestream_t* stream, FILE* ofp) {
 
     size_t written = fwrite(stream->data, sizeof(uint8_t), stream->size, ofp);
     if (written != stream->size) {
-        fprintf(stderr,"BYTESTREAM_WRITE WARNING: only wrote %llu bytes out of %llu\n", written, stream->size);
+        fprintf(stderr,"BYTESTREAM_WRITE WARNING: only wrote %lu bytes out of %lu\n", written, stream->size);
     }
 
     return 0;
