@@ -13,15 +13,7 @@
 #define I8080_MAX_INSTRUCTION_LENGTH         3    // massima dimensione di una istruzione, in byte
 #define I8080_MAX_FILENAME_LENGHT            20   // massima lunghezza del nome di un file
 
-#define ADDRESS_LENGTH  6
-#define OPCODE_LENGTH   3
-#define MNEMONIC_LENGTH         (I8080_MNEMONIC_NAME_LENGTH + 3)
-#define INPUT_REGISTERS_LENGTH  (I8080_REGISTER_NAME_LENGTH + 2)
-#define ARGUMENTS_LENGTH 6
-
-#define LINE_SIZE \
-            ( ADDRESS_LENGTH + 3*OPCODE_LENGTH + MNEMONIC_LENGTH + \
-              INPUT_REGISTERS_LENGTH + ARGUMENTS_LENGTH + 2 )
+#define I8080_LINE_LENGTH 40
 
 
 typedef struct {
@@ -39,7 +31,7 @@ typedef struct {
 } instruction8080_t;
 
 typedef struct {
-    char string[LINE_SIZE + 1];
+    char string[I8080_LINE_LENGTH + 1];
 } i8080_line_t;
 
 // prints one instruction to a fixed-width string
