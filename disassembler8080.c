@@ -54,7 +54,7 @@ void printline(disassembler8080_instruction_t data, FILE* ofp) {
 disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
     disassembler8080_instruction_t data;
     
-    data.opcode = (unsigned char) mem[addr];
+    data.opcode = mem[addr];
     
     data.position = addr;
     data.num_inputRegisters = 0;     //
@@ -1991,4 +1991,22 @@ disassembler8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned 
     }
     
     return data ;
+}
+
+#define AVERAGE_CHARS_PER_PROGRAM_BYTE  15
+
+char* disassemble_program(bytestream_t program) {
+    size_t minResultSize = AVERAGE_CHARS_PER_PROGRAM_BYTE * program.size * sizeof(char);
+    char* result = malloc( minResultSize + 1);
+
+    size_t programPointer = 0;
+    size_t stringPointer = 0;
+    while (programPointer < program.size) {
+        disassembler8080_instruction_t instruction = disassemble_instruction(program.data, programPointer);
+        char* line = instruction_toString(instruction);
+
+        if (sizeof(line) + stringPointer >= sizeof(result)) {
+
+        }
+    }
 }
