@@ -10,8 +10,6 @@
 #define I8080_MNEMONIC_NAME_LENGTH  4
 #define I8080_REGISTER_NAME_LENGTH  4
 #define I8080_MAX_INSTRUCTION_PARAMETERS     2    // massimo numero di parametri espliciti per una istruzione (in pratica questo codice ne supporta al max. 3)
-#define I8080_MAX_INSTRUCTION_LENGTH         3    // massima dimensione di una istruzione, in byte
-#define I8080_MAX_FILENAME_LENGHT            20   // massima lunghezza del nome di un file
 
 #define I8080_LINE_LENGTH 40
 
