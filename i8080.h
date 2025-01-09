@@ -40,8 +40,8 @@ typedef struct {
 // point to the last addressable block of memory (I8080_MEMSIZE - 1)
 void i8080_init(i8080_state_t* state);
 
-// copy the given bytestream to the state's memory at the specified offset.
-// fails with exit() if there is insufficient memory
+// copy the given block of data to the state's memory at the specified offset.
+// fails with exit() if there is insufficient memory.
 void i8080_setMemory(i8080_state_t* state, bytestream_t src, uint16_t offset);
 
 // executes one instruction and returns either the length in bytes of the executed instruction or
@@ -52,7 +52,7 @@ void i8080_setMemory(i8080_state_t* state, bytestream_t src, uint16_t offset);
 // TODO: perché mai dovrebbe restituire la lunghezza dell'istruzione? non può semplicemente
 //       incrementare il program counter? e a quel punto potrei fargli restituire un enum anziché un
 //       int
-int i8080_execute( i8080_state_t* state );
+int i8080_execute(i8080_state_t* state);
 
 
 #endif
