@@ -1,6 +1,22 @@
 #include <string.h>
 #include "disassembler8080.h"
 
+void disassemble_program(bytestream_t program, FILE* ofp) {
+    char result[I8080_LINE_LENGTH * program.size];
+
+    size_t programPointer = 0;
+    size_t stringPointer = 0;
+    while (programPointer < program.size) {
+        instruction8080_t instruction = disassemble_instruction(program.data, programPointer);
+        i8080_line_t line = instruction8080_toString(instruction);
+
+        stringPointer += sprintf(&result[stringPointer], line.string);
+        programPointer += instruction.instructionLength;
+    }
+
+    fprintf(ofp, result);
+}
+
 // raccoglie tutte le info sulla istruzione fornita e le restituisce senza stamparle
 instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
     instruction8080_t data;
@@ -1969,20 +1985,4 @@ instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
     }
     
     return data ;
-}
-
-void disassemble_program(bytestream_t program, FILE* ofp) {
-    char result[I8080_LINE_LENGTH * program.size];
-
-    size_t programPointer = 0;
-    size_t stringPointer = 0;
-    while (programPointer < program.size) {
-        instruction8080_t instruction = disassemble_instruction(program.data, programPointer);
-        i8080_line_t line = instruction8080_toString(instruction);
-
-        stringPointer += sprintf(&result[stringPointer], line.string);
-        programPointer += instruction.instructionLength;
-    }
-
-    fprintf(ofp, result);
 }
