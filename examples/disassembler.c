@@ -4,10 +4,19 @@
 int main(int argc, char** argv) {
     FILE *ofp, *ifp;
 
+    if (argc != 3) {
+        printf("usage: %s INPUT_FILE OUTPUT_FILE\n", argv[0]);
+        return 0;
+    }
+
     ifp = fopen(argv[1], "rb");
-    ofp = fopen("listing.txt", "w");
+    ofp = fopen(argv[2], "w");
     
     bytestream_t* program = bytestream_read(ifp);
+    if (program == NULL) {
+        printf("No valid program found\n");
+        return 0;
+    }
     disassemble_program(*program, ofp);
     
     fclose(ofp);
