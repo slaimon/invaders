@@ -1,11 +1,11 @@
-#include "disassembler8080.h"
-#include "bytestream.h"
+#include "../include/disassembler8080.h"
+#include "../include/bytestream.h"
 
-int main(void) {
-    FILE *ofp,*ifp;
+int main(int argc, char** argv) {
+    FILE *ofp, *ifp;
 
-    ifp = fopen("./INVADERS", "rb");
-    ofp = fopen("./INVADERS.TXT", "w");
+    ifp = fopen(argv[1], "rb");
+    ofp = fopen("listing.txt", "w");
     
     bytestream_t* program = bytestream_read(ifp);
     disassemble_program(*program, ofp);
