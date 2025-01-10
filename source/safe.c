@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <dirent.h>
 
-#include "safe.h"
+#include "../include/safe.h"
 
 void* safe_malloc(size_t bytes) {
 	void* ptr = malloc(bytes);

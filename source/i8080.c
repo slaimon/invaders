@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "i8080.h"
+#include "../include/i8080.h"
 
 /* ------------- BYTE PARITY LOOKUP TABLE ----------- */
 

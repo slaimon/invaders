@@ -1,5 +1,5 @@
 #include <string.h>
-#include "disassembler8080.h"
+#include "../include/disassembler8080.h"
 
 void disassemble_program(bytestream_t program, FILE* ofp) {
     char result[I8080_LINE_LENGTH * program.size];

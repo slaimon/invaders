@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "instruction8080.h"
+#include "../include/instruction8080.h"
 
 i8080_line_t instruction8080_toString(instruction8080_t instruction) {
     i8080_line_t line;
