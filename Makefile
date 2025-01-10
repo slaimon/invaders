@@ -6,7 +6,7 @@ SRC = source
 HDR = include
 EXAMPLES = examples
 
-.PHONY: clean disassembler invaders_listing
+.PHONY: clean invaders_listing
 
 invaders_listing: ./disassembler
 	rm -f ./invaders_listing.txt
@@ -26,3 +26,5 @@ $(BIN)/safe.o: $(HDR)/safe.h
 
 clean:
 	rm $(BIN)/*.o
+	rm -f ./disassembler
+	rm -f ./invaders_listing.txt
