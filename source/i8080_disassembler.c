@@ -429,7 +429,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0x31: {
             strcpy(data.mnemonic, "LXI ");
-            strcpy(data.inputRegisters, "SP  ");
+            strcpy(data.inputRegisters, "SP");
             
             data.inputValues[0] = mem[addr+1];
             data.inputValues[1] = mem[addr+2];
@@ -453,7 +453,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0x33: {
             strcpy(data.mnemonic, "INX ");
-            strcpy(data.inputRegisters, "SP  ");
+            strcpy(data.inputRegisters, "SP");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
@@ -500,7 +500,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0x39: {
             strcpy(data.mnemonic, "DAD ");
-            strcpy(data.inputRegisters, "SP  ");
+            strcpy(data.inputRegisters, "SP");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
@@ -520,7 +520,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0x3B: {
             strcpy(data.mnemonic, "DCX ");
-            strcpy(data.inputRegisters, "SP  ");
+            strcpy(data.inputRegisters, "SP");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;

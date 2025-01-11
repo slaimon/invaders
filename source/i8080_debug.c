@@ -10,7 +10,7 @@
 	(c >= 'a' && c <= 'z') ? (c-32) : (c)
 
 char mainSeparator[] = "_______________________________________________________________________";
-char sectionSeparator[] = "-----------------------------------\n";
+char sectionSeparator[] = "-------------------------------------\n";
 
 
 void i8080_printState (const i8080_state_t state, unsigned int numLines, FILE* ofp) {
@@ -64,7 +64,7 @@ int i8080_tuiDebug(i8080_state_t* state, const char* customCommandMapping) {
         i8080_execute(state);
 
 		// print machine state and commands
-		puts("\n\n\n");
+		puts("\n\n");
 		puts(mainSeparator);
         i8080_printState(*state, 5, stdout);
 		puts(mainSeparator);
