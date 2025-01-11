@@ -13,9 +13,13 @@ int main(int argc, char** argv) {
         printf("No valid program found\n");
         return 0;
     }
+    fclose(ifp);
 
     i8080_state_t state;
     i8080_init(&state);
+    i8080_setMemory(&state, *program, 0);
+    bytestream_destroy(program);
+
     int retval = i8080_tuiDebug(&state, NULL);
 
     printf("user requested %s\n", (retval == 0) ? "CONTINUE" : "QUIT");
