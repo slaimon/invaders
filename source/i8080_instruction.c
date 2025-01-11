@@ -12,7 +12,7 @@ i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction) {
     // binary representation of the instruction (or padding if needed)
     pointer += sprintf(&result[pointer], "%02X", instruction.opcode);
     for(int i = 0; i < 3; ++i) {
-        if (i <= instruction.num_inputValues)
+        if (i < instruction.num_inputValues)
             pointer += sprintf(&result[pointer], " %02X", abs(instruction.inputValues[i]));
         else {
             pointer += sprintf(&result[pointer], "   ");
