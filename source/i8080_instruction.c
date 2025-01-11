@@ -5,7 +5,10 @@
     for(int i = 0; i < n; ++i)      \
         result[pointer++] = ' ';
 
-#define COMMENT_COLUMN_NUMBER   38
+// the mnemonics are placed at this column
+#define MNEMONIC_COLUMN_NUMBER  22
+// the comments are placed at this column
+#define COMMENT_COLUMN_NUMBER   40
 
 
 i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction) {
@@ -20,16 +23,13 @@ i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction) {
 
     // binary representation of the instruction (or padding if needed)
     pointer += sprintf(&result[pointer], "%02X", instruction.opcode);
-    for(int i = 0; i < 3; ++i) {
-        if (i < instruction.num_inputValues)
-            pointer += sprintf(&result[pointer], " %02X", abs(instruction.inputValues[i]));
-        else {
-            pointer += sprintf(&result[pointer], "   ");
-        }
+    for(int i = 0; i < instruction.num_inputValues; ++i) {
+        pointer += sprintf(&result[pointer], " %02X", abs(instruction.inputValues[i]));
     }
 
     // the instruction's mnemonic
-    INSERT_WHITESPACE(4)
+    int padding = MNEMONIC_COLUMN_NUMBER - pointer;
+    INSERT_WHITESPACE(padding)
     pointer += sprintf(&result[pointer], instruction.mnemonic);
 
     // register arguments, if any
@@ -63,12 +63,10 @@ i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction) {
         INSERT_WHITESPACE(2)
     }
 
-    int padding = COMMENT_COLUMN_NUMBER - pointer;
-    INSERT_WHITESPACE(padding)
-
     // comment, if any
     if (hasComment) {
-        INSERT_WHITESPACE(4)
+        padding = COMMENT_COLUMN_NUMBER - pointer;
+        INSERT_WHITESPACE(padding)
         pointer += sprintf(&result[pointer], "; %s", instruction.comment);
     }
 
