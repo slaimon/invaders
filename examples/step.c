@@ -14,9 +14,9 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    i8080_state_t* state;
-    i8080_init(state);
-    int retval = i8080_tuiDebug(state, NULL);
+    i8080_state_t state;
+    i8080_init(&state);
+    int retval = i8080_tuiDebug(&state, NULL);
 
     printf("user requested %s\n", (retval == 0) ? "CONTINUE" : "QUIT");
     return 0;
