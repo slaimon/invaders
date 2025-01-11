@@ -8,9 +8,10 @@
 #define I8080_LITTLE_ENDIAN true
 
 #define I8080_MNEMONIC_NAME_LENGTH  4
-#define I8080_REGISTER_NAME_LENGTH  4
+#define I8080_REGISTER_NAME_LENGTH  8
+#define I8080_MAX_COMMENT_LENGTH   64
 
-#define I8080_LINE_LENGTH 50
+#define I8080_LINE_LENGTH          64 + I8080_MAX_COMMENT_LENGTH
 
 /*
     i8080_instruction_t describes an intel8080 instruction as found in a program, along with some
@@ -38,6 +39,8 @@ typedef struct {
     uint8_t inputValues[2];
     unsigned short num_inputValues;      // number of numerical arguments of the instruction
     bool immediate;                      // true if the value is a literal, false if it's an address
+
+    char comment[I8080_MAX_COMMENT_LENGTH];
 } i8080_instruction_t;
 
 // a fixed-width string containing a single line of i8080 assembly listing

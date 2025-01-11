@@ -17,6 +17,89 @@ void disassemble_program(bytestream_t program, FILE* ofp) {
     fprintf(ofp, result);
 }
 
+#define COMMENT_LXI(x) \
+    sprintf(data.comment, "Load immediate value to %s", x);
+
+#define COMMENT_STAX(x) \
+    sprintf(data.comment, "Store A to $%s", x);
+
+#define COMMENT_INX(x) \
+    sprintf(data.comment, "Increment %s", x);
+
+#define COMMENT_INR(x) \
+    COMMENT_INX(x)
+
+#define COMMENT_DCX(x) \
+    sprintf(data.comment, "Decrement %s", x);
+
+#define COMMENT_DCR(x) \
+    COMMENT_DCX(x)
+
+#define COMMENT_MVI(x) \
+    sprintf(data.comment, "Move immediate value to %s", x);
+
+#define COMMENT_DAD(x) \
+    sprintf(data.comment, "Add %s to HL", x);
+
+#define COMMENT_RLC \
+    strcpy(data.comment, "Rotate A left, set Carry flag");
+
+#define COMMENT_RRC \
+    strcpy(data.comment, "Rotate A right, set Carry flag");
+
+#define COMMENT_RAL \
+    strcpy(data.comment, "Rotate A left");
+
+#define COMMENT_RAR \
+    strcpy(data.comment, "Rotate A right");
+
+#define COMMENT_LDAX(x) \
+    sprintf(data.comment, "Load A from $%s (indirect)", x);
+
+#define COMMENT_SHLD \
+    strcpy(data.comment, "Store HL to address");
+
+#define COMMENT_LHLD \
+    strcpy(data.comment, "Load HL from address");
+
+#define COMMENT_DAA \
+    strcpy(data.comment, "Convert A to binary-coded decimal");
+
+#define COMMENT_CMA \
+    strcpy(data.comment, "Apply one's complement to A");
+
+#define COMMENT_STA \
+    strcpy(data.comment, "Store A to address");
+
+#define COMMENT_LDA \
+    strcpy(data.comment, "Load A from address");
+
+#define COMMENT_STC \
+    strcpy(data.comment, "Set Carry flag");
+
+#define COMMENT_CMC \
+    strcpy(data.comment, "Complement Carry flag");
+
+#define COMMENT_MOV(x, y) \
+    sprintf(data.comment, "Copy %s to %s", x, y);
+
+#define COMMENT_ADD(x) \
+    sprintf(data.comment, "Add %s to A", x);
+
+#define COMMENT_ADC(x) \
+    sprintf(data.comment, "Add %s to A and set Carry flag", x);
+
+#define COMMENT_SUB(x) \
+    sprintf(data.comment, "Subtract %s from A", x);
+
+#define COMMENT_SBB(x) \
+    sprintf(data.comment, "Subtract %s from A with borrow", x);
+
+// continue from line 1617
+
+#define COMMENT_HLT \
+    strcpy(data.comment, "Halt processor");
+
 // raccoglie tutte le info sulla istruzione fornita e le restituisce senza stamparle
 i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int addr ) {
     i8080_instruction_t data;
@@ -28,6 +111,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
     data.num_inputValues = 0;        //
     data.instructionLength = 1;      // default values
     data.immediate = true;           //
+    memset(data.comment, 0, I8080_MAX_COMMENT_LENGTH);
     
     switch (data.opcode) {
         case 0x00: {
@@ -37,7 +121,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0x01: {
             strcpy(data.mnemonic, "LXI ");
-            strcpy(data.inputRegisters, "B");
+            strcpy(data.inputRegisters, "BC");
             
             data.inputValues[0] = mem[addr+1];
             data.inputValues[1] = mem[addr+2];
@@ -45,22 +129,28 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 3;
             data.num_inputRegisters = 1;
             data.num_inputValues = 2;
+
+            COMMENT_LXI("BC")
             break;
         }
         case 0x02: {
             strcpy(data.mnemonic, "STAX");
-            strcpy(data.inputRegisters, "B");
+            strcpy(data.inputRegisters, "$BC");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_STAX("BC")
             break;
         }
         case 0x03: {
             strcpy(data.mnemonic, "INX ");
-            strcpy(data.inputRegisters, "B");
+            strcpy(data.inputRegisters, "BC");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INX("BC")
             break;
         }
         case 0x04: {
@@ -69,6 +159,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INR("B")
             break;
         }
         case 0x05: {
@@ -77,6 +169,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCR("B")
             break;
         }
         case 0x06: {
@@ -88,11 +182,15 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
             data.num_inputValues = 1;
+
+            COMMENT_MVI("B")
             break;
         }
         case 0x07: {
             strcpy(data.mnemonic,"RLC ");
             data.instructionLength = 1;
+
+            COMMENT_RLC
             break;
         }
         case 0x08: {
@@ -102,26 +200,32 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0x09: {
             strcpy(data.mnemonic, "DAD ");
-            strcpy(data.inputRegisters, "B");
+            strcpy(data.inputRegisters, "BC");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DAD("BC")
             break;
         }
         case 0x0A: {
             strcpy(data.mnemonic, "LDAX");
-            strcpy(data.inputRegisters, "B");
+            strcpy(data.inputRegisters, "$BC");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_LDAX("BC")
             break;
         }
         case 0x0B: {
             strcpy(data.mnemonic, "DCX ");
-            strcpy(data.inputRegisters, "B");
+            strcpy(data.inputRegisters, "BC");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCX("BC")
             break;
         }
         case 0x0C: {
@@ -130,6 +234,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INR("C")
             break;
         }
         case 0x0D: {
@@ -138,6 +244,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCR("C")
             break;
         }
         case 0x0E: {
@@ -149,12 +257,16 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
             data.num_inputValues = 1;
+
+            COMMENT_MVI("C")
             break;
         }
         case 0x0F: {
             strcpy(data.mnemonic, "RRC ");
             
             data.instructionLength = 1;
+
+            COMMENT_RRC
             break;
         }
         case 0x10: {
@@ -165,7 +277,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0x11: {
             strcpy(data.mnemonic, "LXI ");
-            strcpy(data.inputRegisters, "D");
+            strcpy(data.inputRegisters, "DE");
             
             data.inputValues[0] = mem[addr+1];
             data.inputValues[1] = mem[addr+2];
@@ -173,22 +285,28 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 3;
             data.num_inputRegisters = 1;
             data.num_inputValues = 2;
+
+            COMMENT_LXI("DE")
             break;
         }
         case 0x12: {
             strcpy(data.mnemonic, "STAX");
-            strcpy(data.inputRegisters, "D");
+            strcpy(data.inputRegisters, "DE");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_STAX("DE")
             break;
         }
         case 0x13: {
             strcpy(data.mnemonic, "INX ");
-            strcpy(data.inputRegisters, "D");
+            strcpy(data.inputRegisters, "DE");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INX("DE")
             break;
         }
         case 0x14: {
@@ -197,6 +315,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INR("D")
             break;
         }
         case 0x15: {
@@ -205,6 +325,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCR("D")
             break;
         }
         case 0x16: {
@@ -216,11 +338,15 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
             data.num_inputValues = 1;
+
+            COMMENT_MVI("D")
             break;
         }
         case 0x17: {
             strcpy(data.mnemonic,"RAL ");
             data.instructionLength = 1;
+
+            COMMENT_RAL
             break;
         }
         case 0x18: {
@@ -230,26 +356,32 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0x19: {
             strcpy(data.mnemonic, "DAD ");
-            strcpy(data.inputRegisters, "D");
+            strcpy(data.inputRegisters, "DE");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DAD("DE")
             break;
         }
         case 0x1A: {
             strcpy(data.mnemonic, "LDAX");
-            strcpy(data.inputRegisters, "D");
+            strcpy(data.inputRegisters, "DE");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_LDAX("DE")
             break;
         }
         case 0x1B: {
             strcpy(data.mnemonic, "DCX ");
-            strcpy(data.inputRegisters, "E");
+            strcpy(data.inputRegisters, "DE");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCX("DE")
             break;
         }
         case 0x1C: {
@@ -258,6 +390,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INR("E")
             break;
         }
         case 0x1D: {
@@ -266,6 +400,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCR("E")
             break;
         }
         case 0x1E: {
@@ -277,12 +413,16 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
             data.num_inputValues = 1;
+
+            COMMENT_MVI("E")
             break;
         }
         case 0x1F: {
             strcpy(data.mnemonic, "RAR ");
             
             data.instructionLength = 1;
+
+            COMMENT_RAR
             break;
         }
         case 0x20: {
@@ -293,7 +433,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0x21: {
             strcpy(data.mnemonic, "LXI ");
-            strcpy(data.inputRegisters, "H");
+            strcpy(data.inputRegisters, "HL");
             
             data.inputValues[0] = mem[addr+1];
             data.inputValues[1] = mem[addr+2];
@@ -301,6 +441,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 3;
             data.num_inputRegisters = 1;
             data.num_inputValues = 2;
+
+            COMMENT_LXI("HL")
             break;
         }
         case 0x22: {
@@ -313,14 +455,18 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 3;
             data.num_inputRegisters = 0;
             data.num_inputValues = 2;
+
+            COMMENT_SHLD
             break;
         }
         case 0x23: {
             strcpy(data.mnemonic, "INX ");
-            strcpy(data.inputRegisters, "H");
+            strcpy(data.inputRegisters, "HL");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INX("HL")
             break;
         }
         case 0x24: {
@@ -329,6 +475,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INR("H")
             break;
         }
         case 0x25: {
@@ -337,6 +485,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCR("H")
             break;
         }
         case 0x26: {
@@ -348,11 +498,15 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
             data.num_inputValues = 1;
+
+            COMMENT_MVI("H")
             break;
         }
         case 0x27: {
             strcpy(data.mnemonic,"DAA ");
             data.instructionLength = 1;
+
+            COMMENT_DAA
             break;
         }
         case 0x28: {
@@ -362,10 +516,12 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0x29: {
             strcpy(data.mnemonic, "DAD ");
-            strcpy(data.inputRegisters, "H");
+            strcpy(data.inputRegisters, "HL");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DAD("HL")
             break;
         }
         case 0x2A: {
@@ -378,14 +534,18 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 3;
             data.num_inputRegisters = 0;
             data.num_inputValues = 2;
+
+            COMMENT_LHLD
             break;
         }
         case 0x2B: {
             strcpy(data.mnemonic, "DCX ");
-            strcpy(data.inputRegisters, "H");
+            strcpy(data.inputRegisters, "HL");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCX("HL")
             break;
         }
         case 0x2C: {
@@ -394,6 +554,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INR("L")
             break;
         }
         case 0x2D: {
@@ -402,6 +564,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCR("L")
             break;
         }
         case 0x2E: {
@@ -413,12 +577,16 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
             data.num_inputValues = 1;
+
+            COMMENT_MVI("L")
             break;
         }
         case 0x2F: {
             strcpy(data.mnemonic, "CMA ");
             
             data.instructionLength = 1;
+
+            COMMENT_CMA
             break;
         }
         case 0x30: {
@@ -437,6 +605,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 3;
             data.num_inputRegisters = 1;
             data.num_inputValues = 2;
+
+            COMMENT_LXI("the Stack Pointer")
             break;
         }
         case 0x32: {
@@ -449,6 +619,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 3;
             data.num_inputRegisters = 0;
             data.num_inputValues = 2;
+
+            COMMENT_STA
             break;
         }
         case 0x33: {
@@ -457,39 +629,49 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INX("the Stack Pointer")
             break;
         }
         case 0x34: {
             strcpy(data.mnemonic, "INR ");
-            strcpy(data.inputRegisters, "M");
+            strcpy(data.inputRegisters, "$HL");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INR("$HL (indirect)")
             break;
         }
         case 0x35: {
             strcpy(data.mnemonic, "DCR ");
-            strcpy(data.inputRegisters, "M");
+            strcpy(data.inputRegisters, "$HL");
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCR("$HL (indirect)")
             break;
         }
         case 0x36: {
             strcpy(data.mnemonic, "MVI ");
-            strcpy(data.inputRegisters, "M");
+            strcpy(data.inputRegisters, "$HL");
             
             data.inputValues[0] = mem[addr+1];
             
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
             data.num_inputValues = 1;
+
+            COMMENT_MVI("$HL (indirect)")
             break;
         }
         case 0x37: {
             strcpy(data.mnemonic,"STC ");
             
             data.instructionLength = 1;
+
+            COMMENT_STC
             break;
         }
         case 0x38: {
@@ -504,6 +686,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DAD("the Stack Pointer")
             break;
         }
         case 0x3A: {
@@ -516,6 +700,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 3;
             data.num_inputRegisters = 0;
             data.num_inputValues = 2;
+
+            COMMENT_LDA
             break;
         }
         case 0x3B: {
@@ -524,6 +710,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCX("the Stack Pointer")
             break;
         }
         case 0x3C: {
@@ -532,6 +720,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_INR("A")
             break;
         }
         case 0x3D: {
@@ -540,6 +730,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             
             data.instructionLength = 1;
             data.num_inputRegisters = 1;
+
+            COMMENT_DCR("A")
             break;
         }
         case 0x3E: {
@@ -551,12 +743,16 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             data.instructionLength = 2;
             data.num_inputRegisters = 1;
             data.num_inputValues = 1;
+
+            COMMENT_MVI("A")
             break;
         }
         case 0x3F: {
             strcpy(data.mnemonic, "CMC ");
             
             data.instructionLength = 1;
+
+            COMMENT_CMC
             break;
         }
         case 0x40: {
@@ -564,6 +760,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "B, B");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("B","B")
             break;
         }
         case 0x41: {
@@ -571,6 +769,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "B, C");
             
             data.num_inputRegisters = 2;
+            COMMENT_MOV("B","C")
             break;
         }
         case 0x42: {
@@ -578,6 +777,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "B, D");
             
             data.num_inputRegisters = 2;
+            COMMENT_MOV("B","D")
             break;
         }
         case 0x43: {
@@ -585,6 +785,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "B, E");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("B","E")
             break;
         }
         case 0x44: {
@@ -592,6 +794,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "B, H");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("B","H")
             break;
         }
         case 0x45: {
@@ -599,13 +803,17 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "B, L");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("B", "L")
             break;
         }
         case 0x46: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "B, M");
+            strcpy(data.inputRegisters, "B, $HL");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("B","$HL")
             break;
         }
         case 0x47: {
@@ -613,6 +821,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "B, A");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("B","A")
             break;
         }
         case 0x48: {
@@ -620,6 +830,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "C, B");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("C","B")
             break;
         }
         case 0x49: {
@@ -627,6 +839,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "C, C");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("C","C")
             break;
         }
         case 0x4A: {
@@ -634,6 +848,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "C, D");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("C","D")
             break;
         }
         case 0x4B: {
@@ -641,6 +857,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "C, E");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("C","E")
             break;
         }
         case 0x4C: {
@@ -648,6 +866,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "C, H");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("C","H")
             break;
         }
         case 0x4D: {
@@ -655,13 +875,17 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "C, L");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("C","L")
             break;
         }
         case 0x4E: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "C, M");
+            strcpy(data.inputRegisters, "C, $HL");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("C","$HL")
             break;
         }
         case 0x4F: {
@@ -669,6 +893,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "C, A");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("C","A")
             break;
         }
         case 0x50: {
@@ -676,6 +902,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "D, B");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("D","B")
             break;
         }
         case 0x51: {
@@ -683,6 +911,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "D, C");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("D","C")
             break;
         }
         case 0x52: {
@@ -690,6 +920,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "D, D");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("D","D")
             break;
         }
         case 0x53: {
@@ -697,6 +929,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "D, E");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("D","E")
             break;
         }
         case 0x54: {
@@ -704,6 +938,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "D, H");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("D","H")
             break;
         }
         case 0x55: {
@@ -711,13 +947,17 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "D, L");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("D","L")
             break;
         }
         case 0x56: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "D, M");
+            strcpy(data.inputRegisters, "D, $HL");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("D","$HL")
             break;
         }
         case 0x57: {
@@ -725,6 +965,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "D, A");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("D","A")
             break;
         }
         case 0x58: {
@@ -732,6 +974,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "E, B");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("E","B")
             break;
         }
         case 0x59: {
@@ -739,6 +983,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "E, C");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("E","C")
             break;
         }
         case 0x5A: {
@@ -746,6 +992,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "E, D");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("E","D")
             break;
         }
         case 0x5B: {
@@ -753,6 +1001,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "E, E");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("E","E")
             break;
         }
         case 0x5C: {
@@ -760,6 +1010,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "E, H");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("E","H")
             break;
         }
         case 0x5D: {
@@ -767,13 +1019,17 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "E, L");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("E","L")
             break;
         }
         case 0x5E: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "E, M");
+            strcpy(data.inputRegisters, "E, $HL");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("E","$HL")
             break;
         }
         case 0x5F: {
@@ -781,6 +1037,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "E, A");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("E","A")
             break;
         }
         case 0x60: {
@@ -788,6 +1046,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "H, B");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("H","B")
             break;
         }
         case 0x61: {
@@ -795,6 +1055,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "H, C");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("H","C")
             break;
         }
         case 0x62: {
@@ -802,6 +1064,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "H, D");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("H","D")
             break;
         }
         case 0x63: {
@@ -809,6 +1073,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "H, E");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("H","E")
             break;
         }
         case 0x64: {
@@ -816,6 +1082,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "H, H");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("H","H")
             break;
         }
         case 0x65: {
@@ -823,13 +1091,17 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "H, L");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("H","L")
             break;
         }
         case 0x66: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "H, M");
+            strcpy(data.inputRegisters, "H, $HL");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("H","$HL")
             break;
         }
         case 0x67: {
@@ -837,6 +1109,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "H, A");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("H","A")
             break;
         }
         case 0x68: {
@@ -844,6 +1118,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "L, B");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("L","B")
             break;
         }
         case 0x69: {
@@ -851,6 +1127,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "L, C");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("L","C")
             break;
         }
         case 0x6A: {
@@ -858,6 +1136,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "L, D");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("L","D")
             break;
         }
         case 0x6B: {
@@ -865,6 +1145,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "L, E");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("L","E")
             break;
         }
         case 0x6C: {
@@ -872,6 +1154,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "L, H");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("L","H")
             break;
         }
         case 0x6D: {
@@ -879,13 +1163,17 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "L, L");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("L","L")
             break;
         }
         case 0x6E: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "L, M");
+            strcpy(data.inputRegisters, "L, $HL");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("L","$HL")
             break;
         }
         case 0x6F: {
@@ -893,61 +1181,79 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "L, A");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("L","A")
             break;
         }
         case 0x70: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "M, B");
+            strcpy(data.inputRegisters, "$HL, B");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("$HL","B")
             break;
         }
         case 0x71: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "M, C");
+            strcpy(data.inputRegisters, "$HL, C");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("$HL","C")
             break;
         }
         case 0x72: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "M, D");
+            strcpy(data.inputRegisters, "$HL, D");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("$HL","D")
             break;
         }
         case 0x73: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "M, E");
+            strcpy(data.inputRegisters, "$HL, E");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("$HL","E")
             break;
         }
         case 0x74: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "M, H");
+            strcpy(data.inputRegisters, "$HL, H");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("$HL","H")
             break;
         }
         case 0x75: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "M, L");
+            strcpy(data.inputRegisters, "$HL, L");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("$HL","L")
             break;
         }
         case 0x76: {
             strcpy(data.mnemonic, "HLT ");
             
             data.instructionLength = 1;
+
+            COMMENT_HLT
             break;
         }
         case 0x77: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "M, A");
+            strcpy(data.inputRegisters, "$HL, A");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("$HL","A")
             break;
         }
         case 0x78: {
@@ -955,6 +1261,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "A, B");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("A","B")
             break;
         }
         case 0x79: {
@@ -962,6 +1270,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "A, C");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("A","C")
             break;
         }
         case 0x7A: {
@@ -969,6 +1279,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "A, D");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("A","D")
             break;
         }
         case 0x7B: {
@@ -976,6 +1288,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "A, E");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("A","E")
             break;
         }
         case 0x7C: {
@@ -983,6 +1297,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "A, H");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("A","H")
             break;
         }
         case 0x7D: {
@@ -990,13 +1306,17 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "A, L");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("A","L")
             break;
         }
         case 0x7E: {
             strcpy(data.mnemonic, "MOV ");
-            strcpy(data.inputRegisters, "A, M");
+            strcpy(data.inputRegisters, "A, $HL");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("A","$HL")
             break;
         }
         case 0x7F: {
@@ -1004,6 +1324,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "A, A");
             
             data.num_inputRegisters = 2;
+
+            COMMENT_MOV("A","A")
             break;
         }
         case 0x80: {
@@ -1011,6 +1333,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "B");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADD("B")
             break;
         }
         case 0x81: {
@@ -1018,6 +1342,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "C");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADD("C")
             break;
         }
         case 0x82: {
@@ -1025,6 +1351,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "D");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADD("D")
             break;
         }
         case 0x83: {
@@ -1032,6 +1360,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "E");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADD("E")
             break;
         }
         case 0x84: {
@@ -1039,6 +1369,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "H");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADD("H")
             break;
         }
         case 0x85: {
@@ -1046,13 +1378,17 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "L");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADD("L")
             break;
         }
         case 0x86: {
             strcpy(data.mnemonic, "ADD ");
-            strcpy(data.inputRegisters, "M");
+            strcpy(data.inputRegisters, "$HL");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADD("$HL")
             break;
         }
         case 0x87: {
@@ -1060,6 +1396,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "A");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADD("A")
             break;
         }
         case 0x88: {
@@ -1067,6 +1405,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "B");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADC("B")
             break;
         }
         case 0x89: {
@@ -1074,6 +1414,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "C");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADC("C")
             break;
         }
         case 0x8A: {
@@ -1081,6 +1423,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "D");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADC("D")
             break;
         }
         case 0x8B: {
@@ -1088,6 +1432,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "E");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADC("E")
             break;
         }
         case 0x8C: {
@@ -1095,6 +1441,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "H");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADC("H")
             break;
         }
         case 0x8D: {
@@ -1102,13 +1450,17 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "L");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADC("L")
             break;
         }
         case 0x8E: {
             strcpy(data.mnemonic, "ADC ");
-            strcpy(data.inputRegisters, "M");
+            strcpy(data.inputRegisters, "$HL");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADC("$HL")
             break;
         }
         case 0x8F: {
@@ -1116,6 +1468,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "A");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_ADC("A")
             break;
         }
         case 0x90: {
@@ -1123,6 +1477,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "B");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SUB("B")
             break;
         }
         case 0x91: {
@@ -1130,6 +1486,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "C");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SUB("C")
             break;
         }
         case 0x92: {
@@ -1137,6 +1495,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "D");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SUB("D")
             break;
         }
         case 0x93: {
@@ -1144,6 +1504,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "E");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SUB("E")
             break;
         }
         case 0x94: {
@@ -1151,6 +1513,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "H");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SUB("H")
             break;
         }
         case 0x95: {
@@ -1158,13 +1522,17 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "L");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SUB("L")
             break;
         }
         case 0x96: {
             strcpy(data.mnemonic, "SUB ");
-            strcpy(data.inputRegisters, "M");
+            strcpy(data.inputRegisters, "$HL");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SUB("$HL")
             break;
         }
         case 0x97: {
@@ -1172,6 +1540,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "A");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SUB("A")
             break;
         }
         case 0x98: {
@@ -1179,6 +1549,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "B");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SBB("B")
             break;
         }
         case 0x99: {
@@ -1186,6 +1558,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "C");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SBB("C")
             break;
         }
         case 0x9A: {
@@ -1193,6 +1567,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "D");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SBB("D")
             break;
         }
         case 0x9B: {
@@ -1200,6 +1576,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "E");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SBB("E")
             break;
         }
         case 0x9C: {
@@ -1207,6 +1585,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "H");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SBB("H")
             break;
         }
         case 0x9D: {
@@ -1214,13 +1594,17 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "L");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SBB("L")
             break;
         }
         case 0x9E: {
             strcpy(data.mnemonic, "SBB ");
-            strcpy(data.inputRegisters, "M");
+            strcpy(data.inputRegisters, "$HL");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SBB("$HL")
             break;
         }
         case 0x9F: {
@@ -1228,6 +1612,8 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.inputRegisters, "A");
             
             data.num_inputRegisters = 1;
+
+            COMMENT_SBB("A")
             break;
         }
         case 0xA0: {
