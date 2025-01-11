@@ -32,6 +32,7 @@ $(BIN)/bytestream.o: $(HDR)/bytestream.h
 $(BIN)/safe.o: $(HDR)/safe.h
 
 clean:
-	rm $(BIN)/*.o
+	rm -f $(BIN)/*.o
 	rm -f ./disassembler
 	rm -f ./listing.txt
+	rm -f ./step
