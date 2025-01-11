@@ -1,5 +1,5 @@
-#ifndef __INSTRUCTION8080_H__
-#define __INSTRUCTION8080_H__
+#ifndef __I8080_INSTRUCTION_H__
+#define __I8080_INSTRUCTION_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -13,7 +13,7 @@
 #define I8080_LINE_LENGTH 50
 
 /*
-    instruction8080_t describes an intel8080 instruction as found in a program, along with some
+    i8080_instruction_t describes an intel8080 instruction as found in a program, along with some
     information to facilitate human reading.
 
     An intel8080 instruction is composed of either one, two or three bytes of machine code.
@@ -38,7 +38,7 @@ typedef struct {
     uint8_t inputValues[2];
     unsigned short num_inputValues;      // number of numerical arguments of the instruction
     bool immediate;                      // true if the value is a literal, false if it's an address
-} instruction8080_t;
+} i8080_instruction_t;
 
 // a fixed-width string containing a single line of i8080 assembly listing
 typedef struct {
@@ -46,6 +46,6 @@ typedef struct {
 } i8080_line_t;
 
 // prints one instruction to a fixed-width string
-i8080_line_t instruction8080_toString(instruction8080_t instruction);
+i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction);
 
 #endif

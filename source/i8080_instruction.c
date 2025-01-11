@@ -1,7 +1,7 @@
 #include <stdlib.h>
-#include "../include/instruction8080.h"
+#include "../include/i8080_instruction.h"
 
-i8080_line_t instruction8080_toString(instruction8080_t instruction) {
+i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction) {
     i8080_line_t line;
     char* result = line.string;
     size_t pointer = 0;

@@ -7,8 +7,8 @@ void disassemble_program(bytestream_t program, FILE* ofp) {
     size_t programPointer = 0;
     size_t stringPointer = 0;
     while (programPointer < program.size) {
-        instruction8080_t instruction = disassemble_instruction(program.data, programPointer);
-        i8080_line_t line = instruction8080_toString(instruction);
+        i8080_instruction_t instruction = disassemble_instruction(program.data, programPointer);
+        i8080_line_t line = i8080_instruction_toString(instruction);
 
         stringPointer += sprintf(&result[stringPointer], line.string);
         programPointer += instruction.instructionLength;
@@ -18,8 +18,8 @@ void disassemble_program(bytestream_t program, FILE* ofp) {
 }
 
 // raccoglie tutte le info sulla istruzione fornita e le restituisce senza stamparle
-instruction8080_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
-    instruction8080_t data;
+i8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
+    i8080_instruction_t data;
     
     data.opcode = mem[addr];
     
