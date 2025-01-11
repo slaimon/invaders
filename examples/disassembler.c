@@ -1,5 +1,6 @@
 #include "../include/disassembler8080.h"
 #include "../include/bytestream.h"
+#include "../include/safe.h"
 
 int main(int argc, char** argv) {
     FILE *ofp, *ifp;
@@ -9,8 +10,8 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    ifp = fopen(argv[1], "rb");
-    ofp = fopen(argv[2], "w");
+    ifp = safe_fopen(argv[1], "rb");
+    ofp = safe_fopen(argv[2], "w");
     
     bytestream_t* program = bytestream_read(ifp);
     if (program == NULL) {

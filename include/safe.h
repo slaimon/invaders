@@ -24,8 +24,9 @@
       exit(EXIT_FAILURE); \
    }
 
-// terminano il processo se l'allocazione fallisce
 void* safe_malloc(size_t bytes);
 void* safe_realloc(void* ptr, size_t nmemb, size_t size);
+
+FILE* safe_fopen(const char* fname, const char* mode);
 
 #endif
