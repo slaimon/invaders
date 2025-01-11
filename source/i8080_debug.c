@@ -6,7 +6,11 @@
 #define PRINTLINE(instr, outfile) \
     fputs(i8080_instruction_toString(instr).string, outfile);
 
-char separator[] = "-------------------------------------------\n";
+#define TO_UPPER_CASE(c) \
+	(c >= 'a' && c <= 'z') ? (c-32) : (c)
+
+char mainSeparator[] = "_______________________________________________________________________";
+char sectionSeparator[] = "-----------------------------------\n";
 
 
 void i8080_printState (const i8080_state_t state, unsigned int numLines, FILE* ofp) {
@@ -23,9 +27,9 @@ void i8080_printState (const i8080_state_t state, unsigned int numLines, FILE* o
 	currentPC = state.programCounter;
 	instruction = disassemble_instruction(state.mem, currentPC);
 	
-	fputs(separator, ofp);
+	fputs(sectionSeparator, ofp);
 	PRINTLINE(instruction, ofp)
-	fputs(separator, ofp);
+	fputs(sectionSeparator, ofp);
 
 	currentPC += instruction.instructionLength;
 	for (i = 0; i < numLines; ++i) {
@@ -34,36 +38,47 @@ void i8080_printState (const i8080_state_t state, unsigned int numLines, FILE* o
 		currentPC += instruction.instructionLength;
 	}
 	
-	fputs("\n\n\nREGISTERS:\n", ofp);
+	fputs("\n\nREGISTERS:\n", ofp);
+	fputs(sectionSeparator, ofp);
 	fprintf(ofp, "[S: %01d | Z: %01d | AC: %01d | P: %01d | C: %01d]\n", state.signFlag, state.zeroFlag, state.auxCarryFlag, state.parityFlag, state.carryFlag );
-	fprintf(ofp, "A:\t%02X\nB:\t%02X\nC:\t%02X\nD:\t%02X\nE:\t%02X\nH:\t%02X\nL:\t%02X\n\n", state.A, state.B, state.C, state.D, state.E, state.H, state.L);
-	fprintf(ofp, "SP:\t%04X\nPC:\t%04X\n\n", state.stackPointer, state.programCounter);
+	fprintf(ofp, "A:\t%02X\nB:\t%02X\nC:\t%02X\nD:\t%02X\nE:\t%02X\nH:\t%02X\nL:\t%02X\n", state.A, state.B, state.C, state.D, state.E, state.H, state.L);
+	fputs(sectionSeparator, ofp);
+	fprintf(ofp, "SP:\t%04X\nPC:\t%04X\n", state.stackPointer, state.programCounter);
 	
 	return;
 }
 
 
-int i8080_tuiDebug(i8080_state_t* state, const char* commandMapping) {
-    const char defaultCommandMapping[] = "scq";
-    const char* conf = (commandMapping == NULL) ? defaultCommandMapping : commandMapping;
+int i8080_tuiDebug(i8080_state_t* state, const char* customCommandMapping) {
+    const char defaultCommandMapping[] = "CQ";
+    const char* conf = (customCommandMapping == NULL) ? defaultCommandMapping : customCommandMapping;
 
-    const char stepKey = conf[0];
-    const char contKey = conf[1];
-    const char quitKey = conf[2];
+	const char stepKey = '\n';
+    const char contKey = TO_UPPER_CASE(conf[0]);
+    const char quitKey = TO_UPPER_CASE(conf[1]);
 
-    const char info[] = "Press (%c) to step ahead - Press (%c) to continue - Press (%c) to quit\n\n";
+    const char info[] = "Press (ENTER) to step ahead - Press (%c) to continue - Press (%c) to quit\n";
     char userInput;
     do {
         i8080_execute(state);
+
+		puts("\n\n\n");
+		puts(mainSeparator);
         i8080_printState(*state, 5, stdout);
-		puts(separator);
-        printf(info, stepKey, contKey, quitKey);
-        userInput = getchar();
-    } while (userInput != contKey && userInput != quitKey);
+		puts(mainSeparator);
+        printf(info, contKey, quitKey);
+
+		do {
+			userInput = getchar();
+			userInput = TO_UPPER_CASE(userInput);
+		} while (userInput != stepKey &&
+				 userInput != contKey &&
+				 userInput != quitKey);
+    } while (userInput == stepKey);
 
 
     if (userInput == contKey)
         return 0;
-    else
+    else // userInput == quitKey
         return 1;
 }

@@ -17,19 +17,18 @@ void i8080_printState(const i8080_state_t state, unsigned int numLines, FILE* of
 // - CONTINUE: exit the debugger and resume normal execution
 // - QUIT: exit the debugger and terminate the machine
 //
-// The commands are issued by pressing certain keys on the keyboard. The mapping of such keys to
-// their actions can be configured via the commandMapping string. For instance, the default mapping
-// of:
-// - (S) for STEP
+// The commands are issued by pressing certain keys on the keyboard. STEP is always mapped to the
+// ENTER key. The other two keys can be configured via the commandMapping string. For instance, the
+// default mapping of:
+// - (ENTER) for STEP
 // - (C) for CONTINUE
 // - (Q) for QUIT
 //
-// can be obtained by passing either NULL or the string "SCQ".
+// can be obtained by passing either NULL or the string "CQ" (case insensitive).
 //
 // Once the function returns, the last command issued by the user (either CONTINUE or QUIT) is
 // indicated by the return value: 0 for CONTINUE, 1 for QUIT.
 //
-// TODO: for now, commandMapping does nothing. The default mapping is the only available one.
 int i8080_tuiDebug(i8080_state_t* state, const char* commandMapping);
 
 #endif
