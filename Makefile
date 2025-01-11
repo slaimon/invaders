@@ -14,11 +14,12 @@ invaders_listing: ./disassembler
 
 ./disassembler: $(BIN)/disassembler.o $(BIN)/i8080_disassembler.o $(BIN)/i8080_instruction.o $(BIN)/bytestream.o $(BIN)/safe.o
 	$(CC) $(CFLAGS) $^ -o $@
-$(BIN)/disassembler.o: $(EXAMPLES)/disassembler.c $(HDR)/i8080_disassembler.h $(HDR)/bytestream.h
-	$(CC) $(CFLAGS) -c $(EXAMPLES)/disassembler.c -o $(BIN)/disassembler.o
 
 $(BIN)/%.o: $(SRC)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
+$(BIN)/disassembler.o: $(EXAMPLES)/disassembler.c $(HDR)/i8080_disassembler.h $(HDR)/bytestream.h
+	$(CC) $(CFLAGS) -c $(EXAMPLES)/disassembler.c -o $(BIN)/disassembler.o
+$(BIN)/i8080_debug.o: $(HDR)/i8080_disassembler.h $(HDR)/i8080_debug.h
 $(BIN)/i8080_disassembler.o: $(HDR)/i8080_disassembler.h
 $(BIN)/i8080_instruction.o: $(HDR)/i8080_instruction.h
 $(BIN)/bytestream.o: $(HDR)/bytestream.h
