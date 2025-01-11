@@ -53,13 +53,13 @@ void i8080_init(i8080_state_t* state) {
 	return state ;
 }
 
-void i8080_setMemory(i8080_state_t* state, bytestream_t* src, uint16_t offset) {
-    if (src->size + offset > I8080_MEMSIZE) {
+void i8080_setMemory(i8080_state_t* state, const bytestream_t src, uint16_t offset) {
+    if (src.size + offset > I8080_MEMSIZE) {
         fprintf(stderr, "ERROR: i8080_setMemory: not enough memory.\n");
         exit(EXIT_FAILURE);
     }
 
-    memcpy(&state->mem[offset], src->data, src->size);
+    memcpy(&state->mem[offset], src.data, src.size);
 }
 
 int i8080_execute(i8080_state_t* state ) {
