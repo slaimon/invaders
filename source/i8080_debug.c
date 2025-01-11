@@ -60,20 +60,19 @@ int i8080_tuiDebug(i8080_state_t* state, const char* customCommandMapping) {
     const char info[] = "Press (ENTER) to step ahead - Press (%c) to continue - Press (%c) to quit\n";
     char userInput;
     do {
+		// step ahead
         i8080_execute(state);
 
+		// print machine state and commands
 		puts("\n\n\n");
 		puts(mainSeparator);
         i8080_printState(*state, 5, stdout);
 		puts(mainSeparator);
         printf(info, contKey, quitKey);
 
-		do {
-			userInput = getchar();
-			userInput = TO_UPPER_CASE(userInput);
-		} while (userInput != stepKey &&
-				 userInput != contKey &&
-				 userInput != quitKey);
+		// handle user input
+		userInput = getchar();
+		userInput = TO_UPPER_CASE(userInput);
     } while (userInput == stepKey);
 
 
