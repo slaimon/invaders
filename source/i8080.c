@@ -16,20 +16,35 @@
 /* ------------- MACRO UTILS: ----------------------- */
 
 // CALL direct address or register
-#define CALL_DIRECT(x) \
-            state->programCounter += 3 ; \
-            state->mem[state->stackPointer-1] = state->programCounter >> 8 ; \
-            state->mem[state->stackPointer-2] = state->programCounter & 0xFF ; \
-            state->stackPointer -= 2 ; \
-            state->programCounter = (x) ; \
-            instructionLength = 0 ;
+#define CALL_DIRECT(x)                                                          \
+            state->programCounter += 3;                                         \
+            state->mem[state->stackPointer-1] = state->programCounter >> 8;     \
+            state->mem[state->stackPointer-2] = state->programCounter & 0xFF;   \
+            state->stackPointer -= 2;                                           \
+            state->programCounter = (x);                                        \
+            instructionLength = 0;
                 
 // RET after termination of a subroutine
-#define RETURN \
-            memoryAddressRegister = state->stackPointer ; \
-            state->programCounter = (state->mem[memoryAddressRegister+1] << 8) + state->mem[memoryAddressRegister] ; \
-            state->stackPointer += 2 ; \
-            instructionLength = 0 ;
+#define RETURN                                                                      \
+            memoryAddressRegister = state->stackPointer;                            \
+            state->programCounter = (state->mem[memoryAddressRegister+1] << 8) +    \
+                                     state->mem[memoryAddressRegister];             \
+            state->stackPointer += 2;                                               \
+            instructionLength = 0;
+
+// SBB - subtract with borrow
+#define SBB(x)                                                          \
+            tmp1 = state->A - ((x) + state->carryFlag);                 \
+            tmp2 = state->A ^ ( -((x) + state->carryFlag) + 1);         \
+            if( (tmp1 & 0xFF00) != 0)                                   \
+                state->carryFlag = 0;                                   \
+            else                                                        \
+                state->carryFlag = 1;                                   \
+            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )                    \
+                state->auxCarryFlag = 1;                                \
+            else                                                        \
+                state->auxCarryFlag = 0;                                \
+            state->A = tmp1;
 
 /* ------------ FLAG UPDATE MACROS ----------------*/
 
@@ -66,18 +81,16 @@ int i8080_execute(i8080_state_t* state ) {
     uint16_t tmp1, tmp2;
 
     uint8_t instruction;
-    uint8_t instructionLength;
+    uint8_t instructionLength = 1;  // default value
 
     bool haltSignal = false;
     
     if ( state == NULL )
         return I8080_FAIL;
     
-    currentProgramCounter = state->programCounter ;
-    instruction = state->mem[currentProgramCounter] ;
-    memoryAddressRegister = (state->H << 8) + state->L;        // memory address "virtual register" [HL]
-    
-    instructionLength = 1 ;        // default value
+    currentProgramCounter = state->programCounter;
+    instruction = state->mem[currentProgramCounter];
+    memoryAddressRegister = (state->H << 8) + state->L;  // memory address "virtual register" [HL]
     
     switch (instruction) {
         case 0x00: {
@@ -104,11 +117,11 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x03: {
             // INX BC
 
-            if ( state->C == 0xFF )    {
-                state->B = (uint8_t) state->B + 1 ;
-                state->C = 0 ;
+            if ( state->C == 0xFF ) {
+                state->B = (uint8_t) state->B + 1;
+                state->C = 0;
             }
-            else state->C = (uint8_t) state->C + 1 ;
+            else state->C = (uint8_t) state->C + 1;
             
             break;
         }
@@ -116,12 +129,12 @@ int i8080_execute(i8080_state_t* state ) {
             // INR B
             
             tmp1 = state->B & 0xF0;
-            state->B = 1 + (uint8_t) state->B ;
+            state->B = 1 + (uint8_t) state->B;
             
             if( ( state->B & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
+                state->auxCarryFlag = 1;
                 else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 0;
             
             SIGN(state->B)
             ZERO(state->B)
@@ -132,12 +145,12 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x05: {
             // DCR B
             tmp1 = state->B & 0xF0;
-            state->B = (uint8_t) state->B - 1 ;
+            state->B = (uint8_t) state->B - 1;
             
             if( ( state->B & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
+                state->auxCarryFlag = 1;
                 else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 0;
             
             SIGN(state->B)
             ZERO(state->B)
@@ -155,7 +168,7 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x07: {
             // RLC A : rotate left
             
-            state->carryFlag = state->A >> 7 ;
+            state->carryFlag = state->A >> 7;
             state->A = state->A << 1;
             state->A += state->carryFlag;
             
@@ -192,23 +205,23 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x0B: {
             // DCX BC
             
-            if ( state->C == 0x00 )    {
-                state->B = (uint8_t) state->B - 1 ;
-                state->C = 0xFF ;
+            if ( state->C == 0x00 ) {
+                state->B = (uint8_t) state->B - 1;
+                state->C = 0xFF;
             }
-            else state->C = (uint8_t) state->C - 1 ;
+            else state->C = (uint8_t) state->C - 1;
             
             break;
         }
         case 0x0C: {
             // INR C
             tmp1 = state->C & 0xF0;
-            state->C = (uint8_t) state->C + 1 ;
+            state->C = (uint8_t) state->C + 1;
             
             if( ( state->C & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->C)
             ZERO(state->C)
@@ -219,12 +232,12 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x0D: {
             // DCR C
             tmp1 = state->C & 0xF0;
-            state->C = (uint8_t) state->C - 1 ;
+            state->C = (uint8_t) state->C - 1;
             
             if( ( state->C & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->C)
             ZERO(state->C)
@@ -234,7 +247,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x0E: {
             // MVI C
-            state->C = state->mem[currentProgramCounter+1] ;
+            state->C = state->mem[currentProgramCounter+1];
             
             instructionLength = 2;
             break;
@@ -273,23 +286,24 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x13: {
             // INX DE
             
-            if ( state->E == 0xFF )    {
-                state->D = 1 + (uint8_t) state->D ;
-                state->E = 0 ;
+            if ( state->E == 0xFF ) {
+                state->D = 1 + (uint8_t) state->D;
+                state->E = 0;
             }
-            else state->E = 1 + (uint8_t) state->E ;
+            else
+                state->E = 1 + (uint8_t) state->E;
             
             break;
         }
         case 0x14: {
             // INR D
             tmp1 = state->D & 0xF0;
-            state->D = (uint8_t) state->D + 1 ;
+            state->D = (uint8_t) state->D + 1;
             
             if( ( state->D & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->D)
             ZERO(state->D)
@@ -300,12 +314,12 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x15: {
             // DCR D
             tmp1 = state->D & 0xF0;
-            state->D = (uint8_t) state->D - 1 ;
+            state->D = (uint8_t) state->D - 1;
             
             if( (state->D & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->D)
             ZERO(state->D)
@@ -324,9 +338,9 @@ int i8080_execute(i8080_state_t* state ) {
             // RAL : rotate A through carry bit
             
             tmp1 = state->carryFlag;
-            state->carryFlag = state->A >> 7 ;
-            state->A = state->A << 1 ;
-            state->A += tmp1 ;
+            state->carryFlag = state->A >> 7;
+            state->A = state->A << 1;
+            state->A += tmp1;
             
             break;
         }
@@ -345,7 +359,7 @@ int i8080_execute(i8080_state_t* state ) {
             
             if( ( tmp2 >> 8 ) != 0 )
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
                 
             break;
@@ -360,23 +374,24 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x1B: {
             // DCX DE
 
-            if ( state->E == 0x00 )    {
-                state->D = (uint8_t) state->D - 1 ;
-                state->E = 0xFF ;
+            if ( state->E == 0x00 ) {
+                state->D = (uint8_t) state->D - 1;
+                state->E = 0xFF;
             }
-            else state->E = (uint8_t) state->E - 1 ;
+            else
+                state->E = (uint8_t) state->E - 1;
             
             break;
         }
         case 0x1C: {
             // INR E
             tmp1 = state->E & 0xF0;
-            state->E = (uint8_t) state->E + 1 ;
+            state->E = (uint8_t) state->E + 1;
             
             if( ( state->E & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->E)
             ZERO(state->E)
@@ -387,12 +402,12 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x1D: {
             // DCR E
             tmp1 = state->E & 0xF0;
-            state->E = (uint8_t) state->E - 1 ;
+            state->E = (uint8_t) state->E - 1;
             
             if( ( state->E & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->E)
             ZERO(state->E)
@@ -444,11 +459,12 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x23: {
             // INX HL
             
-            if ( state->L == 0xFF )    {
-                state->H = (uint8_t) state->H + 1 ;
-                state->L = 0 ;
+            if ( state->L == 0xFF ) {
+                state->H = (uint8_t) state->H + 1;
+                state->L = 0;
             }
-            else state->L = (uint8_t) state->L + 1 ;
+            else
+                state->L = (uint8_t) state->L + 1;
             
             
             break;
@@ -456,12 +472,12 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x24: {
             // INR H
             tmp1 = state->H & 0xF0;
-            state->H = (uint8_t) state->H + 1 ;
+            state->H = (uint8_t) state->H + 1;
             
             if( ( state->H & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->H)
             ZERO(state->H)
@@ -472,12 +488,12 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x25: {
             // DCR H
             tmp1 = state->H & 0xF0;
-            state->H = (uint8_t) state->H - 1 ;
+            state->H = (uint8_t) state->H - 1;
             
             if( ( state->H & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->H)
             ZERO(state->H)
@@ -501,7 +517,7 @@ int i8080_execute(i8080_state_t* state ) {
                 state->A += 6;
             if( (state->A & 0xF0) != tmp1)
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
                     
             tmp1 = state->A;
@@ -510,7 +526,7 @@ int i8080_execute(i8080_state_t* state ) {
                 tmp1 += 0x60;
             if( tmp1 >> 8 != 0 )
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
             
             state->A = tmp1 & 0xFF;
@@ -537,7 +553,7 @@ int i8080_execute(i8080_state_t* state ) {
             
             if((tmp2 >> 8) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
 
             break;
@@ -555,23 +571,24 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x2B: {
             // DCX HL
             
-            if ( state->L == 0x00 )    {
-                state->H = (uint8_t) state->H - 1 ;
-                state->L = 0xFF ;
+            if ( state->L == 0x00 ) {
+                state->H = (uint8_t) state->H - 1;
+                state->L = 0xFF;
             }
-            else state->L = (uint8_t) state->L - 1 ;
+            else
+                state->L = (uint8_t) state->L - 1;
             
             break;
         }
         case 0x2C: {
             // INR L
             tmp1 = state->L & 0xF0;
-            state->L = (uint8_t) state->L + 1 ;
+            state->L = (uint8_t) state->L + 1;
             
             if( (state->L & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->L)
             ZERO(state->L)
@@ -582,12 +599,12 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x2D: {
             // DCR L
             tmp1 = state->L & 0xF0;
-            state->L = (uint8_t) state->L - 1 ;
+            state->L = (uint8_t) state->L - 1;
             
             if( ( state->L & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->L)
             ZERO(state->L)
@@ -615,7 +632,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x31: {
             // LXI SP
-            state->stackPointer = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+            state->stackPointer = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             
             instructionLength = 3;
             break;
@@ -623,8 +640,8 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x32: {
             // STA - store A direct
             
-            memoryAddressRegister = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
-            state->mem[memoryAddressRegister] = state->A ;
+            memoryAddressRegister = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
+            state->mem[memoryAddressRegister] = state->A;
             
             instructionLength = 3;
             break;
@@ -632,19 +649,19 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x33: {
             // INX SP
             
-            state->stackPointer = (uint16_t) state->stackPointer + 1 ;
+            state->stackPointer = (uint16_t) state->stackPointer + 1;
             
             break;
         }
         case 0x34: {
             // INR M
             tmp1 = state->mem[memoryAddressRegister] & 0xF0;
-            state->mem[memoryAddressRegister] = (uint8_t) state->mem[memoryAddressRegister] + 1 ;
+            state->mem[memoryAddressRegister] = (uint8_t) state->mem[memoryAddressRegister] + 1;
             
             if( ( state->mem[memoryAddressRegister] & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->mem[memoryAddressRegister])
             ZERO(state->mem[memoryAddressRegister])
@@ -655,12 +672,12 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x35: {
             // DCR M
             tmp1 = state->mem[memoryAddressRegister] & 0xF0;
-            state->mem[memoryAddressRegister] = (uint8_t) state->mem[memoryAddressRegister] - 1 ;
+            state->mem[memoryAddressRegister] = (uint8_t) state->mem[memoryAddressRegister] - 1;
             
             if( ( state->mem[memoryAddressRegister] & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->mem[memoryAddressRegister])
             ZERO(state->mem[memoryAddressRegister])
@@ -670,7 +687,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x36: {
             // MVI M
-            state->mem[memoryAddressRegister] = state->mem[currentProgramCounter + 1] ;
+            state->mem[memoryAddressRegister] = state->mem[currentProgramCounter + 1];
             
             instructionLength = 2;
             break;
@@ -697,15 +714,15 @@ int i8080_execute(i8080_state_t* state ) {
             
             if( (tmp2 >> 8) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
 
             break;
         }
         case 0x3A: {
             // LDA: load A direct
-            memoryAddressRegister = (state->mem[currentProgramCounter + 2] << 8) + state->mem[currentProgramCounter + 1] ;
-            state->A = state->mem[memoryAddressRegister] ;
+            memoryAddressRegister = (state->mem[currentProgramCounter + 2] << 8) + state->mem[currentProgramCounter + 1];
+            state->A = state->mem[memoryAddressRegister];
             
             instructionLength = 3;
             break;
@@ -713,19 +730,19 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x3B: {
             // DCX SP
             
-            state->stackPointer = (uint16_t) state->stackPointer - 1 ;
+            state->stackPointer = (uint16_t) state->stackPointer - 1;
             
             break;
         }
         case 0x3C: {
             // INR A
             tmp1 = state->A & 0xF0;
-            state->A = (uint8_t) state->A + 1 ;
+            state->A = (uint8_t) state->A + 1;
             
             if( ( state->A & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->A)
             ZERO(state->A)
@@ -736,12 +753,12 @@ int i8080_execute(i8080_state_t* state ) {
         case 0x3D: {
             // DCR A
             tmp1 = state->A & 0xF0;
-            state->A = (uint8_t) state->A - 1 ;
+            state->A = (uint8_t) state->A - 1;
             
             if( ( state->A & 0xF0 ) != tmp1 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             SIGN(state->A)
             ZERO(state->A)
@@ -751,7 +768,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x3E: {
             // MVI A
-            state->A = state->mem[currentProgramCounter + 1] ;
+            state->A = state->mem[currentProgramCounter + 1];
             
             instructionLength = 2;
             break;
@@ -1142,19 +1159,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x80: {
             // ADD B
-            tmp1 = state->A + state->B ;
-            tmp2 = state->A ^ state->B ;
+            tmp1 = state->A + state->B;
+            tmp2 = state->A ^ state->B;
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
                 
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1164,19 +1182,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x81: {
             // ADD C
-            tmp1 = state->A + state->C ;
-            tmp2 = state->A ^ state->C ;
+            tmp1 = state->A + state->C;
+            tmp2 = state->A ^ state->C;
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1186,19 +1205,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x82: {
             // ADD D
-            tmp1 = state->A + state->D ;
-            tmp2 = state->A ^ state->D ;
+            tmp1 = state->A + state->D;
+            tmp2 = state->A ^ state->D;
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1208,19 +1228,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x83: {
             // ADD E
-            tmp1 = state->A + state->E ;
-            tmp2 = state->A ^ state->E ;
+            tmp1 = state->A + state->E;
+            tmp2 = state->A ^ state->E;
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1230,19 +1251,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x84: {
             // ADD H
-            tmp1 = state->A + state->H ;
-            tmp2 = state->A ^ state->H ;
+            tmp1 = state->A + state->H;
+            tmp2 = state->A ^ state->H;
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1252,19 +1274,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x85: {
             // ADD L
-            tmp1 = state->A + state->L ;
-            tmp2 = state->A ^ state->L ;
+            tmp1 = state->A + state->L;
+            tmp2 = state->A ^ state->L;
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1274,19 +1297,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x86: {
             // ADD M
-            tmp1 = state->A + state->mem[memoryAddressRegister] ;
-            tmp2 = state->A ^ state->mem[memoryAddressRegister] ;
+            tmp1 = state->A + state->mem[memoryAddressRegister];
+            tmp2 = state->A ^ state->mem[memoryAddressRegister];
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1296,19 +1320,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x87: {
             // ADD A
-            tmp1 = state->A + state->A ;
-            tmp2 = state->A ^ state->A ;
+            tmp1 = state->A + state->A;
+            tmp2 = state->A ^ state->A;
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1318,19 +1343,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x88: {
             //    ADC B
-            tmp1 = state->A + state->B + state->carryFlag ;
-            tmp2 = state->A ^ (state->B + state->carryFlag) ;
+            tmp1 = state->A + state->B + state->carryFlag;
+            tmp2 = state->A ^ (state->B + state->carryFlag);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
                 
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1340,19 +1366,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x89: {
             //    ADC C
-            tmp1 = state->A + state->C + state->carryFlag ;
-            tmp2 = state->A ^ (state->C + state->carryFlag) ;
+            tmp1 = state->A + state->C + state->carryFlag;
+            tmp2 = state->A ^ (state->C + state->carryFlag);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1362,19 +1389,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x8A: {
             //    ADC D
-            tmp1 = state->A + state->D + state->carryFlag ;
-            tmp2 = state->A ^ (state->D + state->carryFlag) ;
+            tmp1 = state->A + state->D + state->carryFlag;
+            tmp2 = state->A ^ (state->D + state->carryFlag);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1384,19 +1412,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x8B: {
             // ADC E
-            tmp1 = state->A + state->E + state->carryFlag ;
-            tmp2 = state->A ^ (state->E + state->carryFlag) ;
+            tmp1 = state->A + state->E + state->carryFlag;
+            tmp2 = state->A ^ (state->E + state->carryFlag);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1406,19 +1435,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x8C: {
             // ADC H
-            tmp1 = state->A + state->H + state->carryFlag ;
-            tmp2 = state->A ^ (state->H + state->carryFlag) ;
+            tmp1 = state->A + state->H + state->carryFlag;
+            tmp2 = state->A ^ (state->H + state->carryFlag);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1428,19 +1458,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x8D: {
             // ADC L
-            tmp1 = state->A + state->L + state->carryFlag ;
-            tmp2 = state->A ^ (state->L + state->carryFlag) ;
+            tmp1 = state->A + state->L + state->carryFlag;
+            tmp2 = state->A ^ (state->L + state->carryFlag);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1450,19 +1481,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x8E: {
             // ADC M
-            tmp1 = state->A + state->mem[memoryAddressRegister] + state->carryFlag ;
-            tmp2 = state->A ^ (state->mem[memoryAddressRegister] + state->carryFlag) ;
+            tmp1 = state->A + state->mem[memoryAddressRegister] + state->carryFlag;
+            tmp2 = state->A ^ (state->mem[memoryAddressRegister] + state->carryFlag);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1472,19 +1504,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x8F: {
             // ADC A
-            tmp1 = state->A + state->A + state->carryFlag ;
-            tmp2 = state->A ^ (state->A + state->carryFlag) ;
+            tmp1 = state->A + state->A + state->carryFlag;
+            tmp2 = state->A ^ (state->A + state->carryFlag);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 1;
-                else
+            else
                 state->carryFlag = 0;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1492,21 +1525,22 @@ int i8080_execute(i8080_state_t* state ) {
             
             break;
         }
-        case 0x90: {    // SUB - il carry funziona al contrario!!!
+        case 0x90: {
             // SUB B
-            tmp1 = state->A - state->B ;
-            tmp2 = state->A ^ (- state->B + 1) ;
+            tmp1 = state->A - state->B;
+            tmp2 = state->A ^ (- state->B + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1516,19 +1550,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x91: {
             // SUB C
-            tmp1 = state->A - state->C ;
-            tmp2 = state->A ^ (- state->C + 1) ;
+            tmp1 = state->A - state->C;
+            tmp2 = state->A ^ (- state->C + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1538,19 +1573,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x92: {
             // SUB D
-            tmp1 = state->A - state->D ;
-            tmp2 = state->A ^ (- state->D + 1) ;
+            tmp1 = state->A - state->D;
+            tmp2 = state->A ^ (- state->D + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1560,19 +1596,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x93: {
             // SUB E
-            tmp1 = state->A - state->E ;
-            tmp2 = state->A ^ (- state->E + 1) ;
+            tmp1 = state->A - state->E;
+            tmp2 = state->A ^ (- state->E + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1582,19 +1619,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x94: {
             // SUB H
-            tmp1 = state->A - state->H ;
-            tmp2 = state->A ^ (- state->H + 1) ;
+            tmp1 = state->A - state->H;
+            tmp2 = state->A ^ (- state->H + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1604,19 +1642,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x95: {
             // SUB L
-            tmp1 = state->A - state->L ;
-            tmp2 = state->A ^ (- state->L + 1) ;
+            tmp1 = state->A - state->L;
+            tmp2 = state->A ^ (- state->L + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1626,19 +1665,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x96: {
             // SUB M
-            tmp1 = state->A - state->mem[memoryAddressRegister] ;
-            tmp2 = state->A ^ (- state->mem[memoryAddressRegister] + 1) ;
+            tmp1 = state->A - state->mem[memoryAddressRegister];
+            tmp2 = state->A ^ (- state->mem[memoryAddressRegister] + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1648,19 +1688,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x97: {
             // SUB A
-            tmp1 = state->A - state->A ;
-            tmp2 = state->A ^ (- state->A + 1) ;
+            tmp1 = state->A - state->A;
+            tmp2 = state->A ^ (- state->A + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1668,21 +1709,22 @@ int i8080_execute(i8080_state_t* state ) {
             
             break;
         }
-        case 0x98: {            // SBB - subtract with borrow
+        case 0x98: { // SBB - subtract with borrow
             // SBB B
-            tmp1 = state->A - (state->B + state->carryFlag) ;
-            tmp2 = state->A ^ ( -(state->B + state->carryFlag) + 1) ;
+            tmp1 = state->A - (state->B + state->carryFlag);
+            tmp2 = state->A ^ ( -(state->B + state->carryFlag) + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1692,19 +1734,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x99: {
             // SBB C
-            tmp1 = state->A - (state->C + state->carryFlag) ;
-            tmp2 = state->A ^ ( -(state->C + state->carryFlag) + 1) ;
+            tmp1 = state->A - (state->C + state->carryFlag);
+            tmp2 = state->A ^ ( -(state->C + state->carryFlag) + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1714,19 +1757,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x9A: {
             // SBB D
-            tmp1 = state->A - (state->D + state->carryFlag) ;
-            tmp2 = state->A ^ ( -(state->D + state->carryFlag) + 1) ;
+            tmp1 = state->A - (state->D + state->carryFlag);
+            tmp2 = state->A ^ ( -(state->D + state->carryFlag) + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1736,19 +1780,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x9B: {
             // SBB E
-            tmp1 = state->A - (state->E + state->carryFlag) ;
-            tmp2 = state->A ^ ( -(state->E + state->carryFlag) + 1) ;
+            tmp1 = state->A - (state->E + state->carryFlag);
+            tmp2 = state->A ^ ( -(state->E + state->carryFlag) + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+            
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1758,19 +1803,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x9C: {
             // SBB H
-            tmp1 = state->A - (state->H + state->carryFlag) ;
-            tmp2 = state->A ^ ( -(state->H + state->carryFlag) + 1) ;
+            tmp1 = state->A - (state->H + state->carryFlag);
+            tmp2 = state->A ^ ( -(state->H + state->carryFlag) + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+            
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1780,19 +1826,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x9D: {
             // SBB L
-            tmp1 = state->A - (state->L + state->carryFlag) ;
-            tmp2 = state->A ^ ( -(state->L + state->carryFlag) + 1) ;
+            tmp1 = state->A - (state->L + state->carryFlag);
+            tmp2 = state->A ^ ( -(state->L + state->carryFlag) + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+            
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1802,19 +1849,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x9E: {
             // SBB M
-            tmp1 = state->A - (state->mem[memoryAddressRegister] + state->carryFlag) ;
-            tmp2 = state->A ^ ( -(state->mem[memoryAddressRegister] + state->carryFlag) + 1) ;
+            tmp1 = state->A - (state->mem[memoryAddressRegister] + state->carryFlag);
+            tmp2 = state->A ^ ( -(state->mem[memoryAddressRegister] + state->carryFlag) + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+            
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1824,19 +1872,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0x9F: {
             // SBB A
-            tmp1 = state->A - (state->A + state->carryFlag) ;
-            tmp2 = state->A ^ ( -(state->A + state->carryFlag) + 1) ;
+            tmp1 = state->A - (state->A + state->carryFlag);
+            tmp2 = state->A ^ ( -(state->A + state->carryFlag) + 1);
             
             if( (tmp1 & 0xFF00) != 0)
                 state->carryFlag = 0;
-                else
+            else
                 state->carryFlag = 1;
+            
             if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
                 state->auxCarryFlag = 1;
-                else
+            else
                 state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1846,11 +1895,11 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xA0: {    // for AND R instructions: AUX.C = ( (A & 8) | (R & 8) )
             // ANA B
-            tmp1 = state->A & state->B ;
+            tmp1 = state->A & state->B;
             
             state->carryFlag = 0;
-            state->auxCarryFlag = (state->A & 8) | (state->B & 8) ;
-            state->A = tmp1 ;
+            state->auxCarryFlag = (state->A & 8) | (state->B & 8);
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1860,11 +1909,11 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xA1: {
             // ANA C
-            tmp1 = state->A & state->C ;
+            tmp1 = state->A & state->C;
             
-            state->carryFlag = 0 ;
-            state->auxCarryFlag = (state->A & 8) | (state->C & 8) ;
-            state->A = tmp1 ;
+            state->carryFlag = 0;
+            state->auxCarryFlag = (state->A & 8) | (state->C & 8);
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1874,11 +1923,11 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xA2: {
             // ANA D
-            tmp1 = state->A & state->D ;
+            tmp1 = state->A & state->D;
             
             state->carryFlag = 0;
-            state->auxCarryFlag = (state->A & 8) | (state->D & 8) ;
-            state->A = tmp1 ;
+            state->auxCarryFlag = (state->A & 8) | (state->D & 8);
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1888,11 +1937,11 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xA3: {
             // ANA E
-            tmp1 = state->A & state->E ;
+            tmp1 = state->A & state->E;
             
             state->carryFlag = 0;
-            state->auxCarryFlag = (state->A & 8) | (state->E & 8) ;
-            state->A = tmp1 ;
+            state->auxCarryFlag = (state->A & 8) | (state->E & 8);
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1902,11 +1951,11 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xA4: {
             // ANA H
-            tmp1 = state->A & state->H ;
+            tmp1 = state->A & state->H;
             
             state->carryFlag = 0;
-            state->auxCarryFlag = (state->A & 8) | (state->H & 8) ;
-            state->A = tmp1 ;
+            state->auxCarryFlag = (state->A & 8) | (state->H & 8);
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1916,11 +1965,11 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xA5: {
             // ANA L
-            tmp1 = state->A & state->L ;
+            tmp1 = state->A & state->L;
             
-            state->carryFlag = 0 ;
-            state->auxCarryFlag = (state->A & 8) | (state->L & 8) ;
-            state->A = tmp1 ;
+            state->carryFlag = 0;
+            state->auxCarryFlag = (state->A & 8) | (state->L & 8);
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1930,11 +1979,11 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xA6: {
             // ANA M
-            tmp1 = state->A & state->mem[memoryAddressRegister] ;
+            tmp1 = state->A & state->mem[memoryAddressRegister];
             
-            state->carryFlag = 0 ;
-            state->auxCarryFlag = (state->A & 8) | (state->mem[memoryAddressRegister] & 8) ;
-            state->A = tmp1 ;
+            state->carryFlag = 0;
+            state->auxCarryFlag = (state->A & 8) | (state->mem[memoryAddressRegister] & 8);
+            state->A = tmp1;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1945,8 +1994,8 @@ int i8080_execute(i8080_state_t* state ) {
         case 0xA7: {
             // ANA A
             
-            state->carryFlag = 0 ;
-            state->auxCarryFlag = state->A & 8 ;
+            state->carryFlag = 0;
+            state->auxCarryFlag = state->A & 8;
             
             PARITY(state->A)
             SIGN(state->A)
@@ -1956,7 +2005,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xA8: {
             // XOR B
-            state->A = state->A ^ state->B ;
+            state->A = state->A ^ state->B;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -1969,7 +2018,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xA9: {
             // XOR C
-            state->A = state->A ^ state->C ;
+            state->A = state->A ^ state->C;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -1982,7 +2031,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xAA: {
             // XOR D
-            state->A = state->A ^ state->D ;
+            state->A = state->A ^ state->D;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -1995,7 +2044,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xAB: {
             // XOR E
-            state->A = state->A ^ state->E ;
+            state->A = state->A ^ state->E;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -2008,7 +2057,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xAC: {
             // XOR H
-            state->A = state->A ^ state->H ;
+            state->A = state->A ^ state->H;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -2021,7 +2070,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xAD: {
             // XOR L
-            state->A = state->A ^ state->L ;
+            state->A = state->A ^ state->L;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -2034,7 +2083,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xAE: {
             // XOR M
-            state->A = state->A ^ state->mem[memoryAddressRegister] ;
+            state->A = state->A ^ state->mem[memoryAddressRegister];
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -2047,20 +2096,20 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xAF: {
             // XOR A
-            state->A = 0 ;
+            state->A = 0;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
             
             PARITY(state->A)
             SIGN(state->A)
-            state->zeroFlag = 1 ;
+            state->zeroFlag = 1;
             
             break;
         }
         case 0xB0: {
             // OR B
-            state->A = state->A | state->B ;
+            state->A = state->A | state->B;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -2073,7 +2122,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xB1: {
             // OR C
-            state->A = state->A | state->C ;
+            state->A = state->A | state->C;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -2086,7 +2135,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xB2: {
             // OR D
-            state->A = state->A | state->D ;
+            state->A = state->A | state->D;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -2099,7 +2148,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xB3: {
             // OR E
-            state->A = state->A | state->E ;
+            state->A = state->A | state->E;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -2112,7 +2161,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xB4: {
             // OR H
-            state->A = state->A | state->H ;
+            state->A = state->A | state->H;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -2125,7 +2174,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xB5: {
             // OR L
-            state->A = state->A | state->L ;
+            state->A = state->A | state->L;
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -2138,7 +2187,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xB6: {
             // OR M
-            state->A = state->A | state->mem[memoryAddressRegister] ;
+            state->A = state->A | state->mem[memoryAddressRegister];
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -2163,27 +2212,27 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xB8: {
             // CMP B
-            tmp1 = state->A - state->B ;
+            tmp1 = state->A - state->B;
                 
             if ( (uint8_t) state->A < (uint8_t) state->B )        // geniale!
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
                 
             if ( (uint8_t) (state->A & 0xF) < (uint8_t) (state->B & 0xF))
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             /*
             if ( (state->A & 128) == ~ (state->B & 128) )
-                state->carryFlag = (tmp1 >> 8) & 1 ;
+                state->carryFlag = (tmp1 >> 8) & 1;
                 else
-                state->carryFlag = ~ ((tmp1 >> 8) & 1) ;
+                state->carryFlag = ~ ((tmp1 >> 8) & 1);
                 
             if ( (state->A & 0x0F) - (state->B & 0x0F) < 0 )
-                state->auxCarryFlag = 1 ;
+                state->auxCarryFlag = 1;
                 else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 0;
             */
             PARITY(tmp1)
             SIGN(tmp1)
@@ -2193,17 +2242,17 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xB9: {
             // CMP C
-            tmp1 = state->A - state->C ;
+            tmp1 = state->A - state->C;
                 
             if ( (uint8_t) state->A < (uint8_t) state->C )
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
                 
             if ( (uint8_t) (state->A & 0xF) < (uint8_t) (state->C & 0xF))
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             PARITY(tmp1)
             SIGN(tmp1)
@@ -2213,17 +2262,17 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xBA: {
             // CMP D
-            tmp1 = state->A - state->D ;
+            tmp1 = state->A - state->D;
                 
             if ( (uint8_t) state->A < (uint8_t) state->D )
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
             
             if ( (uint8_t) (state->A & 0xF) < (uint8_t) (state->D & 0xF))
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             PARITY(tmp1)
             SIGN(tmp1)
@@ -2233,17 +2282,17 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xBB: {
             // CMP E
-            tmp1 = state->A - state->E ;
+            tmp1 = state->A - state->E;
                 
             if ( (uint8_t) state->A < (uint8_t) state->E )
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
             
             if ( (uint8_t) (state->A & 0xF) < (uint8_t) (state->E & 0xF))
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             PARITY(tmp1)
             SIGN(tmp1)
@@ -2253,17 +2302,17 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xBC: {
             // CMP H
-            tmp1 = state->A - state->H ;
+            tmp1 = state->A - state->H;
                 
             if ( (uint8_t) state->A < (uint8_t) state->H )
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
             
             if ( (uint8_t) (state->A & 0xF) < (uint8_t) (state->H & 0xF))
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             PARITY(tmp1)
             SIGN(tmp1)
@@ -2273,17 +2322,17 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xBD: {
             // CMP L
-            tmp1 = state->A - state->L ;
+            tmp1 = state->A - state->L;
                 
             if ( (uint8_t) state->A < (uint8_t) state->L )
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
             
             if ( (uint8_t) (state->A & 0xF) < (uint8_t) (state->L & 0xF))
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             PARITY(tmp1)
             SIGN(tmp1)
@@ -2293,17 +2342,17 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xBE: {
             // CMP M
-            tmp1 = state->A - state->mem[memoryAddressRegister] ;
+            tmp1 = state->A - state->mem[memoryAddressRegister];
                 
             if ( (uint8_t) state->A < (uint8_t) state->mem[memoryAddressRegister] )
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
             
             if ( (uint8_t) (state->A & 0xF) < (uint8_t) (state->mem[memoryAddressRegister] & 0xF))
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             PARITY(tmp1)
             SIGN(tmp1)
@@ -2314,11 +2363,11 @@ int i8080_execute(i8080_state_t* state ) {
         case 0xBF: {
             // CMP A
 
-            state->zeroFlag = 1 ; 
-            state->carryFlag = 0 ;
-            state->signFlag = 0 ;
-            state->parityFlag = 1 ;
-            state->auxCarryFlag = 0 ;
+            state->zeroFlag = 1; 
+            state->carryFlag = 0;
+            state->signFlag = 0;
+            state->parityFlag = 1;
+            state->auxCarryFlag = 0;
             
             break;
         }
@@ -2333,8 +2382,8 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xC1: {
             // POP BC
-            state->C = state->mem[ state->stackPointer ] ;
-            state->B = state->mem[ state->stackPointer + 1 ] ;
+            state->C = state->mem[ state->stackPointer ];
+            state->B = state->mem[ state->stackPointer + 1 ];
             
             state->stackPointer += 2;
             break;
@@ -2343,9 +2392,9 @@ int i8080_execute(i8080_state_t* state ) {
             // JNZ
             
             if(state->zeroFlag == 0)
-                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             else
-                state->programCounter += 3 ;
+                state->programCounter += 3;
             
             instructionLength = 0;
             break;
@@ -2353,12 +2402,12 @@ int i8080_execute(i8080_state_t* state ) {
         case 0xC3: {
             // JMP
             
-            state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+            state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             
             #if SUPPORT_CPM_CALLS
             
             if (state->programCounter == 0x0000)        // in CP/M saltare a 0x0000 equivale a
-                return I8080_HALT ;            // riavviare il S.O. (warm boot)
+                return I8080_HALT;            // riavviare il S.O. (warm boot)
             
             #endif
             
@@ -2369,37 +2418,37 @@ int i8080_execute(i8080_state_t* state ) {
             // CNZ
             
             if(state->zeroFlag == 0){
-                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
                 CALL_DIRECT(tmp1)
             }
             else
-                instructionLength = 3 ;
+                instructionLength = 3;
             
             break;
         }
         case 0xC5: {
             // PUSH BC
             
-            state->mem[ state->stackPointer - 1 ] = state->B ;
-            state->mem[ state->stackPointer - 2 ] = state->C ;
+            state->mem[ state->stackPointer - 1 ] = state->B;
+            state->mem[ state->stackPointer - 2 ] = state->C;
             
             state->stackPointer -= 2;
             break;
         }
         case 0xC6: {
             // ADI - add immediate to A
-            tmp1 = state->A + state->mem[currentProgramCounter+1] ;
+            tmp1 = state->A + state->mem[currentProgramCounter+1];
             
             if ( (tmp1 >> 8) != 0 )
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
             if ( ( ( (state->A & 0xF) + (state->mem[currentProgramCounter+1] & 0xF) ) & 0xF0 ) != 0)
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             ZERO(state->A)
             SIGN(state->A)
@@ -2434,37 +2483,37 @@ int i8080_execute(i8080_state_t* state ) {
             // JZ
             
             if(state->zeroFlag == 1)
-                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             else
-                state->programCounter += 3 ;
+                state->programCounter += 3;
                 
-            instructionLength = 0 ;
+            instructionLength = 0;
             break;
         }
         case 0xCB: {
             // JMP
             
-            state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+            state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             
-            instructionLength = 0 ;
+            instructionLength = 0;
             break;
         }
         case 0xCC: {
             // CZ
             
             if(state->zeroFlag == 1) {
-                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
                 CALL_DIRECT(tmp1)
             }
             else
-                instructionLength = 3 ;
+                instructionLength = 3;
 
             break;
         }
         case 0xCD: {
             // CALL
             
-            tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+            tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             
             #ifdef SUPPORT_CPM_CALLS
             
@@ -2497,11 +2546,11 @@ int i8080_execute(i8080_state_t* state ) {
                 switch (state->C) {
                     case 9: {
                         printf("\nCP/M PRINT >> ");
-                        tmp2 = (state->D<<8) | state->E ;
-                        str = &(state->mem[tmp2+3]) ;
+                        tmp2 = (state->D<<8) | state->E;
+                        str = &(state->mem[tmp2+3]);
                         
                         while (*str != '$') {
-                            printf("%c", *str) ;
+                            printf("%c", *str);
                             str++;
                     }
                         
@@ -2518,40 +2567,40 @@ int i8080_execute(i8080_state_t* state ) {
                     }
                 }
                 
-                state->programCounter += 3 ;
-                instructionLength = 0 ;
+                state->programCounter += 3;
+                instructionLength = 0;
             }
             else if (tmp1 == 0x0000)    // haltSignal to CP/M warm boot
-                return I8080_HALT ;
+                return I8080_HALT;
             else
             #endif
             
             do{
                 CALL_DIRECT(tmp1)        // TODO : controllare che funzioni anche quando SUPPORT_CPM_CALLS == 0
-            } while(0) ;
+            } while(0);
             
             break;
         }
         case 0xCE: {
             // ACI (ADI w/ carry)
-            tmp1 = state->A + state->mem[currentProgramCounter+1] + state->carryFlag ;
+            tmp1 = state->A + state->mem[currentProgramCounter+1] + state->carryFlag;
             
             if ( (tmp1 >> 8) != 0 )
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
             if ( ( ( (state->A & 0x0F) + (state->mem[currentProgramCounter+1] & 0x0F) ) & 0xF0 ) != 0)
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             ZERO(state->A)
             SIGN(state->A)
             PARITY(state->A)
             
-            instructionLength = 2 ;
+            instructionLength = 2;
             break;
         }
         case 0xCF: {
@@ -2572,8 +2621,8 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xD1: {
             // POP DE
-            state->E = state->mem[ state->stackPointer ] ;
-            state->D = state->mem[ state->stackPointer + 1 ] ;
+            state->E = state->mem[ state->stackPointer ];
+            state->D = state->mem[ state->stackPointer + 1 ];
             
             state->stackPointer += 2;
             
@@ -2583,9 +2632,9 @@ int i8080_execute(i8080_state_t* state ) {
             // JNC
             
             if(state->carryFlag == 0)
-                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             else
-                state->programCounter += 3 ;
+                state->programCounter += 3;
             
             instructionLength= 0;
             break;
@@ -2600,25 +2649,25 @@ int i8080_execute(i8080_state_t* state ) {
             data.num_inputValues= 1;
             #endif
             
-            instructionLength = 2 ;
+            instructionLength = 2;
             break;
         }
         case 0xD4: {
             // CNC
             
             if(state->carryFlag == 0) {
-                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
                 CALL_DIRECT(tmp1)
             }
             else
-                instructionLength = 3 ;
+                instructionLength = 3;
                 
             break;
         }
         case 0xD5: {
             // PUSH DE
-            state->mem[ state->stackPointer - 2 ] = state->E ;
-            state->mem[ state->stackPointer - 1 ] = state->D ;
+            state->mem[ state->stackPointer - 2 ] = state->E;
+            state->mem[ state->stackPointer - 1 ] = state->D;
             
             state->stackPointer -= 2;
             
@@ -2626,18 +2675,18 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xD6: {
             // SUI
-            tmp1 = state->A - state->mem[currentProgramCounter+1] ;
+            tmp1 = state->A - state->mem[currentProgramCounter+1];
             
             if ( (tmp1 >> 8) == 0xFF )
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
             if ( ( ( (state->A & 0x0F) - (state->mem[currentProgramCounter+1] & 0x0F) - state->carryFlag ) & 0xF0 ) != 0 )
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
-            state->A = tmp1 ;
+            state->A = tmp1;
             
             ZERO(state->A)
             SIGN(state->A)
@@ -2671,9 +2720,9 @@ int i8080_execute(i8080_state_t* state ) {
             // JC
             
             if(state->carryFlag == 1)
-                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             else
-                state->programCounter += 3 ;
+                state->programCounter += 3;
             
             instructionLength= 0;
             break;
@@ -2688,36 +2737,37 @@ int i8080_execute(i8080_state_t* state ) {
         case 0xDC: {
             // CC
             if(state->carryFlag == 1) {
-                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
                 CALL_DIRECT(tmp1)
             }
             else
-                instructionLength = 3 ;
+                instructionLength = 3;
             
             break;
         }
         case 0xDD: {
             // CALL
             
-            tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+            tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             CALL_DIRECT(tmp1)
 
             break;
         }
         case 0xDE: {
-            // SBI    (Subtract Immediate w/ Borrow)
-            tmp1 = state->A - state->mem[currentProgramCounter+1] - state->carryFlag ;
+            // SBI - Subtract Immediate with Borrow
+            tmp1 = state->A - state->mem[currentProgramCounter+1] - state->carryFlag;
             
             if ( (tmp1 >> 8) == 0xFF )
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
-            if ( ( ( (state->A & 0x0F) - (state->mem[currentProgramCounter+1] & 0x0F) - state->carryFlag ) & 0xF0 ) != 0)
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
             
-            state->A = tmp1 ;
+            if ( ( ( (state->A & 0x0F) - (state->mem[currentProgramCounter+1] & 0x0F) - state->carryFlag ) & 0xF0 ) != 0)
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
+            
+            state->A = tmp1;
             
             ZERO(state->A)
             SIGN(state->A)
@@ -2744,8 +2794,8 @@ int i8080_execute(i8080_state_t* state ) {
         }
         case 0xE1: {
             // POP HL
-            state->L = state->mem[ state->stackPointer ] ;
-            state->H = state->mem[ state->stackPointer + 1 ] ;
+            state->L = state->mem[ state->stackPointer ];
+            state->H = state->mem[ state->stackPointer + 1 ];
             
             state->stackPointer += 2;
             break;
@@ -2754,16 +2804,16 @@ int i8080_execute(i8080_state_t* state ) {
             // JPO
             
             if(state->parityFlag == 0)
-                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             else
-                state->programCounter += 3 ;
+                state->programCounter += 3;
             
             instructionLength= 0;
             break;
         }
         case 0xE3: {
             // XTHL: swap HL with word [SP]
-            //         i.e. [SP] <-> L ; [SP+1] <-> H;
+            //         i.e. [SP] <-> L; [SP+1] <-> H;
             
             tmp1 = (state->H << 8) + state->L;
             state->L = state->mem[state->stackPointer];
@@ -2777,25 +2827,25 @@ int i8080_execute(i8080_state_t* state ) {
             // CPO
             
             if(state->parityFlag == 0) {
-                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
                 CALL_DIRECT(tmp1)
             }
             else
-                instructionLength = 3 ;
+                instructionLength = 3;
                 
             break;
         }
         case 0xE5: {
             // PUSH HL
-            state->mem[ state->stackPointer - 2] = state->L ;
-            state->mem[ state->stackPointer - 1] = state->H ;
+            state->mem[ state->stackPointer - 2] = state->L;
+            state->mem[ state->stackPointer - 1] = state->H;
             
             state->stackPointer -= 2;
             break;
         }
         case 0xE6: {
             // ANI - logical AND immediate with A
-            state->A = state->A & state->mem[currentProgramCounter+1] ;
+            state->A = state->A & state->mem[currentProgramCounter+1];
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
             
@@ -2826,7 +2876,7 @@ int i8080_execute(i8080_state_t* state ) {
             // PCHL: jump to [HL]
             
             state->programCounter = (state->H << 8) + state->L;
-            instructionLength = 0 ;
+            instructionLength = 0;
             
             break;
         }
@@ -2834,15 +2884,15 @@ int i8080_execute(i8080_state_t* state ) {
             // JPE
             
             if(state->parityFlag == 1)
-                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             else
-                state->programCounter += 3 ;
+                state->programCounter += 3;
             
-            instructionLength = 0 ;
+            instructionLength = 0;
             break;
         }
         case 0xEB: {
-            // XCHG: exchange DE and HL
+            // XCHG - exchange DE and HL
             
             tmp1 = (state->D << 8) + state->E;
             
@@ -2858,25 +2908,25 @@ int i8080_execute(i8080_state_t* state ) {
             // CPE
             
             if(state->parityFlag == 1) {
-                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
                 CALL_DIRECT(tmp1)
             }
             else
-                instructionLength = 3 ;
+                instructionLength = 3;
                 
             break;
         }
         case 0xED: {
             // CALL
         
-            tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+            tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             CALL_DIRECT(tmp1)
     
             break;
         }
         case 0xEE: {
             // XRI - logical XOR immediate with A
-            state->A = state->A ^ state->mem[currentProgramCounter+1] ;
+            state->A = state->A ^ state->mem[currentProgramCounter+1];
             
             instructionLength = 2;
             break;
@@ -2900,17 +2950,15 @@ int i8080_execute(i8080_state_t* state ) {
         case 0xF1: {
             // POP PSW = F:A
             
-            state->A = state->mem[ state->stackPointer ] ;
-            tmp1 = state->mem[ state->stackPointer + 1 ] ;
+            state->A = state->mem[ state->stackPointer ];
+            tmp1 = state->mem[ state->stackPointer + 1 ];
             
-                // restore flags:
-            state->signFlag = (tmp1 >> 7) & 1 ;        // sign
-            state->zeroFlag = (tmp1 >> 6) & 1 ;        // zero
-            state->auxCarryFlag = (tmp1 >> 4) & 1 ;        // aux. carry
-            state->parityFlag = (tmp1 >> 2) & 1 ;        // parity
-            state->carryFlag = tmp1 & 1 ;            // carry
-                //
-                // remember: SZ0A0P1C
+            // restore flags:
+            state->signFlag = (tmp1 >> 7) & 1;
+            state->zeroFlag = (tmp1 >> 6) & 1;
+            state->auxCarryFlag = (tmp1 >> 4) & 1;
+            state->parityFlag = (tmp1 >> 2) & 1;
+            state->carryFlag = tmp1 & 1;
             
             state->stackPointer += 2;
             break;
@@ -2918,11 +2966,11 @@ int i8080_execute(i8080_state_t* state ) {
         case 0xF2: {
             // JP
             if(state->signFlag == 0)
-                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                state->programCounter = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             else
-                state->programCounter += 3 ;
+                state->programCounter += 3;
             
-            instructionLength = 0 ;
+            instructionLength = 0;
             break;
         }
         case 0xF3: {
@@ -2935,38 +2983,38 @@ int i8080_execute(i8080_state_t* state ) {
             // CP
             
             if(state->signFlag == 0) {
-                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
                 CALL_DIRECT(tmp1)
             }
             else
-                instructionLength = 3 ;
+                instructionLength = 3;
                 
             break;
         }
         case 0xF5: {
             // PUSH PSW
             
-            state->mem[ state->stackPointer - 2 ] = state->A ;
-            tmp1 = 0 ;
+            state->mem[ state->stackPointer - 2 ] = state->A;
+            tmp1 = 0;
             
                 // store flags:
-            tmp1 += (state->signFlag) * (1 << 7) ;    // sign
-            tmp1 += (state->zeroFlag) * (1 << 6) ;    // zero
-            tmp1 += (state->auxCarryFlag) * (1 << 4) ;    // aux. carry
-            tmp1 += (state->parityFlag) * (1 << 2) ;    // parity
-            tmp1 += 2 ;                    // 1 flag (state->i)
-            tmp1 += state->carryFlag ;            // carry
+            tmp1 += (state->signFlag) * (1 << 7);    // sign
+            tmp1 += (state->zeroFlag) * (1 << 6);    // zero
+            tmp1 += (state->auxCarryFlag) * (1 << 4);    // aux. carry
+            tmp1 += (state->parityFlag) * (1 << 2);    // parity
+            tmp1 += 2;                    // 1 flag (state->i)
+            tmp1 += state->carryFlag;            // carry
                 //
                 // remember: SZ0A0P1C
             
-            state->mem[ state->stackPointer - 1 ] = tmp1 ;
+            state->mem[ state->stackPointer - 1 ] = tmp1;
             state->stackPointer -= 2;
             
             break;
         }
         case 0xF6: {
             // ORI - logical OR immediate with A
-            state->A = state->A | state->mem[currentProgramCounter+1] ;
+            state->A = state->A | state->mem[currentProgramCounter+1];
             
             state->carryFlag = 0;
             state->auxCarryFlag = 0;
@@ -3005,11 +3053,11 @@ int i8080_execute(i8080_state_t* state ) {
             // JM
             
             if(state->signFlag == 1)
-                state->programCounter = (state->mem[currentProgramCounter+2] << 8 ) + state->mem[currentProgramCounter+1] ;
+                state->programCounter = (state->mem[currentProgramCounter+2] << 8 ) + state->mem[currentProgramCounter+1];
             else
-                state->programCounter += 3 ;
+                state->programCounter += 3;
             
-            instructionLength = 0 ;
+            instructionLength = 0;
             break;
         }
         case 0xFB: {
@@ -3022,18 +3070,18 @@ int i8080_execute(i8080_state_t* state ) {
             // CM
             
             if(state->signFlag == 1) {
-                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+                tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
                 CALL_DIRECT(tmp1)
             }
             else
-                instructionLength = 3 ;
+                instructionLength = 3;
                 
             break;
         }
         case 0xFD: {
             // CALL
             
-            tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1] ;
+            tmp1 = (state->mem[currentProgramCounter+2] << 8) + state->mem[currentProgramCounter+1];
             CALL_DIRECT(tmp1)
 
             break;
@@ -3041,18 +3089,18 @@ int i8080_execute(i8080_state_t* state ) {
         case 0xFE: {
             // CPI - compare immediate with A
             
-            tmp2 = state->mem[currentProgramCounter+1] ;
-            tmp1 = state->A - tmp2 ;
+            tmp2 = state->mem[currentProgramCounter+1];
+            tmp1 = state->A - tmp2;
                 
             if ( (uint8_t) state->A < (uint8_t) tmp2 )
-                state->carryFlag = 1 ;
-                else
-                state->carryFlag = 0 ;
+                state->carryFlag = 1;
+            else
+                state->carryFlag = 0;
                 
             if ( (uint8_t) (state->A & 0xF) < (uint8_t) (tmp2 & 0xF))
-                state->auxCarryFlag = 1 ;
-                else
-                state->auxCarryFlag = 0 ;
+                state->auxCarryFlag = 1;
+            else
+                state->auxCarryFlag = 0;
             
             PARITY(tmp1)
             SIGN(tmp1)
@@ -3070,7 +3118,7 @@ int i8080_execute(i8080_state_t* state ) {
         }
     }
     
-    state->programCounter += instructionLength ;
+    state->programCounter += instructionLength;
     
-    return (haltSignal) ? (I8080_HALT) : (instructionLength) ;
+    return (haltSignal) ? (I8080_HALT) : (instructionLength);
 }

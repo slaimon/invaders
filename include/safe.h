@@ -6,22 +6,22 @@
 #include <errno.h>
 #include <dirent.h>
 
-#define SAFE_NULL(exp, msg) \
-   if ( (exp) == NULL ) { \
-      perror(msg); \
-      exit(EXIT_FAILURE); \
+#define SAFE_NULL(exp, msg)   \
+   if ( (exp) == NULL ) {     \
+      perror(msg);            \
+      exit(EXIT_FAILURE);     \
    }
 
-#define SAFE_NEG1(exp, msg) \
-   if ( (exp) == -1 ) { \
-      perror(msg); \
-      exit(EXIT_FAILURE); \
+#define SAFE_NEG1(exp, msg)   \
+   if ( (exp) == -1 ) {       \
+      perror(msg);            \
+      exit(EXIT_FAILURE);     \
    }
 
-#define SAFE_ERRNO(exp, msg) \
-   if ( (errno = exp) != 0 ) { \
-      perror(msg); \
-      exit(EXIT_FAILURE); \
+#define SAFE_ERRNO(exp, msg)     \
+   if ( (errno = exp) != 0 ) {   \
+      perror(msg);               \
+      exit(EXIT_FAILURE);        \
    }
 
 void* safe_malloc(size_t bytes);

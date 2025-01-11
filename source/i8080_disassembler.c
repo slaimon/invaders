@@ -1898,7 +1898,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
             strcpy(data.mnemonic, "PUSH");
             strcpy(data.inputRegisters, "PSW ");
             
-            data.num_inputRegisters = 1 ;
+            data.num_inputRegisters = 1;
             break;
         }
         case 0xF6: {
@@ -1984,5 +1984,5 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
     }
     
-    return data ;
+    return data;
 }
