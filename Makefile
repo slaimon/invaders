@@ -12,10 +12,10 @@ listing: ./disassembler
 	rm -f ./listing.txt
 	./disassembler ./INVADERS ./listing.txt
 
-./disassembler: $(BIN)/i8080_disassembler.o $(BIN)/i8080_instruction.o $(BIN)/bytestream.o $(BIN)/safe.o
+./disassembler: $(BIN)/disassembler.o $(BIN)/i8080_disassembler.o $(BIN)/i8080_instruction.o $(BIN)/bytestream.o $(BIN)/safe.o
 	$(CC) $(CFLAGS) $^ -o $@
 
-./step: $(EXAMPLES)/step.o $(BIN)/i8080_debug.o $(BIN)/i8080.o $(BIN)/i8080_disassembler.o $(BIN)/i8080_instruction.o $(BIN)/bytestream.o $(BIN)/safe.o
+./step: $(BIN)/step.o $(BIN)/i8080_debug.o $(BIN)/i8080.o $(BIN)/i8080_disassembler.o $(BIN)/i8080_instruction.o $(BIN)/bytestream.o $(BIN)/safe.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(BIN)/%.o: $(SRC)/%.c
