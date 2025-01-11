@@ -1,4 +1,4 @@
-#include "../include/disassembler8080.h"
+#include "../include/i8080_disassembler.h"
 #include "../include/bytestream.h"
 #include "../include/safe.h"
 

@@ -1,11 +1,11 @@
-#ifndef __DISASSEMBLER8080_H__
-#define __DISASSEMBLER8080_H__
+#ifndef __I8080_DISASSEMBLER_H__
+#define __I8080_DISASSEMBLER_H__
 
 #include "bytestream.h"
 #include "i8080_instruction.h"
 
-#define DISASSEMBLER8080_FAIL   -2  // retval on error
-#define DISASSEMBLER8080_LITTLE_ENDIAN  true
+#define I8080_DISASSEMBLER_FAIL   -2  // retval on error
+#define I8080_DISASSEMBLER_LITTLE_ENDIAN  true
 
 
 // returns a struct containing the disassembly of the instruction found at the specified address in the memory 
