@@ -7,12 +7,12 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
     size_t pointer = 0;
 
     // address gutter on the left
-    pointer += sprintf(&result[pointer], "%04X: ", instruction.position);
+    pointer += sprintf(&result[pointer], "%04X:  ", instruction.position);
 
     // binary representation of the instruction (or padding if needed)
     pointer += sprintf(&result[pointer], "%02X", instruction.opcode);
     for(int i = 0; i < 3; ++i) {
-        if (i < instruction.num_inputValues)
+        if (i <= instruction.num_inputValues)
             pointer += sprintf(&result[pointer], " %02X", abs(instruction.inputValues[i]));
         else {
             pointer += sprintf(&result[pointer], "   ");
@@ -20,7 +20,7 @@ i8080_line_t instruction8080_toString(instruction8080_t instruction) {
     }
 
     // the instruction's mnemonic
-    pointer += sprintf(&result[pointer], instruction.mnemonic);
+    pointer += sprintf(&result[pointer], "    %s", instruction.mnemonic);
 
     // register arguments, if any
     if (instruction.num_inputRegisters > 0) {
