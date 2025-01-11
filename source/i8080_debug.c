@@ -12,7 +12,7 @@ void i8080_printState (const i8080_state_t state, unsigned int numLines, FILE* o
 	i8080_instruction_t instruction;
 	
 	if( ofp == NULL ) {
-		fprintf("ERROR: i8080_printState: invalid file\n", stderr);
+		fprintf(stderr, "ERROR: i8080_printState: invalid file\n");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -42,19 +42,19 @@ void i8080_printState (const i8080_state_t state, unsigned int numLines, FILE* o
 
 
 int i8080_tuiDebug(i8080_state_t* state, const char* commandMapping) {
-    char defaultCommandMapping[] = "scq";
-    char* conf = (commandMapping == NULL) ? defaultCommandMapping : commandMapping;
+    const char defaultCommandMapping[] = "scq";
+    const char* conf = (commandMapping == NULL) ? defaultCommandMapping : commandMapping;
 
-    char stepKey = conf[0];
-    char contKey = conf[1];
-    char quitKey = conf[2];
+    const char stepKey = conf[0];
+    const char contKey = conf[1];
+    const char quitKey = conf[2];
 
-    char info[] = "------------------------------------------------------\nPress (%c) to step ahead - Press (%c) to continue - Press (%c) to quit\n\n";
+    const char info[] = "------------------------------------------------------\nPress (%c) to step ahead - Press (%c) to continue - Press (%c) to quit\n\n";
     char userInput;
     do {
         i8080_execute(state);
         i8080_printState(*state, 5, stdout);
-        fprintf(info, stepKey, contKey, quitKey);
+        printf(info, stepKey, contKey, quitKey);
         userInput = getchar();
     } while (userInput != contKey && userInput != quitKey);
 

@@ -8,7 +8,7 @@
 
 
 // returns a struct describing the instruction found at the specified address in the memory 
-i8080_instruction_t disassemble_instruction(uint8_t* mem , unsigned int addr);
+i8080_instruction_t disassemble_instruction(const uint8_t* mem , unsigned int addr);
 
 // returns a string containing the text disassembly of the given program
 void disassemble_program(bytestream_t program, FILE* ofp);

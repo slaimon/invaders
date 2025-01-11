@@ -48,9 +48,7 @@ uint8_t table[256] = { LOOK_UP };
 void i8080_init(i8080_state_t* state) {	
     // set all to zero except stack pointer
     memset(state, 0, sizeof(i8080_state_t));
-	state->stackPointer = I8080_MEMSIZE-1 ;
-	
-	return state ;
+	state->stackPointer = I8080_MEMSIZE-1;
 }
 
 void i8080_setMemory(i8080_state_t* state, const bytestream_t src, uint16_t offset) {

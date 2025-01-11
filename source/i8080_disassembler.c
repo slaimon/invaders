@@ -18,7 +18,7 @@ void disassemble_program(bytestream_t program, FILE* ofp) {
 }
 
 // raccoglie tutte le info sulla istruzione fornita e le restituisce senza stamparle
-i8080_instruction_t disassemble_instruction( uint8_t* mem , unsigned int addr ) {
+i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int addr ) {
     i8080_instruction_t data;
     
     data.opcode = mem[addr];
