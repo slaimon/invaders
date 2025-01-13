@@ -46,6 +46,15 @@
                 machine->auxCarryFlag = 0;                              \
             machine->A = tmp1;
 
+// read value of a register pair
+#define GET_REGISTER_PAIR(x,y) \
+            (((x) << 8) + (y))
+
+// write value to a register pair
+#define SET_REGISTER_PAIR(x,y,v) \
+            x = v & 0xFF00;      \
+            y = v & 0x00FF;
+
 /* ------------ FLAG UPDATE MACROS ----------------*/
 
 #define SIGN(x) \
@@ -64,6 +73,104 @@ void i8080_init(i8080_t* machine) {
     // set all to zero except stack pointer
     memset(machine, 0, sizeof(i8080_t));
 	machine->stackPointer = I8080_MEMSIZE-1;
+}
+
+uint16_t i8080_register_get(const i8080_t* machine, const i8080_register_t reg) {
+    switch (reg) {
+        case I8080_REGISTER_A:
+            return machine->A;
+        case I8080_REGISTER_B:
+            return machine->B;
+        case I8080_REGISTER_C:
+            return machine->C;
+        case I8080_REGISTER_D:
+            return machine->D;
+        case I8080_REGISTER_E:
+            return machine->E;
+        case I8080_REGISTER_H:
+            return machine->H;
+        case I8080_REGISTER_L:
+            return machine->L;
+        
+        case I8080_REGISTER_BC:
+            return GET_REGISTER_PAIR(machine->B, machine->C);
+        case I8080_REGISTER_DE:
+            return GET_REGISTER_PAIR(machine->D, machine->E);
+        case I8080_REGISTER_HL:
+            return GET_REGISTER_PAIR(machine->H, machine->L);
+        
+        default:
+            fprintf(stderr, "ERROR: i8080_register_get: unrecognized register\n");
+            exit(EXIT_FAILURE);
+    }
+}
+
+void i8080_register_set(i8080_t* machine, const i8080_register_t reg, const uint16_t value) {
+    switch (reg) {
+        case I8080_REGISTER_A:
+            machine->A = value & 0x00FF;
+        case I8080_REGISTER_B:
+            machine->B = value & 0x00FF;
+        case I8080_REGISTER_C:
+            machine->C = value & 0x00FF;
+        case I8080_REGISTER_D:
+            machine->D = value & 0x00FF;
+        case I8080_REGISTER_E:
+            machine->E = value & 0x00FF;
+        case I8080_REGISTER_H:
+            machine->H = value & 0x00FF;
+        case I8080_REGISTER_L:
+            machine->L = value & 0x00FF;
+        
+        case I8080_REGISTER_BC:
+            SET_REGISTER_PAIR(machine->B, machine->C, value);
+        case I8080_REGISTER_DE:
+            SET_REGISTER_PAIR(machine->D, machine->E, value);
+        case I8080_REGISTER_HL:
+            SET_REGISTER_PAIR(machine->H, machine->L, value);
+        
+        default:
+            fprintf(stderr, "ERROR: i8080_register_set: unrecognized register\n");
+            exit(EXIT_FAILURE);
+    }
+}
+
+bool i8080_flag_get(const i8080_t* machine, const i8080_flag_t flag) {
+    switch(flag) {
+        case I8080_FLAG_SIGN:
+            return machine->signFlag;
+        case I8080_FLAG_ZERO:
+            return machine->zeroFlag;
+        case I8080_FLAG_CARRY:
+            return machine->carryFlag;
+        case I8080_FLAG_AUXCARRY:
+            return machine->auxCarryFlag;
+        case I8080_FLAG_PARITY:
+            return machine->parityFlag;
+        
+        default:
+            fprintf(stderr, "ERROR: i8080_flag_get: unrecognized flag\n");
+            exit(EXIT_FAILURE);
+    }
+}
+
+void i8080_flag_set(i8080_t* machine, const i8080_flag_t flag, const bool value) {
+    switch(flag) {
+        case I8080_FLAG_SIGN:
+            machine->signFlag = value;
+        case I8080_FLAG_ZERO:
+            machine->zeroFlag = value;
+        case I8080_FLAG_CARRY:
+            machine->carryFlag = value;
+        case I8080_FLAG_AUXCARRY:
+            machine->auxCarryFlag = value;
+        case I8080_FLAG_PARITY:
+            machine->parityFlag = value;
+        
+        default:
+            fprintf(stderr, "ERROR: i8080_flag_set: unrecognized flag\n");
+            exit(EXIT_FAILURE);
+    }
 }
 
 bytestream_t* i8080_memory_read(const i8080_t* machine, const uint16_t size, const uint16_t offset) {
