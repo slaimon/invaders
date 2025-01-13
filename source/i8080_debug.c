@@ -9,7 +9,7 @@
 #define TO_UPPER_CASE(c) \
 	(c >= 'a' && c <= 'z') ? (c-32) : (c)
 
-char mainSeparator[] = "_______________________________________________________________________";
+char mainSeparator[] = "_____________________________________________________________________";
 char sectionSeparator[] = "-------------------------------------\n";
 
 
@@ -57,7 +57,7 @@ int i8080_tuiDebug(i8080_t* machine, const char* customCommandMapping) {
     const char contKey = TO_UPPER_CASE(conf[0]);
     const char quitKey = TO_UPPER_CASE(conf[1]);
 
-    const char info[] = "Press (ENTER) to step ahead - Press (%c) to continue - Press (%c) to quit\n";
+    const char info[] = "Press (ENTER) to step ahead - Send (%c) to continue - Send (%c) to quit\n";
     char userInput;
     do {
 		// step ahead
