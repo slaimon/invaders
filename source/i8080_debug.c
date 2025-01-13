@@ -13,7 +13,7 @@ char mainSeparator[] = "________________________________________________________
 char sectionSeparator[] = "-------------------------------------\n";
 
 
-void i8080_printState (const i8080_state_t state, unsigned int numLines, FILE* ofp) {
+void i8080_printState (const i8080_t machine, unsigned int numLines, FILE* ofp) {
 	unsigned int i, currentPC;
 	i8080_instruction_t instruction;
 
@@ -24,8 +24,8 @@ void i8080_printState (const i8080_state_t state, unsigned int numLines, FILE* o
 	
 	fputs("\nCODE IN EXECUTION:\n", ofp);
 	
-	currentPC = state.programCounter;
-	instruction = disassemble_instruction(state.mem, currentPC);
+	currentPC = machine.programCounter;
+	instruction = disassemble_instruction(machine.mem, currentPC);
 	
 	fputs(sectionSeparator, ofp);
 	PRINTLINE(instruction, ofp)
@@ -33,23 +33,23 @@ void i8080_printState (const i8080_state_t state, unsigned int numLines, FILE* o
 
 	currentPC += instruction.instructionLength;
 	for (i = 0; i < numLines; ++i) {
-		instruction = disassemble_instruction(state.mem, currentPC );
+		instruction = disassemble_instruction(machine.mem, currentPC );
 		PRINTLINE(instruction, ofp);
 		currentPC += instruction.instructionLength;
 	}
 	
 	fputs("\n\nREGISTERS:\n", ofp);
 	fputs(sectionSeparator, ofp);
-	fprintf(ofp, "[S: %01d | Z: %01d | AC: %01d | P: %01d | C: %01d]\n", state.signFlag, state.zeroFlag, state.auxCarryFlag, state.parityFlag, state.carryFlag );
-	fprintf(ofp, "A:\t%02X\nB:\t%02X\nC:\t%02X\nD:\t%02X\nE:\t%02X\nH:\t%02X\nL:\t%02X\n", state.A, state.B, state.C, state.D, state.E, state.H, state.L);
+	fprintf(ofp, "[S: %01d | Z: %01d | AC: %01d | P: %01d | C: %01d]\n", machine.signFlag, machine.zeroFlag, machine.auxCarryFlag, machine.parityFlag, machine.carryFlag );
+	fprintf(ofp, "A:\t%02X\nB:\t%02X\nC:\t%02X\nD:\t%02X\nE:\t%02X\nH:\t%02X\nL:\t%02X\n", machine.A, machine.B, machine.C, machine.D, machine.E, machine.H, machine.L);
 	fputs(sectionSeparator, ofp);
-	fprintf(ofp, "SP:\t%04X\nPC:\t%04X\n", state.stackPointer, state.programCounter);
+	fprintf(ofp, "SP:\t%04X\nPC:\t%04X\n", machine.stackPointer, machine.programCounter);
 	
 	return;
 }
 
 
-int i8080_tuiDebug(i8080_state_t* state, const char* customCommandMapping) {
+int i8080_tuiDebug(i8080_t* machine, const char* customCommandMapping) {
     const char defaultCommandMapping[] = "CQ";
     const char* conf = (customCommandMapping == NULL) ? defaultCommandMapping : customCommandMapping;
 
@@ -61,12 +61,12 @@ int i8080_tuiDebug(i8080_state_t* state, const char* customCommandMapping) {
     char userInput;
     do {
 		// step ahead
-        i8080_execute(state);
+        i8080_execute(machine);
 
-		// print machine state and commands
+		// print machine machine and commands
 		puts("\n\n");
 		puts(mainSeparator);
-        i8080_printState(*state, 5, stdout);
+        i8080_printState(*machine, 5, stdout);
 		puts(mainSeparator);
         printf(info, contKey, quitKey);
 

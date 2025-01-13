@@ -33,26 +33,33 @@ typedef struct {
     // memory:
     uint8_t mem[I8080_MEMSIZE];
 
-} i8080_state_t;
+} i8080_t;
 
 
-// initialize a blank i8080 state: all registers are zero except the Stack Pointer, which is set to
+// Initialize a blank i8080 machine: all registers are zero except the Stack Pointer, which is set to
 // point to the last addressable block of memory (I8080_MEMSIZE - 1)
-void i8080_init(i8080_state_t* state);
+void i8080_init(i8080_t* machine);
 
-// copy the given block of data to the state's memory at the specified offset.
-// fails with exit() if there is insufficient memory.
-void i8080_setMemory(i8080_state_t* state, bytestream_t src, uint16_t offset);
+// Read a contiguous block of memory "size" bytes long and starting at address "offset".
+// Returns a pointer to the bytestream containing the data.
+// The returned bytestream is only guaranteed to be "size" bytes long if offset + size <= I8080_MEMSIZE,
+// otherwise it will only be I8080_MEMSIZE - offset bytes in length.
+// Fails with exit() if the given machine was invalid.
+bytestream_t* i8080_memory_read(const i8080_t* machine, const uint16_t size, const uint16_t offset);
 
-// executes one instruction and returns either the length in bytes of the executed instruction or
+// Copy the given block of data to the machine's memory at the specified offset.
+// Fails with exit() if there is insufficient memory.
+void i8080_memory_write(i8080_t* machine, const bytestream_t src, const uint16_t offset);
+
+// Executes one instruction and returns either the length in bytes of the executed instruction or
 // one of the following values:
-// - I8080_FAIL if the given state was invalid
+// - I8080_FAIL if the given machine was invalid
 // - I8080_HALT if the cpu has determined it should halt
 //
 // TODO: perché mai dovrebbe restituire la lunghezza dell'istruzione? non può semplicemente
 //       incrementare il program counter? e a quel punto potrei fargli restituire un enum anziché un
 //       int
-int i8080_execute(i8080_state_t* state);
+int i8080_execute(i8080_t* machine);
 
 
 #endif

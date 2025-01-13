@@ -3,15 +3,15 @@
 
 #include "../include/i8080.h"
 
-// Prints information about the current machine state. The output is formatted thus:
+// Prints information about the current machine machine. The output is formatted thus:
 // - First the instruction about to be executed is printed between two strokes
 // - Then the following N instructions are printed, where N == numLines
 // - Lastly the CPU's registers are printed
 //
-void i8080_printState(const i8080_state_t state, unsigned int numLines, FILE* ofp);
+void i8080_printState(const i8080_t machine, unsigned int numLines, FILE* ofp);
 
 // Starts the TUI debugger. This tool halts the normal execution of the CPU and proceeds one step at
-// a time, printing the machine's state at each step with i8080_printState. While debugging, it
+// a time, printing the machine's machine at each step with i8080_printState. While debugging, it
 // accepts a few different commands from the user:
 // - STEP: proceed to the next instruction
 // - CONTINUE: exit the debugger and resume normal execution
@@ -29,6 +29,6 @@ void i8080_printState(const i8080_state_t state, unsigned int numLines, FILE* of
 // Once the function returns, the last command issued by the user (either CONTINUE or QUIT) is
 // indicated by the return value: 0 for CONTINUE, 1 for QUIT.
 //
-int i8080_tuiDebug(i8080_state_t* state, const char* commandMapping);
+int i8080_tuiDebug(i8080_t* machine, const char* commandMapping);
 
 #endif
