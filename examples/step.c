@@ -10,7 +10,7 @@
 // The program quits when the user types either "Q" or "C" (case insensitive) and presses enter.
 int main(int argc, char** argv) {
     if (argc != 2) {
-        printf("usage: %s INPUT_FILE\n", argv[0]);
+        printf("usage: %s ROM_FILE\n", argv[0]);
     }
 
     FILE* ifp = safe_fopen(argv[1], "rb");
