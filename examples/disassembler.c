@@ -2,6 +2,8 @@
 #include "../include/bytestream.h"
 #include "../include/safe.h"
 
+// A disassembler utility that takes two filenames as input, IN and OUT, and writes into OUT the
+// disassembly of the Intel 8080 machine code found in file IN.
 int main(int argc, char** argv) {
     FILE *ofp, *ifp;
 

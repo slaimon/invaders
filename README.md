@@ -6,6 +6,9 @@ I originally wrote it in 2019 but never got it to display anything, only running
 
 I tried to write it like a library so as to be able to easily adapt it to other machines based on the same processor. For instance, I'd like to be able to run a simple Altair 8800 emulator.
 
-There is one example so far: it creates a disassembly of the original Space Invaders program. You can run it by doing `make invaders_listing` and the code will be in the file `invaders_listing.txt` thus created.
+There are two example so far:
 
-You can also do `make ./disassembler` to create the disassembler program. It takes two arguments: the input file and the output file names. For instance, `./disassembler INVADERS invaders_listing.txt` is the command executed by the above target.
+- `make disassembler` creates a disassembler program. It takes two arguments: the input filename and the output filename.
+   For instance, `./disassembler INVADERS listing.txt` produces a disassembly of the original Space Invaders program. You can also do `make listing` to directly compile the disassembler and create the file `./listing.txt`.
+
+- `make step` creates a program that takes one argument, the name of a file containing Intel 8080 machine code, and executes it step by step. After each step a crude TUI (terminal user interface) is printed showing the contents of the CPU registers and a disassembly of the instructions that will be executed next. The program quits when the user types either `Q` or `C` (case insensitive) and presses enter.
