@@ -98,6 +98,11 @@ uint16_t i8080_register_get(const i8080_t* machine, const i8080_register_t reg) 
             return GET_REGISTER_PAIR(machine->D, machine->E);
         case I8080_REGISTER_HL:
             return GET_REGISTER_PAIR(machine->H, machine->L);
+
+        case I8080_REGISTER_PROGRAM_COUNTER:
+            return machine->programCounter;
+        case I8080_REGISTER_STACK_POINTER:
+            return machine->stackPointer;
         
         default:
             fprintf(stderr, "ERROR: i8080_register_get: unrecognized register\n");
@@ -109,26 +114,43 @@ void i8080_register_set(i8080_t* machine, const i8080_register_t reg, const uint
     switch (reg) {
         case I8080_REGISTER_A:
             machine->A = value & 0x00FF;
+            break;
         case I8080_REGISTER_B:
             machine->B = value & 0x00FF;
+            break;
         case I8080_REGISTER_C:
             machine->C = value & 0x00FF;
+            break;
         case I8080_REGISTER_D:
             machine->D = value & 0x00FF;
+            break;
         case I8080_REGISTER_E:
             machine->E = value & 0x00FF;
+            break;
         case I8080_REGISTER_H:
             machine->H = value & 0x00FF;
+            break;
         case I8080_REGISTER_L:
             machine->L = value & 0x00FF;
+            break;
         
         case I8080_REGISTER_BC:
             SET_REGISTER_PAIR(machine->B, machine->C, value);
+            break;
         case I8080_REGISTER_DE:
             SET_REGISTER_PAIR(machine->D, machine->E, value);
+            break;
         case I8080_REGISTER_HL:
             SET_REGISTER_PAIR(machine->H, machine->L, value);
+            break;
         
+        case I8080_REGISTER_PROGRAM_COUNTER:
+            machine->programCounter = value;
+            break;
+        case I8080_REGISTER_STACK_POINTER:
+            machine->stackPointer = value;
+            break;
+
         default:
             fprintf(stderr, "ERROR: i8080_register_set: unrecognized register\n");
             exit(EXIT_FAILURE);
@@ -158,14 +180,19 @@ void i8080_flag_set(i8080_t* machine, const i8080_flag_t flag, const bool value)
     switch(flag) {
         case I8080_FLAG_SIGN:
             machine->signFlag = value;
+            break;
         case I8080_FLAG_ZERO:
             machine->zeroFlag = value;
+            break;
         case I8080_FLAG_CARRY:
             machine->carryFlag = value;
+            break;
         case I8080_FLAG_AUXCARRY:
             machine->auxCarryFlag = value;
+            break;
         case I8080_FLAG_PARITY:
             machine->parityFlag = value;
+            break;
         
         default:
             fprintf(stderr, "ERROR: i8080_flag_set: unrecognized flag\n");
