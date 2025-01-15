@@ -15,7 +15,7 @@ listing: ./disassembler
 test: ./cpm
 	./cpm ./assets/TEST.COM
 
-./cpm: $(BIN)/cpm.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
+./cpm: $(BIN)/cpm.o $(BIN)/i8080_cpm.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 ./disassembler: $(BIN)/disassembler.o $(BIN)/i8080_disassembler.o $(BIN)/bytestream.o $(BIN)/safe.o
@@ -32,6 +32,8 @@ $(BIN)/step.o: $(EXAMPLES)/step.c $(HDR)/i8080_debug.h $(HDR)/safe.h $(HDR)/byte
 	$(CC) $(CFLAGS) -c $(EXAMPLES)/step.c -o $(BIN)/step.o
 $(BIN)/disassembler.o: $(EXAMPLES)/disassembler.c $(HDR)/i8080_disassembler.h $(HDR)/bytestream.h
 	$(CC) $(CFLAGS) -c $(EXAMPLES)/disassembler.c -o $(BIN)/disassembler.o
+
+$(BIN)/i8080_cpm.o: $(HDR)/i8080.h
 $(BIN)/i8080_debug.o: $(HDR)/i8080_disassembler.h $(HDR)/i8080_debug.h
 $(BIN)/i8080.o: $(HDR)/i8080.h
 $(BIN)/i8080_disassembler.o: $(HDR)/i8080_disassembler.h

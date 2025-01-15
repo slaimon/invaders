@@ -2,55 +2,7 @@
 
 #include "../include/safe.h"
 #include "../include/bytestream.h"
-#include "../include/i8080.h"
-
-char separator[] = "\n\n--------------------------------------------------";
-
-// returns true iff the emulator should halt
-bool handle_cpm_calls(i8080_t* machine) {
-    uint16_t pc = i8080_register_get(machine, I8080_REGISTER_PROGRAM_COUNTER);
-    
-    // HLT (terminate)
-    if (machine->mem[pc] == 0x76) {
-        puts(separator);
-        printf("HLT instruction encountered at %04Xh, terminating.\n", pc);
-        return true;
-    }
-
-    // JMP 00 (terminate)
-    if (pc == 0x00) {
-        puts(separator);
-        printf("User program returned control to CP/M, terminating.\n");
-        return true;
-    }
-
-    // supervisor call
-    if (pc == 0x05) {
-        uint16_t svc = i8080_register_get(machine, I8080_REGISTER_C);
-        switch (svc) {
-            case 2:
-                // print character in register A
-                putchar(i8080_register_get(machine, I8080_REGISTER_A));
-                break;
-            case 9:;
-                // print string found at $DE and terminating with '$'
-                uint16_t address = i8080_register_get(machine, I8080_REGISTER_DE);
-                char c;
-                do {
-                    c = machine->mem[address];
-                    putchar(c);
-                    ++address;
-                } while (c != '$');
-                break;
-
-            default:
-                fprintf(stderr, "\nERROR: unimplemented supervisor call: %04Xh\nFound at address: %04Xh\n", svc, pc);
-                exit(EXIT_FAILURE);
-        }
-    }
-
-    return false;
-}
+#include "../include/i8080_cpm.h"
 
 // Takes one filename as argument and executes it like a CP/M program. The ROM is loaded at the
 // correct address in memory and some supervisor calls are handled, which allows the program to
