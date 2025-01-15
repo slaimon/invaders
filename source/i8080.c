@@ -479,8 +479,8 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x12: {
             // STAX DE : store accumulator A through register pair DE
-            memoryAddressRegister = (machine->D << 8) + machine->E;
-            machine->mem[memoryAddressRegister] = machine->A;
+            tmp1 = GET_REGISTER_PAIR(machine->D, machine->E);
+            machine->mem[tmp1] = machine->A;
             
             break;
         }
@@ -588,10 +588,10 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x22: {
-            // SHLD: store HL direct
-            memoryAddressRegister = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-            machine->mem[memoryAddressRegister] = machine->L;
-            machine->mem[memoryAddressRegister+1] = machine->H;
+            // SHLD: store HL to immediate address
+            tmp1 = READ_16BIT_IMMEDIATE;
+            machine->mem[tmp1] = machine->L;
+            machine->mem[tmp1+1] = machine->H;
             
             instructionLength = 3;
             break;
@@ -663,11 +663,11 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x2A: {
-            // LHLD HL - load HL direct
+            // LHLD HL - load HL from immediate address
     
-            memoryAddressRegister = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-            machine->H = machine->mem[memoryAddressRegister+1];
-            machine->L = machine->mem[memoryAddressRegister];
+            tmp1 = READ_16BIT_IMMEDIATE;
+            machine->L = machine->mem[tmp1];
+            machine->H = machine->mem[tmp1+1];
             
             instructionLength = 3;
             break;
@@ -774,16 +774,15 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x3A: {
             // LDA: load A direct
-            memoryAddressRegister = (machine->mem[currentProgramCounter + 2] << 8) + machine->mem[currentProgramCounter + 1];
-            machine->A = machine->mem[memoryAddressRegister];
+            tmp1 = READ_16BIT_IMMEDIATE;
+            machine->A = machine->mem[tmp1];
             
             instructionLength = 3;
             break;
         }
         case 0x3B: {
             // DCX SP
-            
-            machine->stackPointer = (uint16_t) machine->stackPointer - 1;
+            machine->stackPointer = (uint16_t) machine->stackPointer-1;
             
             break;
         }
@@ -1386,7 +1385,7 @@ int i8080_execute(i8080_t* machine ) {
             
             break;
         }
-        case 0xA0: {    // for AND R instructions: AUX.C = ( (A & 8) | (R & 8) )
+        case 0xA0: {
             // ANA B
             ANA(machine->B)
             
