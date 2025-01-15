@@ -25,7 +25,7 @@
             machine->parityFlag = ~ table[(x) & 0xff];
 
 #define CARRY(x) \
-            machine->carryFlag = ((x) & 0x0100);
+            machine->carryFlag = (((x) & 0x0100) != 0);
 
 const uint8_t table[256] = { LOOK_UP };
 
@@ -111,17 +111,17 @@ const uint8_t table[256] = { LOOK_UP };
             else                \
                 y = y - 1;      \
 
-// SUB - subtract a register from A
+// SUB - subtract a register from A (the macro is not used for SUB A)
 #define SUB(x)                                      \
             tmp1 = machine->A - (x);                \
             tmp2 = machine->A ^ (-(x) + 1);         \
             CARRY(tmp1)                             \
             machine->auxCarryFlag =                 \
                 (tmp1 & 0x00F0) != (tmp2 & 0x00F0); \
+            machine->A = tmp1;                      \
             PARITY(machine->A)                      \
             SIGN(machine->A)                        \
             ZERO(machine->A)                        \
-            machine->A = tmp1;
 
 // SBB - subtract with borrow
 #define SBB(x) \
@@ -134,10 +134,10 @@ const uint8_t table[256] = { LOOK_UP };
             CARRY(tmp1)                                 \
             machine->auxCarryFlag =                     \
                 (tmp1 & 0x00F0) != (tmp2 & 0x00F0);     \
+            machine->A = tmp1;                          \
             PARITY(machine->A)                          \
             SIGN(machine->A)                            \
             ZERO(machine->A)                            \
-            machine->A = tmp1;
 
 // ADC - add a register to A with carry
 #define ADC(x) \
@@ -171,25 +171,25 @@ const uint8_t table[256] = { LOOK_UP };
             SIGN(machine->A)                 \
             ZERO(machine->A)                 \
 
-// OR - OR a register with A
-#define OR(x)                                       \
-            machine->A = machine->A | machine->B;   \
-            machine->carryFlag = 0;                 \
-            machine->auxCarryFlag = 0;              \
-            PARITY(machine->A)                      \
-            SIGN(machine->A)                        \
-            ZERO(machine->A)                        \
+// ORA - OR a register with A
+#define ORA(x)                            \
+            machine->A = machine->A | x; \
+            machine->carryFlag = 0;      \
+            machine->auxCarryFlag = 0;   \
+            PARITY(machine->A)           \
+            SIGN(machine->A)             \
+            ZERO(machine->A)             \
 
 // CMP - compare a register with A (the macro is not used for CMP A)
-#define CMP(x)                                              \
-            tmp1 = machine->A - machine->B;                 \
-            machine->carryFlag =                            \
-                (machine->A < machine->B);                  \
-            machine->auxCarryFlag =                         \
-                ((machine->A & 0x0F) < (machine->B &0x0F)); \
-            PARITY(tmp1)                                    \
-            SIGN(tmp1)                                      \
-            ZERO(tmp1)                                      \
+#define CMP(x)                                     \
+            tmp1 = machine->A - x;                 \
+            machine->carryFlag =                   \
+                (machine->A < x);                  \
+            machine->auxCarryFlag =                \
+                ((machine->A & 0x0F) < (x &0x0F)); \
+            PARITY(tmp1)                           \
+            SIGN(tmp1)                             \
+            ZERO(tmp1)                             \
 
 
 void i8080_init(i8080_t* machine) {	
@@ -1192,1210 +1192,388 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x80: {
             // ADD B
-            tmp1 = machine->A + machine->B;
-            tmp2 = machine->A ^ machine->B;
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-                
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADD(machine->B);
             
             break;
         }
         case 0x81: {
             // ADD C
-            tmp1 = machine->A + machine->C;
-            tmp2 = machine->A ^ machine->C;
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADD(machine->C)
             
             break;
         }
         case 0x82: {
             // ADD D
-            tmp1 = machine->A + machine->D;
-            tmp2 = machine->A ^ machine->D;
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADD(machine->D)
             
             break;
         }
         case 0x83: {
             // ADD E
-            tmp1 = machine->A + machine->E;
-            tmp2 = machine->A ^ machine->E;
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADD(machine->E)
             
             break;
         }
         case 0x84: {
             // ADD H
-            tmp1 = machine->A + machine->H;
-            tmp2 = machine->A ^ machine->H;
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADD(machine->H)
             
             break;
         }
         case 0x85: {
             // ADD L
-            tmp1 = machine->A + machine->L;
-            tmp2 = machine->A ^ machine->L;
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADD(machine->L)
             
             break;
         }
         case 0x86: {
             // ADD M
-            tmp1 = machine->A + machine->mem[memoryAddressRegister];
-            tmp2 = machine->A ^ machine->mem[memoryAddressRegister];
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADD(machine->mem[memoryAddressRegister])
             
             break;
         }
         case 0x87: {
             // ADD A
-            tmp1 = machine->A + machine->A;
-            tmp2 = machine->A ^ machine->A;
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADD(machine->A)
             
             break;
         }
         case 0x88: {
-            //    ADC B
-            tmp1 = machine->A + machine->B + machine->carryFlag;
-            tmp2 = machine->A ^ (machine->B + machine->carryFlag);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-                
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            // ADC B
+            ADC(machine->B)
             
             break;
         }
         case 0x89: {
-            //    ADC C
-            tmp1 = machine->A + machine->C + machine->carryFlag;
-            tmp2 = machine->A ^ (machine->C + machine->carryFlag);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            // ADC C
+            ADC(machine->C)
             
             break;
         }
         case 0x8A: {
-            //    ADC D
-            tmp1 = machine->A + machine->D + machine->carryFlag;
-            tmp2 = machine->A ^ (machine->D + machine->carryFlag);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            // ADC D
+            ADC(machine->D)
             
             break;
         }
         case 0x8B: {
             // ADC E
-            tmp1 = machine->A + machine->E + machine->carryFlag;
-            tmp2 = machine->A ^ (machine->E + machine->carryFlag);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADC(machine->E)
             
             break;
         }
         case 0x8C: {
             // ADC H
-            tmp1 = machine->A + machine->H + machine->carryFlag;
-            tmp2 = machine->A ^ (machine->H + machine->carryFlag);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADC(machine->H)
             
             break;
         }
         case 0x8D: {
             // ADC L
-            tmp1 = machine->A + machine->L + machine->carryFlag;
-            tmp2 = machine->A ^ (machine->L + machine->carryFlag);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADC(machine->L)
             
             break;
         }
         case 0x8E: {
             // ADC M
-            tmp1 = machine->A + machine->mem[memoryAddressRegister] + machine->carryFlag;
-            tmp2 = machine->A ^ (machine->mem[memoryAddressRegister] + machine->carryFlag);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADC(machine->mem[memoryAddressRegister])
             
             break;
         }
         case 0x8F: {
             // ADC A
-            tmp1 = machine->A + machine->A + machine->carryFlag;
-            tmp2 = machine->A ^ (machine->A + machine->carryFlag);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ADC(machine->A)
             
             break;
         }
         case 0x90: {
             // SUB B
-            tmp1 = machine->A - machine->B;
-            tmp2 = machine->A ^ (- machine->B + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SUB(machine->B)
             
             break;
         }
         case 0x91: {
             // SUB C
-            tmp1 = machine->A - machine->C;
-            tmp2 = machine->A ^ (- machine->C + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SUB(machine->C)
             
             break;
         }
         case 0x92: {
             // SUB D
-            tmp1 = machine->A - machine->D;
-            tmp2 = machine->A ^ (- machine->D + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SUB(machine->D)
             
             break;
         }
         case 0x93: {
             // SUB E
-            tmp1 = machine->A - machine->E;
-            tmp2 = machine->A ^ (- machine->E + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SUB(machine->E)
             
             break;
         }
         case 0x94: {
             // SUB H
-            tmp1 = machine->A - machine->H;
-            tmp2 = machine->A ^ (- machine->H + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SUB(machine->H)
             
             break;
         }
         case 0x95: {
             // SUB L
-            tmp1 = machine->A - machine->L;
-            tmp2 = machine->A ^ (- machine->L + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SUB(machine->L)
             
             break;
         }
         case 0x96: {
             // SUB M
-            tmp1 = machine->A - machine->mem[memoryAddressRegister];
-            tmp2 = machine->A ^ (- machine->mem[memoryAddressRegister] + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SUB(machine->mem[memoryAddressRegister])
             
             break;
         }
         case 0x97: {
             // SUB A
-            tmp1 = machine->A - machine->A;
-            tmp2 = machine->A ^ (- machine->A + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            machine->A = 0;
+            machine->carryFlag = 0;
+            machine->parityFlag = 1;
+            machine->zeroFlag = 1;
+            machine->signFlag = 0;
             
             break;
         }
         case 0x98: { // SBB - subtract with borrow
             // SBB B
-            tmp1 = machine->A - (machine->B + machine->carryFlag);
-            tmp2 = machine->A ^ ( -(machine->B + machine->carryFlag) + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SBB(machine->B)
             
             break;
         }
         case 0x99: {
             // SBB C
-            tmp1 = machine->A - (machine->C + machine->carryFlag);
-            tmp2 = machine->A ^ ( -(machine->C + machine->carryFlag) + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SBB(machine->C)
             
             break;
         }
         case 0x9A: {
             // SBB D
-            tmp1 = machine->A - (machine->D + machine->carryFlag);
-            tmp2 = machine->A ^ ( -(machine->D + machine->carryFlag) + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SBB(machine->D)
             
             break;
         }
         case 0x9B: {
             // SBB E
-            tmp1 = machine->A - (machine->E + machine->carryFlag);
-            tmp2 = machine->A ^ ( -(machine->E + machine->carryFlag) + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-            
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SBB(machine->E)
             
             break;
         }
         case 0x9C: {
             // SBB H
-            tmp1 = machine->A - (machine->H + machine->carryFlag);
-            tmp2 = machine->A ^ ( -(machine->H + machine->carryFlag) + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-            
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SBB(machine->H)
             
             break;
         }
         case 0x9D: {
             // SBB L
-            tmp1 = machine->A - (machine->L + machine->carryFlag);
-            tmp2 = machine->A ^ ( -(machine->L + machine->carryFlag) + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-            
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SBB(machine->L)
             
             break;
         }
         case 0x9E: {
             // SBB M
-            tmp1 = machine->A - (machine->mem[memoryAddressRegister] + machine->carryFlag);
-            tmp2 = machine->A ^ ( -(machine->mem[memoryAddressRegister] + machine->carryFlag) + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-            
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SBB(machine->mem[memoryAddressRegister])
             
             break;
         }
         case 0x9F: {
             // SBB A
-            tmp1 = machine->A - (machine->A + machine->carryFlag);
-            tmp2 = machine->A ^ ( -(machine->A + machine->carryFlag) + 1);
-            
-            if( (tmp1 & 0xFF00) != 0)
-                machine->carryFlag = 0;
-            else
-                machine->carryFlag = 1;
-            
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            SBB(machine->A)
             
             break;
         }
         case 0xA0: {    // for AND R instructions: AUX.C = ( (A & 8) | (R & 8) )
             // ANA B
-            tmp1 = machine->A & machine->B;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = (machine->A & 8) | (machine->B & 8);
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ANA(machine->B)
             
             break;
         }
         case 0xA1: {
             // ANA C
-            tmp1 = machine->A & machine->C;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = (machine->A & 8) | (machine->C & 8);
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ANA(machine->C)
             
             break;
         }
         case 0xA2: {
             // ANA D
-            tmp1 = machine->A & machine->D;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = (machine->A & 8) | (machine->D & 8);
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ANA(machine->D)
             
             break;
         }
         case 0xA3: {
             // ANA E
-            tmp1 = machine->A & machine->E;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = (machine->A & 8) | (machine->E & 8);
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ANA(machine->E)
             
             break;
         }
         case 0xA4: {
             // ANA H
-            tmp1 = machine->A & machine->H;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = (machine->A & 8) | (machine->H & 8);
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ANA(machine->H)
             
             break;
         }
         case 0xA5: {
             // ANA L
-            tmp1 = machine->A & machine->L;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = (machine->A & 8) | (machine->L & 8);
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ANA(machine->L)
             
             break;
         }
         case 0xA6: {
             // ANA M
-            tmp1 = machine->A & machine->mem[memoryAddressRegister];
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = (machine->A & 8) | (machine->mem[memoryAddressRegister] & 8);
-            machine->A = tmp1;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ANA(machine->mem[memoryAddressRegister])
             
             break;
         }
         case 0xA7: {
             // ANA A
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = machine->A & 8;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            ANA(machine->A)
             
             break;
         }
         case 0xA8: {
             // XOR B
-            machine->A = machine->A ^ machine->B;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            XOR(machine->B)
             
             break;
         }
         case 0xA9: {
             // XOR C
-            machine->A = machine->A ^ machine->C;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            XOR(machine->C)
             
             break;
         }
         case 0xAA: {
             // XOR D
-            machine->A = machine->A ^ machine->D;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            XOR(machine->D)
             
             break;
         }
         case 0xAB: {
             // XOR E
-            machine->A = machine->A ^ machine->E;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            XOR(machine->E)
             
             break;
         }
         case 0xAC: {
             // XOR H
-            machine->A = machine->A ^ machine->H;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            XOR(machine->H)
             
             break;
         }
         case 0xAD: {
             // XOR L
-            machine->A = machine->A ^ machine->L;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            XOR(machine->L)
             
             break;
         }
         case 0xAE: {
             // XOR M
-            machine->A = machine->A ^ machine->mem[memoryAddressRegister];
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            XOR(machine->mem[memoryAddressRegister])
             
             break;
         }
         case 0xAF: {
             // XOR A
-            machine->A = 0;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            machine->zeroFlag = 1;
+            XOR(machine->A)
             
             break;
         }
         case 0xB0: {
-            // OR B
-            machine->A = machine->A | machine->B;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            // ORA B
+            ORA(machine->B)
             
             break;
         }
         case 0xB1: {
-            // OR C
-            machine->A = machine->A | machine->C;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            // ORA C
+            ORA(machine->C)
             
             break;
         }
         case 0xB2: {
-            // OR D
-            machine->A = machine->A | machine->D;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            // ORA D
+            ORA(machine->D)
             
             break;
         }
         case 0xB3: {
-            // OR E
-            machine->A = machine->A | machine->E;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            // ORA E
+            ORA(machine->E)
             
             break;
         }
         case 0xB4: {
-            // OR H
-            machine->A = machine->A | machine->H;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            // ORA H
+            ORA(machine->H)
             
             break;
         }
         case 0xB5: {
-            // OR L
-            machine->A = machine->A | machine->L;
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            // ORA L
+            ORA(machine->L)
             
             break;
         }
         case 0xB6: {
-            // OR M
-            machine->A = machine->A | machine->mem[memoryAddressRegister];
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            // ORA M
+            ORA(machine->mem[memoryAddressRegister])
             
             break;
         }
         case 0xB7: {
-            // OR A
-            
-            machine->carryFlag = 0;
-            machine->auxCarryFlag = 0;
-            
-            PARITY(machine->A)
-            SIGN(machine->A)
-            ZERO(machine->A)
+            // ORA A
+            ORA(machine->A)
             
             break;
         }
         case 0xB8: {
             // CMP B
-            tmp1 = machine->A - machine->B;
-                
-            if ( (uint8_t) machine->A < (uint8_t) machine->B )        // geniale!
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-                
-            if ( (uint8_t) (machine->A & 0xF) < (uint8_t) (machine->B & 0xF))
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            /*
-            if ( (machine->A & 128) == ~ (machine->B & 128) )
-                machine->carryFlag = (tmp1 >> 8) & 1;
-                else
-                machine->carryFlag = ~ ((tmp1 >> 8) & 1);
-                
-            if ( (machine->A & 0x0F) - (machine->B & 0x0F) < 0 )
-                machine->auxCarryFlag = 1;
-                else
-                machine->auxCarryFlag = 0;
-            */
-            PARITY(tmp1)
-            SIGN(tmp1)
-            ZERO(tmp1)
+            CMP(machine->B)
             
             break;
         }
         case 0xB9: {
             // CMP C
-            tmp1 = machine->A - machine->C;
-                
-            if ( (uint8_t) machine->A < (uint8_t) machine->C )
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-                
-            if ( (uint8_t) (machine->A & 0xF) < (uint8_t) (machine->C & 0xF))
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            PARITY(tmp1)
-            SIGN(tmp1)
-            ZERO(tmp1)
+            CMP(machine->C)
             
             break;
         }
         case 0xBA: {
             // CMP D
-            tmp1 = machine->A - machine->D;
-                
-            if ( (uint8_t) machine->A < (uint8_t) machine->D )
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-            
-            if ( (uint8_t) (machine->A & 0xF) < (uint8_t) (machine->D & 0xF))
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            PARITY(tmp1)
-            SIGN(tmp1)
-            ZERO(tmp1)
+            CMP(machine->D)
             
             break;
         }
         case 0xBB: {
             // CMP E
-            tmp1 = machine->A - machine->E;
-                
-            if ( (uint8_t) machine->A < (uint8_t) machine->E )
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-            
-            if ( (uint8_t) (machine->A & 0xF) < (uint8_t) (machine->E & 0xF))
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            PARITY(tmp1)
-            SIGN(tmp1)
-            ZERO(tmp1)
+            CMP(machine->E)
             
             break;
         }
         case 0xBC: {
             // CMP H
-            tmp1 = machine->A - machine->H;
-                
-            if ( (uint8_t) machine->A < (uint8_t) machine->H )
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-            
-            if ( (uint8_t) (machine->A & 0xF) < (uint8_t) (machine->H & 0xF))
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            PARITY(tmp1)
-            SIGN(tmp1)
-            ZERO(tmp1)
+            CMP(machine->H)
             
             break;
         }
         case 0xBD: {
             // CMP L
-            tmp1 = machine->A - machine->L;
-                
-            if ( (uint8_t) machine->A < (uint8_t) machine->L )
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-            
-            if ( (uint8_t) (machine->A & 0xF) < (uint8_t) (machine->L & 0xF))
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            PARITY(tmp1)
-            SIGN(tmp1)
-            ZERO(tmp1)
+            CMP(machine->L)
             
             break;
         }
         case 0xBE: {
             // CMP M
-            tmp1 = machine->A - machine->mem[memoryAddressRegister];
-                
-            if ( (uint8_t) machine->A < (uint8_t) machine->mem[memoryAddressRegister] )
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-            
-            if ( (uint8_t) (machine->A & 0xF) < (uint8_t) (machine->mem[memoryAddressRegister] & 0xF))
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            PARITY(tmp1)
-            SIGN(tmp1)
-            ZERO(tmp1)
+            CMP(machine->mem[memoryAddressRegister])
             
             break;
         }
         case 0xBF: {
             // CMP A
-
             machine->zeroFlag = 1; 
             machine->carryFlag = 0;
             machine->signFlag = 0;
@@ -2404,7 +1582,7 @@ int i8080_execute(i8080_t* machine ) {
             
             break;
         }
-        case 0xC0: {                            // SECT. 3:
+        case 0xC0: {
             // RNZ
             
             if(machine->zeroFlag == 0) {
