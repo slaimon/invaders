@@ -37,7 +37,7 @@ const uint8_t table[256] = { LOOK_UP };
 
 // write value to a register pair
 #define SET_REGISTER_PAIR(x,y,v) \
-            x = v & 0xFF00;      \
+            x = v >> 8;          \
             y = v & 0x00FF;
 
 // write a 2-byte value to memory at address x
@@ -69,6 +69,48 @@ const uint8_t table[256] = { LOOK_UP };
             machine->stackPointer += 2;                                             \
             instructionLength = 0;
 
+// INR - increment register
+#define INR(x)                              \
+            tmp1 = x & 0xF0;                \
+            x = (uint8_t) x + 1;            \
+            if(( x & 0xF0 ) != tmp1)        \
+                machine->auxCarryFlag = 1;  \
+            else                            \
+                machine->auxCarryFlag = 0;  \
+            SIGN(x)                         \
+            ZERO(x)                         \
+            PARITY(x)                       \
+
+// DCR - decrement register
+#define DCR(x)                              \
+            tmp1 = x & 0xF0;                \
+            x = (uint8_t) x - 1;            \
+            if(( x & 0xF0 ) != tmp1)        \
+                machine->auxCarryFlag = 1;  \
+            else                            \
+                machine->auxCarryFlag = 0;  \
+            SIGN(x)                         \
+            ZERO(x)                         \
+            PARITY(x)                       \
+
+// INX - increment register pair (the macro is not used for INX SP)
+#define INX(x,y)                \
+            if ( y == 0xFF ) {  \
+                x = x + 1;      \
+                y = 0;          \
+            }                   \
+            else                \
+                y = y + 1;      \
+
+// DCX - decrement register pair (the macro is not used for DCX SP)
+#define DCX(x,y)                \
+            if ( y == 0x00 ) {  \
+                x = x - 1;      \
+                y = 0xFF;       \
+            }                   \
+            else                \
+                y = y - 1;      \
+
 // SUB - subtract a register from A
 #define SUB(x)                                      \
             tmp1 = machine->A - (x);                \
@@ -91,7 +133,7 @@ const uint8_t table[256] = { LOOK_UP };
             tmp2 = machine->A ^ (x);                    \
             CARRY(tmp1)                                 \
             machine->auxCarryFlag =                     \
-                (tmp1 & 0x00F0) != (tmp2 & 0x00F0);     \  
+                (tmp1 & 0x00F0) != (tmp2 & 0x00F0);     \
             PARITY(machine->A)                          \
             SIGN(machine->A)                            \
             ZERO(machine->A)                            \
@@ -100,6 +142,14 @@ const uint8_t table[256] = { LOOK_UP };
 // ADC - add a register to A with carry
 #define ADC(x) \
             ADD(x+machine->carryFlag)
+
+// DAD - add register pair to HL (the macro is not used for DAD SP)
+#define DAD(x,y)                                                \
+            tmp1 = machine->L + y;                              \
+            machine->carryFlag = tmp1 >> 8;                     \
+            tmp2 = machine->H + x + machine->carryFlag;         \
+            machine->L = tmp1 & 0xFF;                           \
+            machine->H = tmp2 & 0xFF;                           \
 
 // ANA - AND a register with A
 #define ANA(x)                                   \
@@ -130,7 +180,7 @@ const uint8_t table[256] = { LOOK_UP };
             SIGN(machine->A)                        \
             ZERO(machine->A)                        \
 
-// CMP - compare a register with A
+// CMP - compare a register with A (the macro is not used for CMP A)
 #define CMP(x)                                              \
             tmp1 = machine->A - machine->B;                 \
             machine->carryFlag =                            \
@@ -329,45 +379,19 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x03: {
             // INX BC
-
-            if ( machine->C == 0xFF ) {
-                machine->B = (uint8_t) machine->B + 1;
-                machine->C = 0;
-            }
-            else machine->C = (uint8_t) machine->C + 1;
+            INX(machine->B, machine->C)
             
             break;
         }
         case 0x04: {
             // INR B
-            
-            tmp1 = machine->B & 0xF0;
-            machine->B = 1 + (uint8_t) machine->B;
-            
-            if( ( machine->B & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-                else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->B)
-            ZERO(machine->B)
-            PARITY(machine->B)
+            INR(machine->B)
             
             break;
         }
         case 0x05: {
             // DCR B
-            tmp1 = machine->B & 0xF0;
-            machine->B = (uint8_t) machine->B - 1;
-            
-            if( ( machine->B & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-                else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->B)
-            ZERO(machine->B)
-            PARITY(machine->B)
+            DCR(machine->B)
             
             break;
         }
@@ -394,17 +418,7 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x09: {
             // DAD BC: add register pair to HL
-            
-            tmp1 = machine->L + machine->C;
-            tmp2 = machine->H + machine->B + (tmp1 >> 8);
-            
-            machine->L = tmp1 & 255;
-            machine->H = tmp2 & 255;
-            
-            if((tmp2 >> 8) != 0)
-                machine->carryFlag = 1;
-                else
-                machine->carryFlag = 0;
+            DAD(machine->B, machine->C)
             
             break;
         }
@@ -417,44 +431,18 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x0B: {
             // DCX BC
-            
-            if ( machine->C == 0x00 ) {
-                machine->B = (uint8_t) machine->B - 1;
-                machine->C = 0xFF;
-            }
-            else machine->C = (uint8_t) machine->C - 1;
+            DCX(machine->B, machine->C)
             
             break;
         }
         case 0x0C: {
             // INR C
-            tmp1 = machine->C & 0xF0;
-            machine->C = (uint8_t) machine->C + 1;
-            
-            if( ( machine->C & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->C)
-            ZERO(machine->C)
-            PARITY(machine->C)
-            
+            INR(machine->C)
             break;
         }
         case 0x0D: {
             // DCR C
-            tmp1 = machine->C & 0xF0;
-            machine->C = (uint8_t) machine->C - 1;
-            
-            if( ( machine->C & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->C)
-            ZERO(machine->C)
-            PARITY(machine->C)
+            DCR(machine->C)
             
             break;
         }
@@ -498,45 +486,19 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x13: {
             // INX DE
-            
-            if ( machine->E == 0xFF ) {
-                machine->D = 1 + (uint8_t) machine->D;
-                machine->E = 0;
-            }
-            else
-                machine->E = 1 + (uint8_t) machine->E;
+            INX(machine->D, machine->E)
             
             break;
         }
         case 0x14: {
             // INR D
-            tmp1 = machine->D & 0xF0;
-            machine->D = (uint8_t) machine->D + 1;
-            
-            if( ( machine->D & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->D)
-            ZERO(machine->D)
-            PARITY(machine->D)
+            INR(machine->D)
             
             break;
         }
         case 0x15: {
             // DCR D
-            tmp1 = machine->D & 0xF0;
-            machine->D = (uint8_t) machine->D - 1;
-            
-            if( (machine->D & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->D)
-            ZERO(machine->D)
-            PARITY(machine->D)
+            DCR(machine->D)
             
             break;
         }
@@ -564,16 +526,7 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x19: {
             // DAD DE
-            tmp1 = machine->L + machine->E;
-            tmp2 = machine->H + machine->D + (tmp1 >> 8);
-            
-            machine->L = tmp1 & 255;
-            machine->H = tmp2 & 255;
-            
-            if( ( tmp2 >> 8 ) != 0 )
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
+            DAD(machine->D, machine->E)
                 
             break;
         }
@@ -586,45 +539,19 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x1B: {
             // DCX DE
-
-            if ( machine->E == 0x00 ) {
-                machine->D = (uint8_t) machine->D - 1;
-                machine->E = 0xFF;
-            }
-            else
-                machine->E = (uint8_t) machine->E - 1;
+            DCX(machine->D, machine->E)
             
             break;
         }
         case 0x1C: {
             // INR E
-            tmp1 = machine->E & 0xF0;
-            machine->E = (uint8_t) machine->E + 1;
-            
-            if( ( machine->E & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->E)
-            ZERO(machine->E)
-            PARITY(machine->E)
+            INR(machine->E)
             
             break;
         }
         case 0x1D: {
             // DCR E
-            tmp1 = machine->E & 0xF0;
-            machine->E = (uint8_t) machine->E - 1;
-            
-            if( ( machine->E & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->E)
-            ZERO(machine->E)
-            PARITY(machine->E)
+            DCR(machine->E)
             
             break;
         }
@@ -671,46 +598,20 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x23: {
             // INX HL
-            
-            if ( machine->L == 0xFF ) {
-                machine->H = (uint8_t) machine->H + 1;
-                machine->L = 0;
-            }
-            else
-                machine->L = (uint8_t) machine->L + 1;
+            INX(machine->H, machine->L)
             
             
             break;
         }
         case 0x24: {
             // INR H
-            tmp1 = machine->H & 0xF0;
-            machine->H = (uint8_t) machine->H + 1;
-            
-            if( ( machine->H & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->H)
-            ZERO(machine->H)
-            PARITY(machine->H)
+            INR(machine->H)
             
             break;
         }
         case 0x25: {
             // DCR H
-            tmp1 = machine->H & 0xF0;
-            machine->H = (uint8_t) machine->H - 1;
-            
-            if( ( machine->H & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->H)
-            ZERO(machine->H)
-            PARITY(machine->H)
+            DCR(machine->H)
             
             break;
         }
@@ -757,17 +658,7 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x29: {
             // DAD HL - add register pair to HL
-            
-            tmp1 = machine->L + machine->L;
-            tmp2 = machine->H + machine->H + (tmp1 >> 8);
-            
-            machine->L = tmp1 & 255;
-            machine->H = tmp2 & 255;
-            
-            if((tmp2 >> 8) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
+            DAD(machine->H, machine->L)
 
             break;
         }
@@ -782,45 +673,19 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x2B: {
             // DCX HL
-            
-            if ( machine->L == 0x00 ) {
-                machine->H = (uint8_t) machine->H - 1;
-                machine->L = 0xFF;
-            }
-            else
-                machine->L = (uint8_t) machine->L - 1;
+            DCX(machine->H, machine->L)
             
             break;
         }
         case 0x2C: {
             // INR L
-            tmp1 = machine->L & 0xF0;
-            machine->L = (uint8_t) machine->L + 1;
-            
-            if( (machine->L & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->L)
-            ZERO(machine->L)
-            PARITY(machine->L)
+            INR(machine->L)
             
             break;
         }
         case 0x2D: {
             // DCR L
-            tmp1 = machine->L & 0xF0;
-            machine->L = (uint8_t) machine->L - 1;
-            
-            if( ( machine->L & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->L)
-            ZERO(machine->L)
-            PARITY(machine->L)
+            DCR(machine->L)
             
             break;
         }
@@ -867,33 +732,13 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x34: {
             // INR M
-            tmp1 = machine->mem[memoryAddressRegister] & 0xF0;
-            machine->mem[memoryAddressRegister] = (uint8_t) machine->mem[memoryAddressRegister] + 1;
-            
-            if( ( machine->mem[memoryAddressRegister] & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->mem[memoryAddressRegister])
-            ZERO(machine->mem[memoryAddressRegister])
-            PARITY(machine->mem[memoryAddressRegister])
+            INR(machine->mem[memoryAddressRegister])
             
             break;
         }
         case 0x35: {
             // DCR M
-            tmp1 = machine->mem[memoryAddressRegister] & 0xF0;
-            machine->mem[memoryAddressRegister] = (uint8_t) machine->mem[memoryAddressRegister] - 1;
-            
-            if( ( machine->mem[memoryAddressRegister] & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->mem[memoryAddressRegister])
-            ZERO(machine->mem[memoryAddressRegister])
-            PARITY(machine->mem[memoryAddressRegister])
+            DCR(machine->mem[memoryAddressRegister])
             
             break;
         }
@@ -920,14 +765,9 @@ int i8080_execute(i8080_t* machine ) {
             
             tmp1 = machine->L + (machine->stackPointer & 0x00FF);
             tmp2 = machine->H + (machine->stackPointer & 0xFF00) + (tmp1 >> 8);
-            
-            machine->L = tmp1 & 255;
-            machine->H = tmp2 & 255;
-            
-            if( (tmp2 >> 8) != 0)
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
+            machine->L = tmp1 & 0xFF;
+            machine->H = tmp2 & 0xFF;
+            CARRY(tmp2)
 
             break;
         }
@@ -941,40 +781,19 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x3B: {
             // DCX SP
-            
             machine->stackPointer = (uint16_t) machine->stackPointer-1;
             
             break;
         }
         case 0x3C: {
             // INR A
-            tmp1 = machine->A & 0xF0;
-            machine->A = (uint8_t) machine->A + 1;
-            
-            if( ( machine->A & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->A)
-            ZERO(machine->A)
-            PARITY(machine->A)
+            INR(machine->A)
             
             break;
         }
         case 0x3D: {
             // DCR A
-            tmp1 = machine->A & 0xF0;
-            machine->A = (uint8_t) machine->A - 1;
-            
-            if( ( machine->A & 0xF0 ) != tmp1 )
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-            
-            SIGN(machine->A)
-            ZERO(machine->A)
-            PARITY(machine->A)
+            DCR(machine->A)
             
             break;
         }
@@ -988,7 +807,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0x3F: {
             // CMC (Complement Carry)
             
-            machine->carryFlag = (machine->carryFlag == 0) ? (1) : (0);
+            machine->carryFlag = ~ machine->carryFlag;
             
             break;
         }
@@ -1887,6 +1706,7 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0xCE: {
             // ACI (ADI w/ carry)
+
             ADC(machine->mem[currentProgramCounter+1]);
             
             instructionLength = 2;
@@ -1930,14 +1750,8 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xD3: {
-            #if 0
-            // TODO !!!!! (anche IN)
-            strcpy(data.mnemonic, "OUT");
-            
-            data.inputValues[0] = + (int) fgetc(ifp);
-            
-            data.num_inputValues= 1;
-            #endif
+            // OUT
+            // TODO
             
             instructionLength = 2;
             break;
@@ -2261,12 +2075,12 @@ int i8080_execute(i8080_t* machine ) {
             machine->mem[ machine->stackPointer - 2 ] = machine->A;
             tmp1 = 0;
             
-                // store flags:
-            tmp1 += (machine->signFlag) * (1 << 7);     // sign
-            tmp1 += (machine->zeroFlag) * (1 << 6);     // zero
-            tmp1 += (machine->auxCarryFlag) * (1 << 4); // aux. carry
-            tmp1 += (machine->parityFlag) * (1 << 2);   // parity
-            tmp1 += machine->carryFlag;                 // carry
+            // store flags:
+            tmp1 += (machine->signFlag) * (1 << 7);
+            tmp1 += (machine->zeroFlag) * (1 << 6);
+            tmp1 += (machine->auxCarryFlag) * (1 << 4);
+            tmp1 += (machine->parityFlag) * (1 << 2);
+            tmp1 += machine->carryFlag;
             
             machine->mem[ machine->stackPointer - 1 ] = tmp1;
             machine->stackPointer -= 2;
