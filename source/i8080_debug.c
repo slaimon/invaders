@@ -63,7 +63,7 @@ int i8080_tuiDebug(i8080_t* machine, const char* customCommandMapping) {
 		// step ahead
         i8080_execute(machine);
 
-		// print machine machine and commands
+		// print machine state and commands
 		puts("\n\n");
 		puts(mainSeparator);
         i8080_printState(*machine, 5, stdout);
