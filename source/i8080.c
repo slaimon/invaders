@@ -111,22 +111,6 @@ const uint8_t table[256] = { LOOK_UP };
             else                \
                 y = y - 1;      \
 
-// SUB - subtract a register from A (the macro is not used for SUB A)
-#define SUB(x)                                      \
-            tmp1 = machine->A - (x);                \
-            tmp2 = machine->A ^ (-(x) + 1);         \
-            CARRY(tmp1)                             \
-            machine->auxCarryFlag =                 \
-                (tmp1 & 0x00F0) != (tmp2 & 0x00F0); \
-            machine->A = tmp1;                      \
-            PARITY(machine->A)                      \
-            SIGN(machine->A)                        \
-            ZERO(machine->A)                        \
-
-// SBB - subtract with borrow
-#define SBB(x) \
-            SUB((x)+machine->carryFlag)
-
 // ADD - add a register to A
 #define ADD(x)                                      \
             tmp1 = machine->A + (x);                \
@@ -150,6 +134,22 @@ const uint8_t table[256] = { LOOK_UP };
             tmp2 = machine->H + x + machine->carryFlag; \
             machine->L = tmp1 & 0xFF;                   \
             machine->H = tmp2 & 0xFF;                   \
+
+// SUB - subtract a register from A (the macro is not used for SUB A)
+#define SUB(x)                                      \
+            tmp1 = machine->A - (x);                \
+            tmp2 = machine->A ^ (-(x) + 1);         \
+            CARRY(tmp1)                             \
+            machine->auxCarryFlag =                 \
+                (tmp1 & 0x0010) != (tmp2 & 0x0010); \
+            machine->A = tmp1;                      \
+            PARITY(machine->A)                      \
+            SIGN(machine->A)                        \
+            ZERO(machine->A)                        \
+
+// SBB - subtract with borrow
+#define SBB(x) \
+            SUB((x)+machine->carryFlag)
 
 // ANA - AND a register with A
 #define ANA(x)                                \
@@ -356,7 +356,14 @@ int i8080_execute(i8080_t* machine ) {
     uint16_t tmp1, tmp2;
     
     switch (instruction) {
-        case 0x00: {
+        case 0x00:
+        case 0x08:
+        case 0x10:
+        case 0x18:
+        case 0x20:
+        case 0x28:
+        case 0x30:
+        case 0x38: {
             // NOP
             
             break;
@@ -411,11 +418,6 @@ int i8080_execute(i8080_t* machine ) {
             
             break;
         }
-        case 0x08: {
-            // NOP
-            
-            break;
-        }
         case 0x09: {
             // DAD BC: add register pair to HL
             DAD(machine->B, machine->C)
@@ -461,11 +463,6 @@ int i8080_execute(i8080_t* machine ) {
             machine->A += machine->carryFlag << 7;
             
             instructionLength = 1;
-            break;
-        }
-        case 0x10: {
-            // NOP
-            
             break;
         }
         case 0x11: {
@@ -519,11 +516,6 @@ int i8080_execute(i8080_t* machine ) {
             
             break;
         }
-        case 0x18: {
-            // NOP
-            
-            break;
-        }
         case 0x19: {
             // DAD DE
             DAD(machine->D, machine->E)
@@ -570,11 +562,6 @@ int i8080_execute(i8080_t* machine ) {
             machine->carryFlag = machine->A & 1;
             machine->A = machine->A >> 1;
             machine->A += tmp1 << 7;
-            
-            break;
-        }
-        case 0x20: {
-            // NOP
             
             break;
         }
@@ -651,11 +638,6 @@ int i8080_execute(i8080_t* machine ) {
             
             break;
         }
-        case 0x28: {
-            // NOP
-            
-            break;
-        }
         case 0x29: {
             // DAD HL - add register pair to HL
             DAD(machine->H, machine->L)
@@ -700,11 +682,6 @@ int i8080_execute(i8080_t* machine ) {
         case 0x2F: {
             // CMA
             machine->A = ~ machine->A;
-            
-            break;
-        }
-        case 0x30: {
-            // NOP
             
             break;
         }
@@ -753,11 +730,6 @@ int i8080_execute(i8080_t* machine ) {
         case 0x37: {
             // STC
             machine->carryFlag = 1;
-            
-            break;
-        }
-        case 0x38: {
-            // NOP
             
             break;
         }
