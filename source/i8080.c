@@ -6,54 +6,12 @@
 
 #include "../include/i8080.h"
 
-/* ------------- BYTE PARITY LOOKUP TABLE ----------- */
+/* ----------- BYTE PARITY LOOKUP TABLE ----------- */
 
 #define P2(n) n, n ^ 1, n ^ 1, n
 #define P4(n) P2(n), P2(n ^ 1), P2(n ^ 1), P2(n)
 #define P6(n) P4(n), P4(n ^ 1), P4(n ^ 1), P4(n)
 #define LOOK_UP P6(0), P6(1), P6(1), P6(0)
-
-/* ------------- MACRO UTILS: ----------------------- */
-
-// CALL direct address or register
-#define CALL_DIRECT(x)                                                              \
-            machine->programCounter += 3;                                           \
-            machine->mem[machine->stackPointer-1] = machine->programCounter >> 8;   \
-            machine->mem[machine->stackPointer-2] = machine->programCounter & 0xFF; \
-            machine->stackPointer -= 2;                                             \
-            machine->programCounter = (x);                                          \
-            instructionLength = 0;
-                
-// RET after termination of a subroutine
-#define RETURN                                                                       \
-            memoryAddressRegister = machine->stackPointer;                           \
-            machine->programCounter = (machine->mem[memoryAddressRegister+1] << 8) + \
-                                     machine->mem[memoryAddressRegister];            \
-            machine->stackPointer += 2;                                              \
-            instructionLength = 0;
-
-// SBB - subtract with borrow
-#define SBB(x)                                                          \
-            tmp1 = machine->A - ((x) + machine->carryFlag);             \
-            tmp2 = machine->A ^ ( -((x) + machine->carryFlag) + 1);     \
-            if( (tmp1 & 0xFF00) != 0)                                   \
-                machine->carryFlag = 0;                                 \
-            else                                                        \
-                machine->carryFlag = 1;                                 \
-            if( (tmp1 & 0x00F0) != (tmp2 & 0x00F0) )                    \
-                machine->auxCarryFlag = 1;                              \
-            else                                                        \
-                machine->auxCarryFlag = 0;                              \
-            machine->A = tmp1;
-
-// read value of a register pair
-#define GET_REGISTER_PAIR(x,y) \
-            (((x) << 8) + (y))
-
-// write value to a register pair
-#define SET_REGISTER_PAIR(x,y,v) \
-            x = v & 0xFF00;      \
-            y = v & 0x00FF;
 
 /* ------------ FLAG UPDATE MACROS ----------------*/
 
@@ -61,12 +19,55 @@
             machine->signFlag = ((x) >> 7) ;
 
 #define ZERO(x) \
-            machine->zeroFlag = ( (x) == 0 ) ? (1) : (0) ;
+            machine->zeroFlag = ((x) == 0);
 
 #define PARITY(x) \
             machine->parityFlag = ~ table[(x) & 0xff];
 
+#define CARRY(x) \
+            machine->carryFlag = (((x) & 0xFF00) == 0);
+
 const uint8_t table[256] = { LOOK_UP };
+
+/* ----------- ACCESS MACROS ----------- */
+
+// read value of a register pair
+#define GET_REGISTER_PAIR(x,y) \
+            (((x) << 8) + (y))
+
+// write value to a register pair
+#define SET_REGISTER_PAIR(x,y,v) \
+            x = v >> 8;          \
+            y = v & 0x00FF;
+
+// write a 2-byte value to memory at address x
+#define WRITE_16BIT_TO_MEM(x, v)            \
+            machine->mem[x] = v & 0xFF;     \
+            machine->mem[x+1] = ((v) >> 8);
+
+// read a 2-byte value from memory at address x
+#define READ_16BIT_FROM_MEM(x) \
+            (machine->mem[x+1] << 8) + (machine->mem[x] & 0xFF)
+
+// read an immediate 2-byte value
+#define READ_16BIT_IMMEDIATE \
+            READ_16BIT_FROM_MEM(currentProgramCounter+1)
+
+/* ----------- INSTRUCTION MACROS ----------- */
+
+// CALL immediate address or register
+#define CALL_IMMEDIATE(x)                                                           \
+            machine->programCounter += 3;                                           \
+            machine->stackPointer -= 2;                                             \
+            WRITE_16BIT_TO_MEM(machine->stackPointer, machine->programCounter);     \
+            machine->programCounter = (x);                                          \
+            instructionLength = 0;
+                
+// RET after termination of a subroutine
+#define RETURN                                                                      \
+            machine->programCounter = READ_16BIT_FROM_MEM(machine->stackPointer);   \
+            machine->stackPointer += 2;                                             \
+            instructionLength = 0;
 
 
 void i8080_init(i8080_t* machine) {	
@@ -2559,7 +2560,7 @@ int i8080_execute(i8080_t* machine ) {
             
             if(machine->zeroFlag == 0){
                 tmp1 = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-                CALL_DIRECT(tmp1)
+                CALL_IMMEDIATE(tmp1)
             }
             else
                 instructionLength = 3;
@@ -2600,7 +2601,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xC7: {
             // RST 0
             
-            CALL_DIRECT(0x0000)
+            CALL_IMMEDIATE(0x0000)
 
             break;
         }
@@ -2643,7 +2644,7 @@ int i8080_execute(i8080_t* machine ) {
             
             if(machine->zeroFlag == 1) {
                 tmp1 = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-                CALL_DIRECT(tmp1)
+                CALL_IMMEDIATE(tmp1)
             }
             else
                 instructionLength = 3;
@@ -2716,7 +2717,7 @@ int i8080_execute(i8080_t* machine ) {
             #endif
             
             do{
-                CALL_DIRECT(tmp1)        // TODO : controllare che funzioni anche quando SUPPORT_CPM_CALLS == 0
+                CALL_IMMEDIATE(tmp1)        // TODO : controllare che funzioni anche quando SUPPORT_CPM_CALLS == 0
             } while(0);
             
             break;
@@ -2746,7 +2747,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xCF: {
             // RST 1
             
-            CALL_DIRECT(0x0008)
+            CALL_IMMEDIATE(0x0008)
             
             break;
         }
@@ -2797,7 +2798,7 @@ int i8080_execute(i8080_t* machine ) {
             
             if(machine->carryFlag == 0) {
                 tmp1 = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-                CALL_DIRECT(tmp1)
+                CALL_IMMEDIATE(tmp1)
             }
             else
                 instructionLength = 3;
@@ -2838,7 +2839,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xD7: {
             // RST 2
             
-            CALL_DIRECT(0x0010)
+            CALL_IMMEDIATE(0x0010)
             
             break;
         }
@@ -2878,7 +2879,7 @@ int i8080_execute(i8080_t* machine ) {
             // CC
             if(machine->carryFlag == 1) {
                 tmp1 = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-                CALL_DIRECT(tmp1)
+                CALL_IMMEDIATE(tmp1)
             }
             else
                 instructionLength = 3;
@@ -2889,7 +2890,7 @@ int i8080_execute(i8080_t* machine ) {
             // CALL
             
             tmp1 = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-            CALL_DIRECT(tmp1)
+            CALL_IMMEDIATE(tmp1)
 
             break;
         }
@@ -2919,7 +2920,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xDF: {
             // RST 3
             
-            CALL_DIRECT(0x0018)
+            CALL_IMMEDIATE(0x0018)
             
             break;
         }
@@ -2968,7 +2969,7 @@ int i8080_execute(i8080_t* machine ) {
             
             if(machine->parityFlag == 0) {
                 tmp1 = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-                CALL_DIRECT(tmp1)
+                CALL_IMMEDIATE(tmp1)
             }
             else
                 instructionLength = 3;
@@ -2999,7 +3000,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xE7: {
             // RST 4
             
-            CALL_DIRECT(0x0020)
+            CALL_IMMEDIATE(0x0020)
 
             break;
         }
@@ -3049,7 +3050,7 @@ int i8080_execute(i8080_t* machine ) {
             
             if(machine->parityFlag == 1) {
                 tmp1 = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-                CALL_DIRECT(tmp1)
+                CALL_IMMEDIATE(tmp1)
             }
             else
                 instructionLength = 3;
@@ -3060,7 +3061,7 @@ int i8080_execute(i8080_t* machine ) {
             // CALL
         
             tmp1 = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-            CALL_DIRECT(tmp1)
+            CALL_IMMEDIATE(tmp1)
     
             break;
         }
@@ -3074,7 +3075,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xEF: {
             // RST 5
             
-            CALL_DIRECT(0x0028)
+            CALL_IMMEDIATE(0x0028)
 
             break;
         }
@@ -3124,7 +3125,7 @@ int i8080_execute(i8080_t* machine ) {
             
             if(machine->signFlag == 0) {
                 tmp1 = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-                CALL_DIRECT(tmp1)
+                CALL_IMMEDIATE(tmp1)
             }
             else
                 instructionLength = 3;
@@ -3169,7 +3170,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xF7: {
             // RST 6
             
-            CALL_DIRECT(0x0030)
+            CALL_IMMEDIATE(0x0030)
             
             break;
         }
@@ -3211,7 +3212,7 @@ int i8080_execute(i8080_t* machine ) {
             
             if(machine->signFlag == 1) {
                 tmp1 = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-                CALL_DIRECT(tmp1)
+                CALL_IMMEDIATE(tmp1)
             }
             else
                 instructionLength = 3;
@@ -3222,7 +3223,7 @@ int i8080_execute(i8080_t* machine ) {
             // CALL
             
             tmp1 = (machine->mem[currentProgramCounter+2] << 8) + machine->mem[currentProgramCounter+1];
-            CALL_DIRECT(tmp1)
+            CALL_IMMEDIATE(tmp1)
 
             break;
         }
@@ -3252,7 +3253,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xFF: {
             // RST 7
             
-            CALL_DIRECT(0x0038)
+            CALL_IMMEDIATE(0x0038)
 
             break;
         }
