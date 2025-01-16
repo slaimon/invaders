@@ -19,7 +19,7 @@ test: ./tester
 steptest: ./cpmdbg
 	./cpmdbg ./assets/TEST.COM ./out.txt
 
-./cpmdbg: $(BIN)/cpmdbg.o $(BIN)/i8080_cpm.o $(BIN)/i8080_debug.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
+./cpmdbg: $(BIN)/cpmdbg.o $(BIN)/i8080_cpm.o $(BIN)/i8080_debug.o $(BIN)/i8080_disassembler.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 ./tester: $(BIN)/tester.o $(BIN)/i8080_cpm.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
@@ -44,11 +44,11 @@ $(BIN)/disassembler.o: $(EXAMPLES)/disassembler.c $(HDR)/i8080_disassembler.h $(
 
 $(BIN)/i8080_cpm.o: $(HDR)/i8080_cpm.h $(HDR)/i8080.h
 $(BIN)/i8080_debug.o: $(HDR)/i8080_disassembler.h $(HDR)/i8080_debug.h
-$(BIN)/i8080.o: $(HDR)/i8080.h
 $(BIN)/i8080_disassembler.o: $(HDR)/i8080_disassembler.h
+$(BIN)/i8080.o: $(HDR)/i8080.h
 $(BIN)/bytestream.o: $(HDR)/bytestream.h
 $(BIN)/safe.o: $(HDR)/safe.h
 
 clean:
 	rm -f $(BIN)/*.o
-	rm -f ./disassembler ./listing.txt ./step ./tester ./cpmdbg ./output.txt
+	rm -f ./disassembler ./listing.txt ./step ./tester ./cpmdbg ./out.txt
