@@ -9,14 +9,14 @@ bool handle_cpm_calls_file(i8080_t* machine, FILE* ofp) {
     // HLT (terminate)
     if (machine->mem[pc] == 0x76) {
         fputs(separator, ofp);
-        fprintf(ofp, "HLT instruction encountered at %04Xh, terminating.\n", pc);
+        fprintf(ofp, "HLT instruction encountered at %04Xh, terminating.\n\n", pc);
         return true;
     }
 
     // JMP 00 (terminate)
     if (pc == 0x00) {
         fputs(separator, ofp);
-        fprintf(ofp, "User program returned control to CP/M, terminating.\n");
+        fprintf(ofp, "User program returned control to CP/M, terminating.\n\n");
         return true;
     }
 

@@ -28,6 +28,8 @@ int main (int argc, char** argv) {
     machine.mem[5] = 0xC9;  // Return immediately after all CP/M calls
     i8080_register_set(&machine, I8080_REGISTER_PROGRAM_COUNTER, 0X100);    // JMP 100h
     
+    printf("Loaded ROM: %s\n", argv[1]);
+    puts("--------------------------------------------------\n");
     while (true) {
         if (handle_cpm_calls(&machine))
             return 0;
