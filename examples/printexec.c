@@ -33,7 +33,7 @@ int main (int argc, char** argv) {
     size_t iteration = 0;
     while (true) {
         fprintf(ofp, "ITERATION No: %lu\n-------------------------------------\n\n", iteration++);
-        i8080_printState(machine, 3, ofp);
+        i8080_printState(machine, 0, ofp);
         fputs("\n\n", ofp);
 
         if (handle_cpm_calls_file(&machine, stdout))

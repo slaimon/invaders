@@ -102,6 +102,7 @@ i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction) {
 
 
 /* ---------------- COMMENT GENERATOR MACROS ---------------- */
+
 #define COMMENT_LXI(x)      sprintf(data.comment, "Load immediate value to %s", x);
 #define COMMENT_STAX(x)     sprintf(data.comment, "Store A to $%s", x);
 #define COMMENT_INX(x)      sprintf(data.comment, "Increment %s", x);
