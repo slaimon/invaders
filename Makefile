@@ -16,10 +16,10 @@ test: ./tester
 	./tester ./assets/TEST.COM
 	./tester ./assets/8080EX1.COM
 
-steptest: ./cpmdbg
-	./cpmdbg ./assets/TEST.COM ./out.txt
+print_test: ./printexec
+	./printexec ./assets/8080EX1.COM ./out.txt
 
-./cpmdbg: $(BIN)/cpmdbg.o $(BIN)/i8080_cpm.o $(BIN)/i8080_debug.o $(BIN)/i8080_disassembler.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
+./printexec: $(BIN)/printexec.o $(BIN)/i8080_cpm.o $(BIN)/i8080_debug.o $(BIN)/i8080_disassembler.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 ./tester: $(BIN)/tester.o $(BIN)/i8080_cpm.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
@@ -33,7 +33,7 @@ steptest: ./cpmdbg
 
 $(BIN)/%.o: $(SRC)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
-$(BIN)/cpmdbg.o: $(EXAMPLES)/cpmdbg.c $(HDR)/i8080_cpm.h $(HDR)/i8080_debug.h $(HDR)/i8080.h $(HDR)/bytestream.h $(HDR)/safe.h
+$(BIN)/printexec.o: $(EXAMPLES)/printexec.c $(HDR)/i8080_cpm.h $(HDR)/i8080_debug.h $(HDR)/i8080.h $(HDR)/bytestream.h $(HDR)/safe.h
 	$(CC) $(CFLAGS) -c $< -o $@
 $(BIN)/tester.o: $(EXAMPLES)/tester.c $(HDR)/i8080_cpm.h $(HDR)/i8080.h $(HDR)/bytestream.h $(HDR)/safe.h
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -51,4 +51,4 @@ $(BIN)/safe.o: $(HDR)/safe.h
 
 clean:
 	rm -f $(BIN)/*.o
-	rm -f ./disassembler ./listing.txt ./step ./tester ./cpmdbg ./out.txt
+	rm -f ./disassembler ./listing.txt ./step ./tester ./printexec ./out.txt

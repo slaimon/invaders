@@ -34,7 +34,8 @@ bool handle_cpm_calls_file(i8080_t* machine, FILE* ofp) {
                 char c;
                 do {
                     c = machine->mem[address];
-                    fputc(c, ofp);
+                    if (c != '$')
+                        fputc(c, ofp);
                     ++address;
                 } while (c != '$');
                 break;
