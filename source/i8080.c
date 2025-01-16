@@ -25,7 +25,7 @@
             machine->parityFlag = ~ table[(x) & 0xff];
 
 #define CARRY(x) \
-            machine->carryFlag = (((x) & 0xFF00) == 0);
+            machine->carryFlag = (((x) & 0x0100) != 0);
 
 const uint8_t table[256] = { LOOK_UP };
 
@@ -111,85 +111,85 @@ const uint8_t table[256] = { LOOK_UP };
             else                \
                 y = y - 1;      \
 
-// SUB - subtract a register from A
-#define SUB(x)                                      \
-            tmp1 = machine->A - (x);                \
-            tmp2 = machine->A ^ (-(x) + 1);         \
+// ADD - add a register to A
+#define ADD(x)                                      \
+            tmp1 = machine->A + (x);                \
+            tmp2 = machine->A ^ (x);                \
             CARRY(tmp1)                             \
             machine->auxCarryFlag =                 \
                 (tmp1 & 0x00F0) != (tmp2 & 0x00F0); \
+            machine->A = tmp1;                      \
             PARITY(machine->A)                      \
             SIGN(machine->A)                        \
             ZERO(machine->A)                        \
-            machine->A = tmp1;
-
-// SBB - subtract with borrow
-#define SBB(x) \
-            SUB((x)+machine->carryFlag)
-
-// ADD - add a register to A
-#define ADD(x)                                          \
-            tmp1 = machine->A + (x);                    \
-            tmp2 = machine->A ^ (x);                    \
-            CARRY(tmp1)                                 \
-            machine->auxCarryFlag =                     \
-                (tmp1 & 0x00F0) != (tmp2 & 0x00F0);     \
-            PARITY(machine->A)                          \
-            SIGN(machine->A)                            \
-            ZERO(machine->A)                            \
-            machine->A = tmp1;
 
 // ADC - add a register to A with carry
 #define ADC(x) \
             ADD(x+machine->carryFlag)
 
 // DAD - add register pair to HL (the macro is not used for DAD SP)
-#define DAD(x,y)                                                \
-            tmp1 = machine->L + y;                              \
-            machine->carryFlag = tmp1 >> 8;                     \
-            tmp2 = machine->H + x + machine->carryFlag;         \
-            machine->L = tmp1 & 0xFF;                           \
-            machine->H = tmp2 & 0xFF;                           \
+#define DAD(x,y)                                        \
+            tmp1 = machine->L + y;                      \
+            machine->carryFlag = tmp1 >> 8;             \
+            tmp2 = machine->H + x + machine->carryFlag; \
+            machine->L = tmp1 & 0xFF;                   \
+            machine->H = tmp2 & 0xFF;                   \
 
-// ANA - AND a register with A
-#define ANA(x)                                   \
-            tmp1 = machine->A & (x);             \
-            machine->carryFlag = 0;              \
-            machine->auxCarryFlag =              \
-                (machine->A & 8) | ((x) & 8);    \
-            machine->A = tmp1;                   \
-            PARITY(machine->A)                   \
-            SIGN(machine->A)                     \
-            ZERO(machine->A)                     \
-
-// XOR - XOR a register with A
-#define XOR(x)                               \
-            machine->A = machine->A ^ (x);   \
-            machine->carryFlag = 0;          \
-            machine->auxCarryFlag = 0;       \
-            PARITY(machine->A)               \
-            SIGN(machine->A)                 \
-            ZERO(machine->A)                 \
-
-// OR - OR a register with A
-#define OR(x)                                       \
-            machine->A = machine->A | machine->B;   \
-            machine->carryFlag = 0;                 \
-            machine->auxCarryFlag = 0;              \
+// SUB - subtract a register from A (the macro is not used for SUB A)
+#define SUB(x)                                      \
+            tmp1 = machine->A - (x);                \
+            tmp2 = machine->A ^ (-(x) + 1);         \
+            CARRY(tmp1)                             \
+            machine->auxCarryFlag =                 \
+                (tmp1 & 0x0010) != (tmp2 & 0x0010); \
+            machine->A = tmp1;                      \
             PARITY(machine->A)                      \
             SIGN(machine->A)                        \
             ZERO(machine->A)                        \
 
+// SBB - subtract with borrow
+#define SBB(x) \
+            SUB((x)+machine->carryFlag)
+
+// ANA - AND a register with A
+#define ANA(x)                                \
+            tmp1 = machine->A & (x);          \
+            machine->carryFlag = 0;           \
+            machine->auxCarryFlag =           \
+                (machine->A & 8) | ((x) & 8); \
+            machine->A = tmp1;                \
+            ZERO(machine->A)                  \
+            PARITY(machine->A)                \
+            SIGN(machine->A)                  \
+
+// XOR - XOR a register with A
+#define XOR(x)                             \
+            machine->A = machine->A ^ (x); \
+            machine->carryFlag = 0;        \
+            machine->auxCarryFlag = 0;     \
+            PARITY(machine->A)             \
+            SIGN(machine->A)               \
+            ZERO(machine->A)               \
+
+// ORA - OR a register with A
+#define ORA(x)                           \
+            machine->A = machine->A | x; \
+            machine->carryFlag = 0;      \
+            machine->auxCarryFlag = 0;   \
+            PARITY(machine->A)           \
+            SIGN(machine->A)             \
+            ZERO(machine->A)             \
+
 // CMP - compare a register with A (the macro is not used for CMP A)
-#define CMP(x)                                              \
-            tmp1 = machine->A - machine->B;                 \
-            machine->carryFlag =                            \
-                (machine->A < machine->B);                  \
-            machine->auxCarryFlag =                         \
-                ((machine->A & 0x0F) < (machine->B &0x0F)); \
-            PARITY(tmp1)                                    \
-            SIGN(tmp1)                                      \
-            ZERO(tmp1)                                      \
+#define CMP(x)                                     \
+            tmp1 = machine->A - x;                 \
+            machine->carryFlag =                   \
+                (machine->A < x);                  \
+            machine->auxCarryFlag =                \
+                ((machine->A & 0x0F) < (x &0x0F)); \
+            PARITY(tmp1)                           \
+            SIGN(tmp1)                             \
+            ZERO(tmp1)                             \
 
 
 void i8080_init(i8080_t* machine) {	
@@ -356,7 +356,14 @@ int i8080_execute(i8080_t* machine ) {
     uint16_t tmp1, tmp2;
     
     switch (instruction) {
-        case 0x00: {
+        case 0x00:
+        case 0x08:
+        case 0x10:
+        case 0x18:
+        case 0x20:
+        case 0x28:
+        case 0x30:
+        case 0x38: {
             // NOP
             
             break;
@@ -411,11 +418,6 @@ int i8080_execute(i8080_t* machine ) {
             
             break;
         }
-        case 0x08: {
-            // NOP
-            
-            break;
-        }
         case 0x09: {
             // DAD BC: add register pair to HL
             DAD(machine->B, machine->C)
@@ -461,11 +463,6 @@ int i8080_execute(i8080_t* machine ) {
             machine->A += machine->carryFlag << 7;
             
             instructionLength = 1;
-            break;
-        }
-        case 0x10: {
-            // NOP
-            
             break;
         }
         case 0x11: {
@@ -519,11 +516,6 @@ int i8080_execute(i8080_t* machine ) {
             
             break;
         }
-        case 0x18: {
-            // NOP
-            
-            break;
-        }
         case 0x19: {
             // DAD DE
             DAD(machine->D, machine->E)
@@ -570,11 +562,6 @@ int i8080_execute(i8080_t* machine ) {
             machine->carryFlag = machine->A & 1;
             machine->A = machine->A >> 1;
             machine->A += tmp1 << 7;
-            
-            break;
-        }
-        case 0x20: {
-            // NOP
             
             break;
         }
@@ -651,11 +638,6 @@ int i8080_execute(i8080_t* machine ) {
             
             break;
         }
-        case 0x28: {
-            // NOP
-            
-            break;
-        }
         case 0x29: {
             // DAD HL - add register pair to HL
             DAD(machine->H, machine->L)
@@ -664,9 +646,10 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x2A: {
             // LHLD HL - load HL from immediate address
-
+    
             tmp1 = READ_16BIT_IMMEDIATE;
-            SET_REGISTER_PAIR(machine->H, machine->L, tmp1);
+            machine->L = machine->mem[tmp1];
+            machine->H = machine->mem[tmp1+1];
             
             instructionLength = 3;
             break;
@@ -699,11 +682,6 @@ int i8080_execute(i8080_t* machine ) {
         case 0x2F: {
             // CMA
             machine->A = ~ machine->A;
-            
-            break;
-        }
-        case 0x30: {
-            // NOP
             
             break;
         }
@@ -752,11 +730,6 @@ int i8080_execute(i8080_t* machine ) {
         case 0x37: {
             // STC
             machine->carryFlag = 1;
-            
-            break;
-        }
-        case 0x38: {
-            // NOP
             
             break;
         }
@@ -1196,14 +1169,14 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x81: {
             // ADD C
-            ADD(machine->B)
+            ADD(machine->C)
             
             break;
         }
         case 0x82: {
             // ADD D
-            ADD(machine->B)
-
+            ADD(machine->D)
+            
             break;
         }
         case 0x83: {
@@ -1328,7 +1301,11 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0x97: {
             // SUB A
-            SUB(machine->A)
+            machine->A = 0;
+            machine->carryFlag = 0;
+            machine->parityFlag = 1;
+            machine->zeroFlag = 1;
+            machine->signFlag = 0;
             
             break;
         }
@@ -1477,50 +1454,50 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xB0: {
-            // OR B
-            OR(machine->B)
+            // ORA B
+            ORA(machine->B)
             
             break;
         }
         case 0xB1: {
-            // OR C
-            OR(machine->C)
+            // ORA C
+            ORA(machine->C)
             
             break;
         }
         case 0xB2: {
-            // OR D
-            OR(machine->D)
+            // ORA D
+            ORA(machine->D)
             
             break;
         }
         case 0xB3: {
-            // OR E
-            OR(machine->E)
+            // ORA E
+            ORA(machine->E)
             
             break;
         }
         case 0xB4: {
-            // OR H
-            OR(machine->H)
-
+            // ORA H
+            ORA(machine->H)
+            
             break;
         }
         case 0xB5: {
-            // OR L
-            OR(machine->L)
+            // ORA L
+            ORA(machine->L)
             
             break;
         }
         case 0xB6: {
-            // OR M
-            OR(machine->mem[memoryAddressRegister])
+            // ORA M
+            ORA(machine->mem[memoryAddressRegister])
             
             break;
         }
         case 0xB7: {
-            // OR A
-            OR(machine->A)
+            // ORA A
+            ORA(machine->A)
             
             break;
         }
@@ -1698,7 +1675,7 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0xCD: {
             // CALL
-
+            
             tmp1 = READ_16BIT_IMMEDIATE;
             CALL_IMMEDIATE(tmp1)
             
@@ -1788,7 +1765,7 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0xD7: {
             // RST 2
-
+            
             CALL_IMMEDIATE(0x0010)
             
             break;
@@ -1841,7 +1818,7 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0xDD: {
             // CALL
-
+            
             tmp1 = READ_16BIT_IMMEDIATE;
             CALL_IMMEDIATE(tmp1)
 
@@ -1857,7 +1834,7 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0xDF: {
             // RST 3
-
+            
             CALL_IMMEDIATE(0x0018)
             
             break;
@@ -1925,7 +1902,7 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0xE6: {
             // ANI - logical AND immediate with A
-
+            
             ANA(machine->mem[currentProgramCounter+1])
             
             instructionLength = 2;
@@ -1933,7 +1910,7 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0xE7: {
             // RST 4
-
+            
             CALL_IMMEDIATE(0x0020)
 
             break;
@@ -2090,7 +2067,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xF6: {
             // ORI - logical OR immediate with A
 
-            OR(machine->mem[currentProgramCounter])
+            ORA(machine->mem[currentProgramCounter+1])
             
             instructionLength = 2;
             break;
@@ -2158,7 +2135,7 @@ int i8080_execute(i8080_t* machine ) {
         }
         case 0xFE: {
             // CPI - compare immediate with A
-
+            
             CMP(machine->mem[currentProgramCounter+1]);
             
             instructionLength = 2;
