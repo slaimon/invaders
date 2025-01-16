@@ -2057,6 +2057,7 @@ int i8080_execute(i8080_t* machine ) {
             tmp1 += (machine->zeroFlag) * (1 << 6);
             tmp1 += (machine->auxCarryFlag) * (1 << 4);
             tmp1 += (machine->parityFlag) * (1 << 2);
+            tmp1 += 1 << 1;
             tmp1 += machine->carryFlag;
             
             machine->mem[ machine->stackPointer - 1 ] = tmp1;
