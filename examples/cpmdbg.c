@@ -30,12 +30,18 @@ int main (int argc, char** argv) {
     machine.mem[5] = 0xC9;  // Return immediately after all CP/M calls
     i8080_register_set(&machine, I8080_REGISTER_PROGRAM_COUNTER, 0X100);    // JMP 100h
     
+    char userInput;
     while (true) {
         if (handle_cpm_calls_file(&machine, ofp))
             return 0;
         
         i8080_execute(&machine);
         i8080_printState(machine, 5, stdout);
+
+        // handle user input
+		userInput = getchar();
+        if (userInput == 'q' || userInput == 'Q')
+            return 0;
     }
 
     return 0;
