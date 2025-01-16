@@ -16,7 +16,7 @@ int main (int argc, char** argv) {
     bytestream_t* program = bytestream_read(ifp);
         if (program == NULL) {
         printf("No valid program found\n");
-        return 0;
+        return -1;
     }
     fclose(ifp);
 
