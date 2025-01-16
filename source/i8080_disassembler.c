@@ -11,7 +11,7 @@ void disassemble_program(bytestream_t program, FILE* ofp) {
         i8080_instruction_t instruction = disassemble_instruction(program.data, programPointer);
         i8080_line_t line = i8080_instruction_toString(instruction);
 
-        stringPointer += sprintf(&result[stringPointer], line.string);
+        stringPointer += sprintf(&result[stringPointer], "%s\n", line.string);
         programPointer += instruction.instructionLength;
     }
 
@@ -90,12 +90,8 @@ i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction) {
     }
 
     result[pointer++] = '\n';
+    PAD_TO(93)
     result[pointer] = '\0';
-
-    if (pointer > I8080_LINE_LENGTH) {
-        fprintf(stderr, "ERROR: buffer overrun while converting instruction to string\n");
-        exit(-1);
-    }
 
     return line;
 }
