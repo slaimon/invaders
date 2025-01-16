@@ -1,9 +1,9 @@
 #include <stdlib.h>
-#include "../include/i8080_debug.h"
+#include "../include/i8080.h"
 
-const char separator[] = "\n\n--------------------------------------------------";
+const char separator[] = "\n\n--------------------------------------------------\n";
 
-bool handle_cpm_calls(i8080_t* machine, FILE* ofp) {
+bool handle_cpm_calls_file(i8080_t* machine, FILE* ofp) {
     const uint16_t pc = i8080_register_get(machine, I8080_REGISTER_PROGRAM_COUNTER);
     
     // HLT (terminate)

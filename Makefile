@@ -33,13 +33,13 @@ steptest: ./cpmdbg
 $(BIN)/%.o: $(SRC)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 $(BIN)/cpmdbg.o: $(EXAMPLES)/cpmdbg.c $(HDR)/i8080_cpm.h $(HDR)/i8080_debug.h $(HDR)/i8080.h $(HDR)/bytestream.h $(HDR)/safe.h
-	$(CC) $(CFLAGS) -c $(EXAMPLES)/cpmdbg.c -o $(BIN)/cpmdbg.o
+	$(CC) $(CFLAGS) -c $< -o $@
 $(BIN)/cpm.o: $(EXAMPLES)/cpmharness.c $(HDR)/i8080_cpm.h $(HDR)/i8080.h $(HDR)/bytestream.h $(HDR)/safe.h
-	$(CC) $(CFLAGS) -c $(EXAMPLES)/cpmharness.c -o $(BIN)/cpm.o
+	$(CC) $(CFLAGS) -c $< -o $@
 $(BIN)/step.o: $(EXAMPLES)/step.c $(HDR)/i8080_debug.h $(HDR)/safe.h $(HDR)/bytestream.h
-	$(CC) $(CFLAGS) -c $(EXAMPLES)/step.c -o $(BIN)/step.o
+	$(CC) $(CFLAGS) -c $< -o $@
 $(BIN)/disassembler.o: $(EXAMPLES)/disassembler.c $(HDR)/i8080_disassembler.h $(HDR)/bytestream.h
-	$(CC) $(CFLAGS) -c $(EXAMPLES)/disassembler.c -o $(BIN)/disassembler.o
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BIN)/i8080_cpm.o: $(HDR)/i8080_cpm.h $(HDR)/i8080.h
 $(BIN)/i8080_debug.o: $(HDR)/i8080_disassembler.h $(HDR)/i8080_debug.h
