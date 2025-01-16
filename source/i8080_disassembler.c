@@ -102,225 +102,79 @@ i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction) {
 
 
 /* ---------------- COMMENT GENERATOR MACROS ---------------- */
-
-#define COMMENT_LXI(x) \
-    sprintf(data.comment, "Load immediate value to %s", x);
-
-#define COMMENT_STAX(x) \
-    sprintf(data.comment, "Store A to $%s", x);
-
-#define COMMENT_INX(x) \
-    sprintf(data.comment, "Increment %s", x);
-
-#define COMMENT_INR(x) \
-    COMMENT_INX(x)
-
-#define COMMENT_DCX(x) \
-    sprintf(data.comment, "Decrement %s", x);
-
-#define COMMENT_DCR(x) \
-    COMMENT_DCX(x)
-
-#define COMMENT_MVI(x) \
-    sprintf(data.comment, "Move immediate value to %s", x);
-
-#define COMMENT_DAD(x) \
-    sprintf(data.comment, "Add %s to HL", x);
-
-#define COMMENT_RLC \
-    strcpy(data.comment, "Rotate A left, set Carry flag");
-
-#define COMMENT_RRC \
-    strcpy(data.comment, "Rotate A right, set Carry flag");
-
-#define COMMENT_RAL \
-    strcpy(data.comment, "Rotate A left");
-
-#define COMMENT_RAR \
-    strcpy(data.comment, "Rotate A right");
-
-#define COMMENT_LDAX(x) \
-    sprintf(data.comment, "Load A from $%s (indirect)", x);
-
-#define COMMENT_SHLD \
-    strcpy(data.comment, "Store HL to address");
-
-#define COMMENT_LHLD \
-    strcpy(data.comment, "Load HL from address");
-
-#define COMMENT_DAA \
-    strcpy(data.comment, "Convert A to binary-coded decimal");
-
-#define COMMENT_CMA \
-    strcpy(data.comment, "Apply one's complement to A");
-
-#define COMMENT_STA \
-    strcpy(data.comment, "Store A to address");
-
-#define COMMENT_LDA \
-    strcpy(data.comment, "Load A from address");
-
-#define COMMENT_STC \
-    strcpy(data.comment, "Set Carry flag");
-
-#define COMMENT_CMC \
-    strcpy(data.comment, "Complement Carry flag");
-
-#define COMMENT_MOV(x, y) \
-    sprintf(data.comment, "Copy %s to %s", x, y);
-
-#define COMMENT_ADD(x) \
-    sprintf(data.comment, "Add %s to A", x);
-
-#define COMMENT_ADC(x) \
-    sprintf(data.comment, "Add %s to A and set Carry flag", x);
-
-#define COMMENT_ADI \
-    strcpy(data.comment, "Add immediate to A");
-
-#define COMMENT_ACI \
-    strcpy(data.comment, "Add immediate to A and set Carry flag");
-
-#define COMMENT_SUB(x) \
-    sprintf(data.comment, "Subtract %s from A", x);
-
-#define COMMENT_SBB(x) \
-    sprintf(data.comment, "Subtract %s from A with borrow", x);
-
-#define COMMENT_SUI \
-    strcpy(data.comment, "Subtract immediate from A");
-
-#define COMMENT_SBI \
-    strcpy(data.comment, "Subtract immediate from A with borrow");
-
-#define COMMENT_ANA(x) \
-    sprintf(data.comment, "A <- %s AND A", x);
-
-#define COMMENT_ANI \
-    sprintf(data.comment, "A <- immediate AND A");
-
-#define COMMENT_XRA(x) \
-    sprintf(data.comment, "A <- %s XOR A", x);
-
-#define COMMENT_XRI \
-    sprintf(data.comment, "A <- immediate XOR A");
-
-#define COMMENT_ORA(x) \
-    sprintf(data.comment, "A <- %s OR A", x);
-
-#define COMMENT_ORI \
-    strcpy(data.comment, "A <- immediate OR A");
-
-#define COMMENT_CMP(x) \
-    sprintf(data.comment, "Compare %s with A and store result in Zero flag", x);
-
-#define COMMENT_CPI \
-    strcpy(data.comment, "Compare immediate with A and store result in Zero flag");
-
-#define COMMENT_RET \
-    strcpy(data.comment, "Return");
-
-#define COMMENT_RZ \
-    strcpy(data.comment, "Return if Zero flag is set (Equal)");
-
-#define COMMENT_RNZ \
-    strcpy(data.comment, "Return if Zero flag is not set (Not Equal)");
-
-#define COMMENT_RC \
-    strcpy(data.comment, "Return if Carry flag is set");
-
-#define COMMENT_RNC \
-    strcpy(data.comment, "Return if Carry flag is not set");
-
-#define COMMENT_RPE \
-    strcpy(data.comment, "Return if Parity flag is set (Even)");
-
-#define COMMENT_RPO \
-    strcpy(data.comment, "Return if Parity flag is not set (Odd)");
-
-#define COMMENT_RP \
-    strcpy(data.comment, "Return if Sign flag is not set (Plus)");
-
-#define COMMENT_RM \
-    strcpy(data.comment, "Return if Sign flag is set (Minus)");
-
-#define COMMENT_JZ \
-    strcpy(data.comment, "Jump if Zero flag is set");
-
-#define COMMENT_JNZ \
-    strcpy(data.comment, "Jump if Zero flag is not set");
-
-#define COMMENT_JC \
-    strcpy(data.comment, "Jump if Carry flag is set");
-
-#define COMMENT_JNC \
-    strcpy(data.comment, "Jump if Carry flag is not set");
-
-#define COMMENT_JPE \
-    strcpy(data.comment, "Jump if Parity flag is set");
-
-#define COMMENT_JPO \
-    strcpy(data.comment, "Jump if Parity flag is not set");
-
-#define COMMENT_JP \
-    strcpy(data.comment, "Jump if Sign flag is not set (positive result)");
-
-#define COMMENT_JM \
-    strcpy(data.comment, "Jump if Sign flag is set (negative result)");
-
-#define COMMENT_CZ \
-    strcpy(data.comment, "Call if Zero flag is set");
-
-#define COMMENT_CNZ \
-    strcpy(data.comment, "Call if Zero flag is not set");
-
-#define COMMENT_CC \
-    strcpy(data.comment, "Call if Carry flag is set");
-
-#define COMMENT_CNC \
-    strcpy(data.comment, "Call if Carry flag is not set");
-
-#define COMMENT_CPE \
-    strcpy(data.comment, "Call if Parity flag is set");
-
-#define COMMENT_CPO \
-    strcpy(data.comment, "Call if Parity flag is not set");
-
-#define COMMENT_CP \
-    strcpy(data.comment, "Call if Sign flag is not set (positive result)");
-
-#define COMMENT_CM \
-    strcpy(data.comment, "Call if Sign flag is set (negative result)");
-
-#define COMMENT_RST(x) \
-    sprintf(data.comment, "Call address %04Xh", x);
-
-#define COMMENT_PCHL \
-    strcpy(data.comment, "Jump to $HL");
-
-#define COMMENT_XTHL \
-    strcpy(data.comment, "Swap HL with the top word of the Stack");
-
-#define COMMENT_SPHL \
-    strcpy(data.comment, "Copy HL to the Stack Pointer");
-
-#define COMMENT_XCHG \
-    strcpy(data.comment, "Swap the contents of HL and DE");
-
-#define COMMENT_HLT \
-    strcpy(data.comment, "Halt processor");
-
-#define COMMENT_IN \
-    strcpy(data.comment, "Read input port to A");
-
-#define COMMENT_OUT \
-    strcpy(data.comment, "Write A to output port");
-
-#define COMMENT_EI \
-    strcpy(data.comment, "Enable Interrupts");
-
-#define COMMENT_DI \
-    strcpy(data.comment, "Disable Interrupts");
+#define COMMENT_LXI(x)      sprintf(data.comment, "Load immediate value to %s", x);
+#define COMMENT_STAX(x)     sprintf(data.comment, "Store A to $%s", x);
+#define COMMENT_INX(x)      sprintf(data.comment, "Increment %s", x);
+#define COMMENT_INR(x)      COMMENT_INX(x)
+#define COMMENT_DCX(x)      sprintf(data.comment, "Decrement %s", x);
+#define COMMENT_DCR(x)      COMMENT_DCX(x)
+#define COMMENT_MVI(x)      sprintf(data.comment, "Move immediate value to %s", x);
+#define COMMENT_DAD(x)      sprintf(data.comment, "Add %s to HL", x);
+#define COMMENT_RLC         strcpy (data.comment, "Rotate A left, set Carry flag");
+#define COMMENT_RRC         strcpy (data.comment, "Rotate A right, set Carry flag");
+#define COMMENT_RAL         strcpy (data.comment, "Rotate A left");
+#define COMMENT_RAR         strcpy (data.comment, "Rotate A right");
+#define COMMENT_LDAX(x)     sprintf(data.comment, "Load A from $%s (indirect)", x);
+#define COMMENT_SHLD        strcpy (data.comment, "Store HL to address");
+#define COMMENT_LHLD        strcpy (data.comment, "Load HL from address");
+#define COMMENT_DAA         strcpy (data.comment, "Convert A to binary-coded decimal");
+#define COMMENT_CMA         strcpy (data.comment, "Apply one's complement to A");
+#define COMMENT_STA         strcpy (data.comment, "Store A to address");
+#define COMMENT_LDA         strcpy (data.comment, "Load A from address");
+#define COMMENT_STC         strcpy (data.comment, "Set Carry flag");
+#define COMMENT_CMC         strcpy (data.comment, "Complement Carry flag");
+#define COMMENT_MOV(x, y)   sprintf(data.comment, "Copy %s to %s", y, x);
+#define COMMENT_ADD(x)      sprintf(data.comment, "Add %s to A", x);
+#define COMMENT_ADC(x)      sprintf(data.comment, "Add %s to A and set Carry flag", x);
+#define COMMENT_ADI         strcpy (data.comment, "Add immediate to A");
+#define COMMENT_ACI         strcpy (data.comment, "Add immediate to A and set Carry flag");
+#define COMMENT_SUB(x)      sprintf(data.comment, "Subtract %s from A", x);
+#define COMMENT_SBB(x)      sprintf(data.comment, "Subtract %s from A with borrow", x);
+#define COMMENT_SUI         strcpy (data.comment, "Subtract immediate from A");
+#define COMMENT_SBI         strcpy (data.comment, "Subtract immediate from A with borrow");
+#define COMMENT_ANA(x)      sprintf(data.comment, "A <- %s AND A", x);
+#define COMMENT_ANI         sprintf(data.comment, "A <- immediate AND A");
+#define COMMENT_XRA(x)      sprintf(data.comment, "A <- %s XOR A", x);
+#define COMMENT_XRI         sprintf(data.comment, "A <- immediate XOR A");
+#define COMMENT_ORA(x)      sprintf(data.comment, "A <- %s OR A", x);
+#define COMMENT_ORI         strcpy (data.comment, "A <- immediate OR A");
+#define COMMENT_CMP(x)      sprintf(data.comment, "Compare %s with A and store result in Zero flag", x);
+#define COMMENT_CPI         strcpy (data.comment, "Compare immediate with A and store result in Zero flag");
+#define COMMENT_RET         strcpy (data.comment, "Return");
+#define COMMENT_RZ          strcpy (data.comment, "Return if Zero flag is set (Equal)");
+#define COMMENT_RNZ         strcpy (data.comment, "Return if Zero flag is not set (Not Equal)");
+#define COMMENT_RC          strcpy (data.comment, "Return if Carry flag is set");
+#define COMMENT_RNC         strcpy (data.comment, "Return if Carry flag is not set");
+#define COMMENT_RPE         strcpy (data.comment, "Return if Parity flag is set (Even)");
+#define COMMENT_RPO         strcpy (data.comment, "Return if Parity flag is not set (Odd)");
+#define COMMENT_RP          strcpy (data.comment, "Return if Sign flag is not set (Plus)");
+#define COMMENT_RM          strcpy (data.comment, "Return if Sign flag is set (Minus)");
+#define COMMENT_JZ          strcpy (data.comment, "Jump if Zero flag is set");
+#define COMMENT_JNZ         strcpy (data.comment, "Jump if Zero flag is not set");
+#define COMMENT_JC          strcpy (data.comment, "Jump if Carry flag is set");
+#define COMMENT_JNC         strcpy (data.comment, "Jump if Carry flag is not set");
+#define COMMENT_JPE         strcpy (data.comment, "Jump if Parity flag is set");
+#define COMMENT_JPO         strcpy (data.comment, "Jump if Parity flag is not set");
+#define COMMENT_JP          strcpy (data.comment, "Jump if Sign flag is not set (positive result)");
+#define COMMENT_JM          strcpy (data.comment, "Jump if Sign flag is set (negative result)");
+#define COMMENT_CZ          strcpy (data.comment, "Call if Zero flag is set");
+#define COMMENT_CNZ         strcpy (data.comment, "Call if Zero flag is not set");
+#define COMMENT_CC          strcpy (data.comment, "Call if Carry flag is set");
+#define COMMENT_CNC         strcpy (data.comment, "Call if Carry flag is not set");
+#define COMMENT_CPE         strcpy (data.comment, "Call if Parity flag is set");
+#define COMMENT_CPO         strcpy (data.comment, "Call if Parity flag is not set");
+#define COMMENT_CP          strcpy (data.comment, "Call if Sign flag is not set (positive result)");
+#define COMMENT_CM          strcpy (data.comment, "Call if Sign flag is set (negative result)");
+#define COMMENT_RST(x)      sprintf(data.comment, "Call address %04Xh", x);
+#define COMMENT_PCHL        strcpy (data.comment, "Jump to $HL");
+#define COMMENT_XTHL        strcpy (data.comment, "Swap HL with the top word of the Stack");
+#define COMMENT_SPHL        strcpy (data.comment, "Copy HL to the Stack Pointer");
+#define COMMENT_XCHG        strcpy (data.comment, "Swap the contents of HL and DE");
+#define COMMENT_HLT         strcpy (data.comment, "Halt processor");
+#define COMMENT_IN          strcpy (data.comment, "Read input port to A");
+#define COMMENT_OUT         strcpy (data.comment, "Write A to output port");
+#define COMMENT_EI          strcpy (data.comment, "Enable Interrupts");
+#define COMMENT_DI          strcpy (data.comment, "Disable Interrupts");
 
 
 
