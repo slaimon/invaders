@@ -6,7 +6,7 @@ SRC = source
 HDR = include
 EXAMPLES = examples
 
-.PHONY: clean listing test
+.PHONY: clean listing test log
 
 listing: ./disassembler
 	rm -f ./listing.txt
@@ -16,8 +16,8 @@ test: ./tester
 	./tester ./assets/TEST.COM
 	./tester ./assets/8080EX1.COM
 
-print_test: ./logger
-	./logger ./assets/8080EX1.COM ./out.txt
+log: ./logger
+	./logger ./assets/8080EX1.COM ./mylog.txt 2999
 
 ./logger: $(BIN)/logger.o $(BIN)/i8080_cpm.o $(BIN)/i8080_debug.o $(BIN)/i8080_disassembler.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
 	$(CC) $(CFLAGS) $^ -o $@
@@ -51,4 +51,4 @@ $(BIN)/safe.o: $(HDR)/safe.h
 
 clean:
 	rm -f $(BIN)/*.o
-	rm -f ./disassembler ./listing.txt ./step ./tester ./logger ./out.txt
+	rm -f ./disassembler ./listing.txt ./step ./tester ./logger ./mylog.txt
