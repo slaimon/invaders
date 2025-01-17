@@ -51,6 +51,8 @@ int main (int argc, char** argv) {
             return 0;
         
         i8080_execute(&machine);
+        if (iteration > 999)
+            return 0;
         ++iteration;
     }
 
