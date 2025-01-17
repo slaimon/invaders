@@ -161,15 +161,15 @@ const uint8_t table[256] = { LOOK_UP };
             SUB((x)+machine->carryFlag)
 
 // ANA - AND a register with A
-#define ANA(x)                                \
-            tmp1 = machine->A & (x);          \
-            machine->carryFlag = 0;           \
-            machine->auxCarryFlag =           \
-                (machine->A & 8) | ((x) & 8); \
-            machine->A = tmp1;                \
-            ZERO(machine->A)                  \
-            PARITY(machine->A)                \
-            SIGN(machine->A)                  \
+#define ANA(x)                                  \
+            tmp1 = machine->A & (x);            \
+            machine->carryFlag = 0;             \
+            machine->auxCarryFlag =             \
+                ((machine->A | (x)) & 8) != 0;  \
+            machine->A = tmp1;                  \
+            ZERO(machine->A)                    \
+            PARITY(machine->A)                  \
+            SIGN(machine->A)                    \
 
 // XOR - XOR a register with A
 #define XOR(x)                             \
