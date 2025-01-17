@@ -22,8 +22,8 @@ void printstate(const size_t iteration, const i8080_t machine, FILE* ofp) {
 // and executed like a CPU program. The second file is used to dump a printout of the machine's
 // state at each step of execution.
 int main (int argc, char** argv) {
-    if (argc != 4) {
-        printf("usage: %s ROM_FILE  OUTPUT_FILE  MAX_ITERATIONS\n", argv[0]);
+    if (argc != 4 && argc != 5) {
+        printf("usage: %s ROM_FILE  OUTPUT_FILE  MAX_ITERATIONS  PAGE_NUM\n", argv[0]);
         return 0;
     }
 
@@ -44,19 +44,33 @@ int main (int argc, char** argv) {
     machine.mem[5] = 0xC9;  // Return immediately after all CP/M calls
     i8080_register_set(&machine, I8080_REGISTER_PROGRAM_COUNTER, 0X100);    // JMP 100h
     
+    size_t total_iteration = 0;
     size_t iteration = 0;
-    size_t max_iter;
+    size_t current_page = 0;
+    size_t max_iter, page_num;
     sscanf(argv[3], "%lu", &max_iter);
+    if (argc == 5) sscanf(argv[4], "%lu", &page_num);
+    else page_num = 0;
     while (true) {
-        printstate(iteration, machine, ofp);
+        if (current_page == page_num)
+            printstate(total_iteration, machine, ofp);
 
         if (handle_cpm_calls_file(&machine, stdout))
             return 0;
         
         i8080_execute(&machine);
-        if (iteration > max_iter)
-            return 0;
+        if (current_page == page_num) {
+            if (iteration > max_iter)
+                return 0;
+        }
+        else
+            if (iteration > max_iter) {
+                ++current_page;
+                iteration = 0;
+                continue;
+            }
         ++iteration;
+        ++total_iteration;
     }
 
     return 0;
