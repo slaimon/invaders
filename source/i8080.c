@@ -79,6 +79,11 @@ const uint8_t table[256] = { LOOK_UP };
             PUSH_16BIT(machine->programCounter+3);  \
             machine->programCounter = (x);          \
             instructionLength = 0;
+
+#define RST(x) \
+            PUSH_16BIT(machine->programCounter+1);  \
+            machine->programCounter = (x);          \
+            instructionLength = 0;
                 
 // RET after termination of a subroutine
 #define RETURN                                  \
@@ -1625,7 +1630,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xC7: {
             // RST 0
             
-            CALL_IMMEDIATE(0x0000)
+            RST(0x0000)
 
             break;
         }
@@ -1695,7 +1700,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xCF: {
             // RST 1
             
-            CALL_IMMEDIATE(0x0008)
+            RST(0x0008)
             
             break;
         }
@@ -1769,7 +1774,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xD7: {
             // RST 2
             
-            CALL_IMMEDIATE(0x0010)
+            RST(0x0010)
             
             break;
         }
@@ -1838,7 +1843,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xDF: {
             // RST 3
             
-            CALL_IMMEDIATE(0x0018)
+            RST(0x0018)
             
             break;
         }
@@ -1914,7 +1919,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xE7: {
             // RST 4
             
-            CALL_IMMEDIATE(0x0020)
+            RST(0x0020)
 
             break;
         }
@@ -1990,7 +1995,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xEF: {
             // RST 5
             
-            CALL_IMMEDIATE(0x0028)
+            RST(0x0028)
 
             break;
         }
@@ -2081,7 +2086,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xF7: {
             // RST 6
             
-            CALL_IMMEDIATE(0x0030)
+            RST(0x0030)
             
             break;
         }
@@ -2150,7 +2155,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xFF: {
             // RST 7
             
-            CALL_IMMEDIATE(0x0038)
+            RST(0x0038)
 
             break;
         }
