@@ -4,6 +4,19 @@
 #include "../include/bytestream.h"
 #include "../include/i8080_cpm.h"
 #include "../include/i8080_debug.h"
+#include "../include/i8080_disassembler.h"
+
+#define FORMAT \
+"N:%lu | %s\t | A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%02X s:%1u z:%1u a:%1u p:%1u c:%1u | $HL:%02X $SP:%02X\n"
+// example:
+// N:6 | 21 C0 20       LXI   HL, #20C0 | A:FF B:1A C:00 D:00 E:01 H:5B L:0F SP:FFEC PC:0019 s:0 z:1 a:0 p:1 c:0 | $HL:9E $SP:4F
+void printstate(const size_t iteration, const i8080_t machine, FILE* ofp) {
+    char* currentInstructionDisassembly = i8080_instruction_toString(disassemble_instruction(machine.mem, machine.programCounter), false).string;
+    fprintf(ofp, FORMAT, iteration, currentInstructionDisassembly,
+        machine.A, machine.B, machine.C, machine.D, machine.E, machine.H, machine.L, machine.stackPointer, machine.programCounter,
+        machine.signFlag, machine.zeroFlag, machine.auxCarryFlag, machine.parityFlag, machine.carryFlag, 
+        machine.mem[i8080_register_get(&machine, I8080_REGISTER_HL)], machine.mem[machine.stackPointer]);
+}
 
 // Takes two filenames as arguments, one input and one output. The input file is loaded into memory
 // and executed like a CPU program. The second file is used to dump a printout of the machine's
@@ -32,14 +45,13 @@ int main (int argc, char** argv) {
     
     size_t iteration = 0;
     while (true) {
-        fprintf(ofp, "ITERATION No: %lu\n-------------------------------------\n\n", iteration++);
-        i8080_printState(machine, 0, ofp);
-        fputs("\n\n", ofp);
+        printstate(iteration, machine, ofp);
 
         if (handle_cpm_calls_file(&machine, stdout))
             return 0;
         
         i8080_execute(&machine);
+        ++iteration;
     }
 
     return 0;
