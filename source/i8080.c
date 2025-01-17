@@ -31,8 +31,12 @@
 #define AUXCARRY_ADD(x,y) \
             machine->auxCarryFlag = ((((x & 0x0F)+(y & 0x0F)) & 0x10) == 0x10);
 
-#define AUXCARRY_SUB(x,y) \
-            AUXCARRY_ADD(x, (~(y)+1))
+#define AUXCARRY_SUB(x,y) {                 \
+            if (y == 0)                     \
+                machine->auxCarryFlag = 1;  \
+            else                            \
+                AUXCARRY_ADD(x, (~(y)+1))   \
+}
 
 const uint8_t table[256] = { LOOK_UP };
 
