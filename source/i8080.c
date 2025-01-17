@@ -740,7 +740,7 @@ int i8080_execute(i8080_t* machine ) {
             // DAD SP - add register pair to HL
             
             tmp1 = machine->L + (machine->stackPointer & 0x00FF);
-            tmp2 = machine->H + (machine->stackPointer & 0xFF00) + (tmp1 >> 8);
+            tmp2 = machine->H + (machine->stackPointer >> 8) + (tmp1 >> 8);
             machine->L = tmp1 & 0xFF;
             machine->H = tmp2 & 0xFF;
             CARRY(tmp2)
