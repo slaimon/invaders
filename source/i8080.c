@@ -1552,7 +1552,7 @@ int i8080_execute(i8080_t* machine ) {
             machine->carryFlag = 0;
             machine->signFlag = 0;
             machine->parityFlag = 1;
-            machine->auxCarryFlag = 0;
+            machine->auxCarryFlag = 1;
             
             break;
         }
