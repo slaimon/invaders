@@ -22,8 +22,8 @@ void printstate(const size_t iteration, const i8080_t machine, FILE* ofp) {
 // and executed like a CPU program. The second file is used to dump a printout of the machine's
 // state at each step of execution.
 int main (int argc, char** argv) {
-    if (argc != 3) {
-        printf("usage: %s ROM_FILE  OUTPUT_FILE\n", argv[0]);
+    if (argc != 4) {
+        printf("usage: %s ROM_FILE  OUTPUT_FILE  MAX_ITERATIONS\n", argv[0]);
     }
 
     FILE* ifp = safe_fopen(argv[1], "rb");
@@ -44,6 +44,8 @@ int main (int argc, char** argv) {
     i8080_register_set(&machine, I8080_REGISTER_PROGRAM_COUNTER, 0X100);    // JMP 100h
     
     size_t iteration = 0;
+    size_t max_iter;
+    sscanf(argv[3], "%lu", &max_iter);
     while (true) {
         printstate(iteration, machine, ofp);
 
@@ -51,7 +53,7 @@ int main (int argc, char** argv) {
             return 0;
         
         i8080_execute(&machine);
-        if (iteration > 999)
+        if (iteration > max_iter)
             return 0;
         ++iteration;
     }
