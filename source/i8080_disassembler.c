@@ -2032,7 +2032,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0xC5: {
             strcpy(data.mnemonic, "PUSH");
-            strcpy(data.inputRegisters, "B");
+            strcpy(data.inputRegisters, "BC");
             
             data.num_inputRegisters = 1;
             break;
@@ -2190,7 +2190,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0xD5: {
             strcpy(data.mnemonic, "PUSH");
-            strcpy(data.inputRegisters, "D");
+            strcpy(data.inputRegisters, "DE");
             
             data.num_inputRegisters = 1;
             break;
@@ -2343,7 +2343,7 @@ i8080_instruction_t disassemble_instruction( const uint8_t* mem , unsigned int a
         }
         case 0xE5: {
             strcpy(data.mnemonic, "PUSH");
-            strcpy(data.inputRegisters, "H");
+            strcpy(data.inputRegisters, "HL");
             
             data.num_inputRegisters = 1;
             break;
