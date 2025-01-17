@@ -53,20 +53,29 @@ const uint8_t table[256] = { LOOK_UP };
 #define READ_16BIT_IMMEDIATE \
             READ_16BIT_FROM_MEM(currentProgramCounter+1)
 
+#define PUSH_16BIT(x)                                   \
+    machine->mem[machine->stackPointer-1] = (x >> 8);   \
+    machine->mem[machine->stackPointer-2] = (x & 0xFF); \
+    machine->stackPointer -= 2;
+
+#define POP_16BIT(x)                                    \
+    x = 0;                                              \
+    x += machine->mem[machine->stackPointer];           \
+    x += machine->mem[machine->stackPointer+1] << 8;    \
+    machine->stackPointer += 2;
+
 /* ----------- INSTRUCTION MACROS ----------- */
 
 // CALL immediate address or register
-#define CALL_IMMEDIATE(x)                                                           \
-            machine->programCounter += 3;                                           \
-            machine->stackPointer -= 2;                                             \
-            WRITE_16BIT_TO_MEM(machine->stackPointer, machine->programCounter);     \
-            machine->programCounter = (x);                                          \
+#define CALL_IMMEDIATE(x)                       \
+            machine->programCounter += 3;       \
+            PUSH_16BIT(machine->programCounter) \
+            machine->programCounter = (x);      \
             instructionLength = 0;
                 
 // RET after termination of a subroutine
-#define RETURN                                                                      \
-            machine->programCounter = READ_16BIT_FROM_MEM(machine->stackPointer);   \
-            machine->stackPointer += 2;                                             \
+#define RETURN                                  \
+            POP_16BIT(machine->programCounter)  \
             instructionLength = 0;
 
 // INR - increment register
