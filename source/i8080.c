@@ -132,12 +132,12 @@ const uint8_t table[256] = { LOOK_UP };
             ADD(x+machine->carryFlag)
 
 // DAD - add register pair to HL (the macro is not used for DAD SP)
-#define DAD(x,y)                                        \
-            tmp1 = machine->L + y;                      \
-            machine->carryFlag = (tmp1 >> 8 != 0);      \
-            tmp2 = machine->H + x + machine->carryFlag; \
-            machine->L = tmp1 & 0xFF;                   \
-            machine->H = tmp2 & 0xFF;                   \
+#define DAD(x,y)                                    \
+            tmp1 = machine->L + y;                  \
+            tmp2 = machine->H + x + (tmp1 >> 8);    \
+            machine->carryFlag = (tmp2 >> 8);       \
+            machine->L = tmp1 & 0xFF;               \
+            machine->H = tmp2 & 0xFF;               \
 
 // SUB - subtract a register from A (the macro is not used for SUB A)
 #define SUB(x)                                      \
