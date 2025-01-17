@@ -128,6 +128,7 @@ const uint8_t table[256] = { LOOK_UP };
             tmp1 = machine->A + (x);        \
             CARRY(tmp1)                     \
             AUXCARRY_ADD(machine->A, (x))   \
+            machine->A = tmp1;              \
             PARITY(machine->A)              \
             SIGN(machine->A)                \
             ZERO(machine->A)                \
