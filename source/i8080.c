@@ -191,7 +191,7 @@ const uint8_t table[256] = { LOOK_UP };
             machine->carryFlag =                   \
                 (machine->A < x);                  \
             machine->auxCarryFlag =                \
-                ((machine->A & 0x0F) < (x &0x0F)); \
+                ((machine->A & 0x0F) < (x & 0x0F));\
             PARITY(tmp1)                           \
             SIGN(tmp1)                             \
             ZERO(tmp1)                             \
@@ -2006,8 +2006,8 @@ int i8080_execute(i8080_t* machine ) {
         case 0xF1: {
             // POP PSW = F:A
             
-            machine->A = machine->mem[ machine->stackPointer ];
-            tmp1 = machine->mem[ machine->stackPointer + 1 ];
+            machine->A = machine->mem[machine->stackPointer+1];
+            tmp1 = machine->mem[machine->stackPointer];
             
             // restore flags:
             machine->signFlag = (tmp1 >> 7) & 1;
@@ -2052,7 +2052,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xF5: {
             // PUSH PSW
             
-            machine->mem[ machine->stackPointer - 2 ] = machine->A;
+            machine->mem[ machine->stackPointer - 1 ] = machine->A;
             tmp1 = 0;
             
             // store flags:
@@ -2065,7 +2065,7 @@ int i8080_execute(i8080_t* machine ) {
             tmp1 += (1 << 1);
             tmp1 += machine->carryFlag;
             
-            machine->mem[machine->stackPointer - 1] = tmp1;
+            machine->mem[machine->stackPointer - 2] = tmp1;
             machine->stackPointer -= 2;
             
             break;
