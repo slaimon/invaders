@@ -4,7 +4,7 @@
 #include "../include/i8080_disassembler.h"
 
 #define PRINTLINE(instr, outfile) \
-    fputs(i8080_instruction_toString(instr).string, outfile);
+    fputs(i8080_instruction_toString(instr, true).string, outfile);
 
 #define TO_UPPER_CASE(c) \
 	(c >= 'a' && c <= 'z') ? (c-32) : (c)
