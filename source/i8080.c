@@ -27,6 +27,13 @@
 #define CARRY(x) \
             machine->carryFlag = (((x) & 0x0100) != 0);
 
+// sets the aux. carry flag according to the result of the operation x + y
+#define AUXCARRY_ADD(x,y) \
+            machine->auxCarryFlag = ((((x & 0x0F)+(y & 0x0F)) & 0x10) == 0x10);
+
+#define AUXCARRY_SUB(x,y) \
+            AUXCARRY_ADD(x, (~(y)+1))
+
 const uint8_t table[256] = { LOOK_UP };
 
 /* ----------- ACCESS MACROS ----------- */
@@ -76,9 +83,9 @@ const uint8_t table[256] = { LOOK_UP };
 
 // INR - increment register
 #define INR(x)                              \
-            tmp1 = x & 0xF0;                \
+            tmp1 = x & 0x10;                \
             x = (uint8_t) x + 1;            \
-            if(( x & 0xF0 ) != tmp1)        \
+            if(( x & 0x10 ) != tmp1)        \
                 machine->auxCarryFlag = 1;  \
             else                            \
                 machine->auxCarryFlag = 0;  \
@@ -88,9 +95,9 @@ const uint8_t table[256] = { LOOK_UP };
 
 // DCR - decrement register
 #define DCR(x)                              \
-            tmp1 = x & 0xF0;                \
+            tmp1 = x & 0x0F;                \
             x = (uint8_t) x - 1;            \
-            if(( x & 0xF0 ) != tmp1)        \
+            if(( x & 0x0F ) != tmp1)        \
                 machine->auxCarryFlag = 1;  \
             else                            \
                 machine->auxCarryFlag = 0;  \
@@ -117,16 +124,13 @@ const uint8_t table[256] = { LOOK_UP };
                 y = y - 1;      \
 
 // ADD - add a register to A
-#define ADD(x)                                      \
-            tmp1 = machine->A + (x);                \
-            tmp2 = machine->A ^ (x);                \
-            CARRY(tmp1)                             \
-            machine->auxCarryFlag =                 \
-                (tmp1 & 0x00F0) != (tmp2 & 0x00F0); \
-            machine->A = tmp1;                      \
-            PARITY(machine->A)                      \
-            SIGN(machine->A)                        \
-            ZERO(machine->A)                        \
+#define ADD(x)                              \
+            tmp1 = machine->A + (x);        \
+            CARRY(tmp1)                     \
+            AUXCARRY_ADD(machine->A, (x))   \
+            PARITY(machine->A)              \
+            SIGN(machine->A)                \
+            ZERO(machine->A)                \
 
 // ADC - add a register to A with carry
 #define ADC(x) \
@@ -186,15 +190,14 @@ const uint8_t table[256] = { LOOK_UP };
             ZERO(machine->A)             \
 
 // CMP - compare a register with A (the macro is not used for CMP A)
-#define CMP(x)                                     \
-            tmp1 = machine->A - x;                 \
-            machine->carryFlag =                   \
-                (machine->A < x);                  \
-            machine->auxCarryFlag =                \
-                ((machine->A & 0x0F) < (x & 0x0F));\
-            PARITY(tmp1)                           \
-            SIGN(tmp1)                             \
-            ZERO(tmp1)                             \
+#define CMP(x)                            \
+            tmp1 = machine->A - (x);      \
+            machine->carryFlag =          \
+                (machine->A < (x));       \
+            AUXCARRY_SUB(machine->A, (x)) \
+            PARITY(tmp1)                  \
+            SIGN(tmp1)                    \
+            ZERO(tmp1)                    \
 
 
 void i8080_init(i8080_t* machine) {
