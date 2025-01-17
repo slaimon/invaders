@@ -83,24 +83,18 @@ const uint8_t table[256] = { LOOK_UP };
 
 // INR - increment register
 #define INR(x)                              \
-            tmp1 = x & 0x10;                \
             x = (uint8_t) x + 1;            \
-            if(( x & 0x10 ) != tmp1)        \
-                machine->auxCarryFlag = 1;  \
-            else                            \
-                machine->auxCarryFlag = 0;  \
+            machine->auxCarryFlag =         \
+                (((x) & 0x0F) == 0x00);     \
             SIGN(x)                         \
             ZERO(x)                         \
             PARITY(x)                       \
 
 // DCR - decrement register
 #define DCR(x)                              \
-            tmp1 = x & 0x0F;                \
             x = (uint8_t) x - 1;            \
-            if(( x & 0x0F ) != tmp1)        \
-                machine->auxCarryFlag = 1;  \
-            else                            \
-                machine->auxCarryFlag = 0;  \
+            machine->auxCarryFlag =         \
+                (((x) & 0x0F) != 0x0F);     \
             SIGN(x)                         \
             ZERO(x)                         \
             PARITY(x)                       \
@@ -140,7 +134,7 @@ const uint8_t table[256] = { LOOK_UP };
 // DAD - add register pair to HL (the macro is not used for DAD SP)
 #define DAD(x,y)                                        \
             tmp1 = machine->L + y;                      \
-            machine->carryFlag = tmp1 >> 8;             \
+            machine->carryFlag = (tmp1 >> 8 != 0);      \
             tmp2 = machine->H + x + machine->carryFlag; \
             machine->L = tmp1 & 0xFF;                   \
             machine->H = tmp2 & 0xFF;                   \
@@ -148,10 +142,8 @@ const uint8_t table[256] = { LOOK_UP };
 // SUB - subtract a register from A (the macro is not used for SUB A)
 #define SUB(x)                                      \
             tmp1 = machine->A - (x);                \
-            tmp2 = machine->A ^ (-(x) + 1);         \
             CARRY(tmp1)                             \
-            machine->auxCarryFlag =                 \
-                (tmp1 & 0x0010) != (tmp2 & 0x0010); \
+            AUXCARRY_SUB(machine->A, (x))           \
             machine->A = tmp1;                      \
             PARITY(machine->A)                      \
             SIGN(machine->A)                        \
