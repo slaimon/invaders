@@ -24,6 +24,7 @@ void printstate(const size_t iteration, const i8080_t machine, FILE* ofp) {
 int main (int argc, char** argv) {
     if (argc != 4) {
         printf("usage: %s ROM_FILE  OUTPUT_FILE  MAX_ITERATIONS\n", argv[0]);
+        return 0;
     }
 
     FILE* ifp = safe_fopen(argv[1], "rb");
