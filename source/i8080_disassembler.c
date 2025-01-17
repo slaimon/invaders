@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include "../include/i8080_disassembler.h"
 
-void disassemble_program(bytestream_t program, FILE* ofp) {
+void disassemble_program(const bytestream_t program, FILE* ofp) {
     char result[I8080_LINE_LENGTH * program.size];
 
     size_t programPointer = 0;
     size_t stringPointer = 0;
     while (programPointer < program.size) {
         i8080_instruction_t instruction = disassemble_instruction(program.data, programPointer);
-        i8080_line_t line = i8080_instruction_toString(instruction);
+        i8080_line_t line = i8080_instruction_toString(instruction, true);
 
         stringPointer += sprintf(&result[stringPointer], "%s\n", line.string);
         programPointer += instruction.instructionLength;
@@ -30,12 +30,16 @@ void disassemble_program(bytestream_t program, FILE* ofp) {
     for(int i = 0; i < n; ++i)      \
         result[pointer++] = ' ';
 
-i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction) {
+#define PAD_TO(n)                 \
+    while(pointer < (n))          \
+        result[pointer++] = ' ';
+
+i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction, bool generateComments) {
     i8080_line_t line;
     char* result = line.string;
-    size_t pointer = 0;
-
+    memset(result, '\0', I8080_LINE_LENGTH);
     bool hasComment = (instruction.comment[0] != '\0');
+    size_t pointer = 0;
 
     // address gutter on the left
     pointer += sprintf(&result[pointer], "%04X:  ", instruction.position);
@@ -47,8 +51,7 @@ i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction) {
     }
 
     // the instruction's mnemonic
-    int padding = MNEMONIC_COLUMN_NUMBER - pointer;
-    INSERT_WHITESPACE(padding)
+    PAD_TO(MNEMONIC_COLUMN_NUMBER)
     pointer += sprintf(&result[pointer], instruction.mnemonic);
 
     // register arguments, if any
@@ -83,15 +86,10 @@ i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction) {
     }
 
     // comment, if any
-    if (hasComment) {
-        padding = COMMENT_COLUMN_NUMBER - pointer;
-        INSERT_WHITESPACE(padding)
+    if (hasComment && generateComments) {
+        PAD_TO(COMMENT_COLUMN_NUMBER)
         pointer += sprintf(&result[pointer], "; %s", instruction.comment);
     }
-
-    result[pointer++] = '\n';
-    PAD_TO(93)
-    result[pointer] = '\0';
 
     return line;
 }

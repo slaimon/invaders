@@ -48,14 +48,12 @@ typedef struct {
 } i8080_line_t;
 
 // prints one instruction to a fixed-width string
-i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction);
-
-
+i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction, bool generateComments);
 
 // returns a struct describing the instruction found at the specified address in the memory 
 i8080_instruction_t disassemble_instruction(const uint8_t* mem , unsigned int addr);
 
 // returns a string containing the text disassembly of the given program
-void disassemble_program(bytestream_t program, FILE* ofp);
+void disassemble_program(const bytestream_t program, FILE* ofp);
 
 #endif
