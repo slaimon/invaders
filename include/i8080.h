@@ -60,8 +60,7 @@ typedef enum {
 } i8080_flag_t;
 
 
-// Initialize a blank i8080 machine: all registers are zero except the Stack Pointer, which is set to
-// point to the last addressable block of memory (I8080_MEMSIZE - 1)
+// Initialize a blank i8080 machine: all registers are zero
 void i8080_init(i8080_t* machine);
 
 // Read the value of a CPU register.

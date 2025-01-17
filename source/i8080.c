@@ -192,10 +192,8 @@ const uint8_t table[256] = { LOOK_UP };
             ZERO(tmp1)                             \
 
 
-void i8080_init(i8080_t* machine) {	
-    // set all to zero except stack pointer
+void i8080_init(i8080_t* machine) {
     memset(machine, 0, sizeof(i8080_t));
-	machine->stackPointer = I8080_MEMSIZE-1;
 }
 
 uint16_t i8080_register_get(const i8080_t* machine, const i8080_register_t reg) {
