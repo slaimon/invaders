@@ -53,6 +53,24 @@ void machine_OUT(uint8_t port, uint8_t value) {
     }
 }
 
+void invaders_execute(i8080_t machine) {
+    uint8_t opcode = machine.mem[machine.programCounter];
+    uint8_t port = machine.mem[machine.programCounter+1];
+    
+    // IN handler
+    if (opcode == 0xDB) {
+        machine.A = machine_IN(port);
+        machine.programCounter += 2;
+    }
+    // OUT handler
+    else if (opcode == 0xD3) {
+        machine_OUT(port, machine.A);
+        machine.programCounter += 2;
+    }
+    else
+        i8080_execute(&machine);
+}
+
 int main (void) {
     FILE* ifp = safe_fopen(ROM_FILENAME, "rb");
     bytestream_t* program = bytestream_read(ifp);
@@ -69,20 +87,6 @@ int main (void) {
 
     SHIFT_INIT;
     while (true) {
-        uint8_t opcode = machine.mem[machine.programCounter];
-        uint8_t port = machine.mem[machine.programCounter+1];
-        
-        // IN handler
-        if (opcode == 0xDB) {
-            machine.A = machine_IN(port);
-            machine.programCounter += 2;
-        }
-        // OUT handler
-        else if (opcode == 0xD3) {
-            machine_OUT(port, machine.A);
-            machine.programCounter += 2;
-        }
-        else
-            i8080_execute(&machine);
+        invaders_execute(machine);
     }
 }
