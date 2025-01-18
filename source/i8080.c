@@ -653,29 +653,21 @@ int i8080_execute(i8080_t* machine ) {
         case 0x27: {
             // DAA - Decimal Adjust Accumulator : SZAPC
             
-            tmp1 = machine->A & 0xF0;
+            uint8_t add = 0;
+            uint8_t carry = machine->carryFlag;
+            uint8_t lo = machine->A & 0x0F;
+            if(lo > 9 || machine->auxCarryFlag) {
+                add = 6;
+            }
+
+            uint8_t hi = machine->A >> 4;
+            if( hi > 9 || (hi == 9 && lo > 9) || carry) {
+                add += 6 << 4;
+                carry = 1;
+            }
             
-            if( (machine->A & 0x0F) > 9 || machine->auxCarryFlag == 1)
-                machine->A += 6;
-            if( (machine->A & 0xF0) != tmp1)
-                machine->auxCarryFlag = 1;
-            else
-                machine->auxCarryFlag = 0;
-                    
-            tmp1 = machine->A;
-            
-            if( ( (machine->A & 0xF0) >> 4 ) > 9 || machine->carryFlag == 1)
-                tmp1 += 0x60;
-            if( tmp1 >> 8 != 0 )
-                machine->carryFlag = 1;
-            else
-                machine->carryFlag = 0;
-            
-            machine->A = tmp1 & 0xFF;
-            
-            SIGN(machine->A)
-            ZERO(machine->A)
-            PARITY(machine->A)
+            ADD(add)
+            machine->carryFlag = carry;
             
             break;
         }
