@@ -67,13 +67,22 @@ int main (void) {
     i8080_memory_write(&machine, *program, 0);
     bytestream_destroy(program);
 
+    SHIFT_INIT;
     while (true) {
-        i8080_execute(&machine);
-
-        if (machine.programCounter == 0x0ADD &&
-            machine.A != 0) {
-                printf("Infinite loop reached. Success!\n");
-                return 0;
-            }
+        uint8_t opcode = machine.mem[machine.programCounter];
+        uint8_t port = machine.mem[machine.programCounter+1];
+        
+        // IN handler
+        if (opcode == 0xDB) {
+            machine.A = machine_IN(port);
+            machine.programCounter += 2;
+        }
+        // OUT handler
+        else if (opcode == 0xD3) {
+            machine_OUT(port, machine.A);
+            machine.programCounter += 2;
+        }
+        else
+            i8080_execute(&machine);
     }
 }
