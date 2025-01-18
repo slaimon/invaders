@@ -151,8 +151,21 @@ const uint8_t carry_table[256] = { LOOK_UP };
             ZERO(machine->A)                \
 
 // ADC - add a register to A with carry
-#define ADC(x) \
-            ADD(x+machine->carryFlag)
+/*
+// da provare quando passa i test
+#define ADC(x) {
+            uint16_t tmp = (x) + machine->carryFlag;
+            ADD(tmp)
+}
+*/
+#define ADC(x)                                              \
+            tmp1 = machine->A + (x) + machine->carryFlag;   \
+            CARRY(tmp1)                                     \
+            AUXCARRY_ADD(machine->A, (x))                   \
+            machine->A = tmp1;                              \
+            PARITY(machine->A)                              \
+            SIGN(machine->A)                                \
+            ZERO(machine->A)                                \
 
 // DAD - add register pair to HL (the macro is not used for DAD SP)
 #define DAD(x,y)                                    \
@@ -173,8 +186,14 @@ const uint8_t carry_table[256] = { LOOK_UP };
             ZERO(machine->A)                        \
 
 // SBB - subtract with borrow
-#define SBB(x) \
-            SUB((x)+machine->carryFlag)
+#define SBB(x)                                              \
+            tmp1 = machine->A - (x) - machine->carryFlag;   \
+            CARRY(tmp1)                                     \
+            AUXCARRY_SUB(machine->A, (x))                   \
+            machine->A = tmp1;                              \
+            PARITY(machine->A)                              \
+            SIGN(machine->A)                                \
+            ZERO(machine->A)     
 
 // ANA - AND a register with A
 #define ANA(x)                                  \
