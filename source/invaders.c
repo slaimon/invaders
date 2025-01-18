@@ -3,6 +3,26 @@
 
 #define ROM_FILENAME "assets/INVADERS"
 
+typedef struct shift {
+    uint16_t value;
+    uint8_t read_offset;
+} shift_register_t;
+
+shift_register_t shift;
+
+uint8_t shift_read(void) {
+    uint16_t mask = 0xFF00 >> shift.read_offset;
+    return shift.value & mask;
+}
+
+void shift_write(uint8_t x) {
+    shift.value = (x << 8) | shift.value >> 8;
+}
+
+void shift_setOffset(uint8_t off) {
+    shift.read_offset = off & 7;
+}
+
 int main (void) {
     FILE* ifp = safe_fopen(ROM_FILENAME, "rb");
     bytestream_t* program = bytestream_read(ifp);
