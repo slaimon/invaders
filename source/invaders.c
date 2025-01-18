@@ -87,6 +87,11 @@ int main (void) {
 
     SHIFT_INIT;
     while (true) {
-        invaders_execute(machine);
+        invaders_execute(&machine);
+        if (machine.programCounter == 0x0ADD &&
+            machine.A != 0) {
+                printf("Infinite loop reached. Success!\n");
+                return 0;
+            }
     }
 }
