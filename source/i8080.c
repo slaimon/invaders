@@ -1344,6 +1344,7 @@ int i8080_execute(i8080_t* machine ) {
             // SUB A
             machine->A = 0;
             machine->carryFlag = 0;
+            machine->auxCarryFlag = 1;
             machine->parityFlag = 1;
             machine->zeroFlag = 1;
             machine->signFlag = 0;
