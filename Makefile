@@ -20,6 +20,9 @@ test: ./tester
 log: ./logger
 	./logger ./assets/8080EX1.COM ./mylog.txt 1000
 
+./invaders: $(BIN)/invaders.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
+	$(CC) $(CFLAGS) $^ -o $@
+
 ./logger: $(BIN)/logger.o $(BIN)/i8080_cpm.o $(BIN)/i8080_debug.o $(BIN)/i8080_disassembler.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
 	$(CC) $(CFLAGS) $^ -o $@
 
@@ -34,6 +37,7 @@ log: ./logger
 
 $(BIN)/%.o: $(SRC)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
+$(BIN)/invaders.o: $(HDR)/i8080.h $(HDR)/safe.h
 $(BIN)/logger.o: $(EXAMPLES)/logger.c $(HDR)/i8080_cpm.h $(HDR)/i8080_debug.h $(HDR)/i8080.h $(HDR)/bytestream.h $(HDR)/safe.h
 	$(CC) $(CFLAGS) -c $< -o $@
 $(BIN)/tester.o: $(EXAMPLES)/tester.c $(HDR)/i8080_cpm.h $(HDR)/i8080.h $(HDR)/bytestream.h $(HDR)/safe.h
@@ -52,4 +56,4 @@ $(BIN)/safe.o: $(HDR)/safe.h
 
 clean:
 	rm -f $(BIN)/*.o
-	rm -f ./disassembler ./listing.txt ./step ./tester ./logger ./mylog.txt
+	rm -f ./disassembler ./listing.txt ./step ./tester ./logger ./mylog.txt ./invaders
