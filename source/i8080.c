@@ -27,20 +27,32 @@
 #define CARRY(x) \
             machine->carryFlag = (((x) & 0x0100) != 0);
 
-// sets the aux. carry flag according to the result of the operation x + y
-#define AUXCARRY_ADD(x,y) \
-            machine->auxCarryFlag = ((((x & 0x0F)+(y & 0x0F)) & 0x10) == 0x10);
+// Aux. carry look-up tables. These were computed by Alexander Demin based on a
+// real KR580VM80A processor and found at https://github.com/begoon/i8080-core/
+// I'm not sure if they can be computed with a more readable logic expression
+// but I sure tried
+const bool add_auxcarry_table[] = { 0, 0, 1, 0, 1, 0, 1, 1 };
+const bool sub_auxcarry_table[] = { 1, 0, 0, 0, 1, 1, 1, 0 };
+#define AUXCARRY_INDEX(x,y)     \
+            (((x) & 8) >> 1) |  \
+            (((y) & 8) >> 2) |  \
+            ((tmp1 & 8) >> 3)   \
 
+// sets the aux. carry flag according to the result of the operation x + y
+// expects result of operation in tmp1 variable
+#define AUXCARRY_ADD(x,y) {                                \
+            uint8_t index = AUXCARRY_INDEX(x,y);           \
+            machine->auxCarryFlag = add_auxcarry_table[index]; \
+}
+
+// sets the aux. carry flag according to the result of the operation x - y
 // expects result of operation in tmp1 variable
 #define AUXCARRY_SUB(x,y) {                                    \
-            uint8_t index = (((x) & 8) >> 1) |                 \
-                            (((y) & 8) >> 2) |                 \
-                            ((tmp1 & 8) >> 3);                 \
+            uint8_t index = AUXCARRY_INDEX(x,y);               \
             machine->auxCarryFlag = sub_auxcarry_table[index]; \
 }
 
 const uint8_t carry_table[256] = { LOOK_UP };
-const bool sub_auxcarry_table[] = { 1, 0, 0, 0, 1, 1, 1, 0 };
 
 /* ----------- ACCESS MACROS ----------- */
 
