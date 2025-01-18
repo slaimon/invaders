@@ -10,17 +10,20 @@ typedef struct shift {
 
 shift_register_t shift;
 
-uint8_t shift_read(void) {
-    uint16_t mask = 0xFF00 >> shift.read_offset;
-    return shift.value & mask;
+#define SHIFT_INIT          \
+    shift.value = 0x0000;   \
+    shift.read_offset = 0   \
+
+#define SHIFT_READ \
+    shift.value & (0xFF00 >> shift.read_offset)
+
+#define SHIFT_WRITE(x) \
+    shift.value = ((x) << 8) | shift.value >> 8
+
+#define SHIFT_SETOFFSET(x) \
+    shift.read_offset = (x) & 7
 }
 
-void shift_write(uint8_t x) {
-    shift.value = (x << 8) | shift.value >> 8;
-}
-
-void shift_setOffset(uint8_t off) {
-    shift.read_offset = off & 7;
 }
 
 int main (void) {
