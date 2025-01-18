@@ -15,7 +15,7 @@ void printstate(const size_t iteration, const i8080_t machine, FILE* ofp) {
     fprintf(ofp, FORMAT, iteration, currentInstructionDisassembly,
         machine.A, machine.B, machine.C, machine.D, machine.E, machine.H, machine.L, machine.stackPointer, machine.programCounter,
         machine.signFlag, machine.zeroFlag, machine.auxCarryFlag, machine.parityFlag, machine.carryFlag, 
-        machine.mem[i8080_register_get(&machine, I8080_REGISTER_HL)], machine.mem[machine.stackPointer]);
+        machine.mem[i8080_get_hl(&machine)], machine.mem[machine.stackPointer]);
 }
 
 // Takes two filenames as arguments, one input and one output. The input file is loaded into memory
@@ -42,7 +42,7 @@ int main (int argc, char** argv) {
     bytestream_destroy(program);
 
     machine.mem[5] = 0xC9;  // Return immediately after all CP/M calls
-    i8080_register_set(&machine, I8080_REGISTER_PROGRAM_COUNTER, 0X100);    // JMP 100h
+    machine.programCounter = 0x100;    // JMP 100h
     
     size_t total_iteration = 0;
     size_t iteration = 0;

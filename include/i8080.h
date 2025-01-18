@@ -36,46 +36,32 @@ typedef struct {
 
 } i8080_t;
 
-typedef enum {
-    I8080_REGISTER_A,
-    I8080_REGISTER_B,
-    I8080_REGISTER_C,
-    I8080_REGISTER_D,
-    I8080_REGISTER_E,
-    I8080_REGISTER_H,
-    I8080_REGISTER_L,
-    I8080_REGISTER_BC,
-    I8080_REGISTER_DE,
-    I8080_REGISTER_HL,
-    I8080_REGISTER_PROGRAM_COUNTER,
-    I8080_REGISTER_STACK_POINTER
-} i8080_register_t;
+#define i8080_get_bc(m) \
+    ((uint16_t) ((m)->B << 8) + (m)->C)
 
-typedef enum {
-    I8080_FLAG_SIGN,
-    I8080_FLAG_ZERO,
-    I8080_FLAG_CARRY,
-    I8080_FLAG_AUXCARRY,
-    I8080_FLAG_PARITY
-} i8080_flag_t;
+#define i8080_set_bc(m, v) { \
+    (m)->B = (v) >> 8;       \
+    (m)->C = (v) & 0xFF;     \
+}
 
+#define i8080_get_de(m) \
+    ((uint16_t) ((m)->D << 8) + (m)->E)
+
+#define i8080_set_de(m, v) { \
+    (m)->D = (v) >> 8;       \
+    (m)->E = (v) & 0xFF;     \
+}
+
+#define i8080_get_hl(m) \
+    ((uint16_t) ((m)->H << 8) + (m)->L)
+
+#define i8080_set_hl(m, v) { \
+    (m)->H = (v) >> 8;       \
+    (m)->L = (v) & 0xFF;     \
+}
 
 // Initialize a blank i8080 machine: all registers are zero
 void i8080_init(i8080_t* machine);
-
-// Read the value of a CPU register.
-uint16_t i8080_register_get(const i8080_t* machine, const i8080_register_t register);
-
-// Set the value of a CPU register.
-// If register is 8 bits wide, only the lower 8 bits of value will be used 
-void i8080_register_set(i8080_t* machine, const i8080_register_t register, const uint16_t value);
-
-// Read the value of a CPU flag.
-bool i8080_flag_get(const i8080_t* machine, const i8080_flag_t flag);
-
-// Set the value of a CPU flag.
-// If register is 8 bits wide, only the lower 8 bits of value will be used 
-void i8080_flag_set(i8080_t* machine, const i8080_flag_t flag, const bool value);
 
 // Read a contiguous block of memory "size" bytes long and starting at address "offset".
 // Returns a pointer to the bytestream containing the data.

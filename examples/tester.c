@@ -26,7 +26,7 @@ int main (int argc, char** argv) {
     bytestream_destroy(program);
 
     machine.mem[5] = 0xC9;  // Return immediately after all CP/M calls
-    i8080_register_set(&machine, I8080_REGISTER_PROGRAM_COUNTER, 0X100);    // JMP 100h
+    machine.programCounter = 0x100;    // JMP 100h
     
     printf("Loaded ROM: %s\n", argv[1]);
     puts("--------------------------------------------------\n");

@@ -4,7 +4,7 @@
 const char separator[] = "\n\n--------------------------------------------------\n";
 
 bool handle_cpm_calls_file(i8080_t* machine, FILE* ofp) {
-    const uint16_t pc = i8080_register_get(machine, I8080_REGISTER_PROGRAM_COUNTER);
+    const uint16_t pc = machine->programCounter;
     
     // HLT (terminate)
     if (machine->mem[pc] == 0x76) {
@@ -22,15 +22,15 @@ bool handle_cpm_calls_file(i8080_t* machine, FILE* ofp) {
 
     // supervisor call
     if (pc == 0x05) {
-        const uint16_t svc = i8080_register_get(machine, I8080_REGISTER_C);
+        const uint16_t svc = machine->C;
         switch (svc) {
             case 2:
                 // print character in register A
-                fputc(i8080_register_get(machine, I8080_REGISTER_A), ofp);
+                fputc(machine->A, ofp);
                 break;
             case 9:;
                 // print string found at $DE and terminating with '$'
-                uint16_t address = i8080_register_get(machine, I8080_REGISTER_DE);
+                uint16_t address = i8080_get_de(machine);
                 char c;
                 do {
                     c = machine->mem[address];
