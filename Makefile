@@ -13,11 +13,12 @@ listing: ./disassembler
 	./disassembler ./assets/INVADERS ./listing.txt
 
 test: ./tester
+	./tester ./assets/8080PRE.COM
 	./tester ./assets/TEST.COM
 	./tester ./assets/8080EX1.COM
 
 log: ./logger
-	./logger ./assets/8080EX1.COM ./mylog.txt 10000
+	./logger ./assets/8080EX1.COM ./mylog.txt 1000
 
 ./logger: $(BIN)/logger.o $(BIN)/i8080_cpm.o $(BIN)/i8080_debug.o $(BIN)/i8080_disassembler.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
 	$(CC) $(CFLAGS) $^ -o $@
