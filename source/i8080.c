@@ -151,13 +151,6 @@ const bool sub_auxcarry_table[] = { 1, 0, 0, 0, 1, 1, 1, 0 };
             ZERO(machine->A)                \
 
 // ADC - add a register to A with carry
-/*
-// da provare quando passa i test
-#define ADC(x) {
-            uint16_t tmp = (x) + machine->carryFlag;
-            ADD(tmp)
-}
-*/
 #define ADC(x)                                              \
             tmp1 = machine->A + (x) + machine->carryFlag;   \
             CARRY(tmp1)                                     \
