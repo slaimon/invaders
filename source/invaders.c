@@ -1,7 +1,9 @@
+#include <stdlib.h>
 #include "../include/safe.h"
 #include "../include/i8080.h"
 
 #define ROM_FILENAME "assets/INVADERS"
+
 
 typedef struct shift {
     uint16_t value;
@@ -22,8 +24,33 @@ shift_register_t shift;
 
 #define SHIFT_SETOFFSET(x) \
     shift.read_offset = (x) & 7
+
+// reads a value from the port
+uint16_t machine_IN(uint8_t port) {
+    switch (port) {
+        case 3:
+            return SHIFT_READ;
+            break;
+        
+        default:
+            fprintf(stderr, "ERROR! Unexpected instruction IN %02Xh\n", port);
+            exit(1);
+    }
 }
 
+void machine_OUT(uint8_t port, uint8_t value) {
+    switch (port) {
+        case 2:
+            SHIFT_SETOFFSET(value);
+            break;
+        case 4:
+            SHIFT_WRITE(value); 
+            break;
+        
+        default:
+            fprintf(stderr, "ERROR! Unexpected instruction OUT %02Xh\n", port);
+            exit(1);
+    }
 }
 
 int main (void) {
