@@ -13,6 +13,8 @@
 #define P6(n) P4(n), P4(n ^ 1), P4(n ^ 1), P4(n)
 #define LOOK_UP P6(0), P6(1), P6(1), P6(0)
 
+const uint8_t parity_table[256] = { LOOK_UP };
+
 /* ------------ FLAG UPDATE MACROS ----------------*/
 
 #define SIGN(x) \
@@ -22,7 +24,7 @@
             machine->zeroFlag = ((x) == 0);
 
 #define PARITY(x) \
-            machine->parityFlag = ~ carry_table[(x) & 0xff];
+            machine->parityFlag = ~ parity_table[(x) & 0xff];
 
 #define CARRY(x) \
             machine->carryFlag = (((x) & 0x0100) != 0);
@@ -51,8 +53,6 @@ const bool sub_auxcarry_table[] = { 1, 0, 0, 0, 1, 1, 1, 0 };
             uint8_t index = AUXCARRY_INDEX(x,y);               \
             machine->auxCarryFlag = sub_auxcarry_table[index]; \
 }
-
-const uint8_t carry_table[256] = { LOOK_UP };
 
 /* ----------- ACCESS MACROS ----------- */
 
