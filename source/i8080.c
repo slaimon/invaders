@@ -22,7 +22,7 @@
             machine->zeroFlag = ((x) == 0);
 
 #define PARITY(x) \
-            machine->parityFlag = ~ table[(x) & 0xff];
+            machine->parityFlag = ~ carry_table[(x) & 0xff];
 
 #define CARRY(x) \
             machine->carryFlag = (((x) & 0x0100) != 0);
@@ -31,14 +31,16 @@
 #define AUXCARRY_ADD(x,y) \
             machine->auxCarryFlag = ((((x & 0x0F)+(y & 0x0F)) & 0x10) == 0x10);
 
-#define AUXCARRY_SUB(x,y) {                 \
-            if ((y == 0) || ((x) == (y)))   \
-                machine->auxCarryFlag = 1;  \
-            else                            \
-                AUXCARRY_ADD(x, (~(y)+1))   \
+// expects result of operation in tmp1 variable
+#define AUXCARRY_SUB(x,y) {                                    \
+            uint8_t index = (((x) & 8) >> 1) |                 \
+                            (((y) & 8) >> 2) |                 \
+                            ((tmp1 & 8) >> 3);                 \
+            machine->auxCarryFlag = sub_auxcarry_table[index]; \
 }
 
-const uint8_t table[256] = { LOOK_UP };
+const uint8_t carry_table[256] = { LOOK_UP };
+const bool sub_auxcarry_table[] = { 1, 0, 0, 0, 1, 1, 1, 0 };
 
 /* ----------- ACCESS MACROS ----------- */
 
@@ -64,13 +66,13 @@ const uint8_t table[256] = { LOOK_UP };
 #define READ_16BIT_IMMEDIATE \
             READ_16BIT_FROM_MEM(currentProgramCounter+1)
 
-#define PUSH_16BIT(x)                                   \
-    machine->stackPointer -= 2;                         \
-    WRITE_16BIT_TO_MEM(machine->stackPointer, (x))
+#define PUSH_16BIT(x)                                           \
+            machine->stackPointer -= 2;                         \
+            WRITE_16BIT_TO_MEM(machine->stackPointer, (x))
 
-#define POP_16BIT(x)                                \
-    x = READ_16BIT_FROM_MEM(machine->stackPointer); \
-    machine->stackPointer += 2;
+#define POP_16BIT(x)                                        \
+            x = READ_16BIT_FROM_MEM(machine->stackPointer); \
+            machine->stackPointer += 2;
 
 /* ----------- INSTRUCTION MACROS ----------- */
 
