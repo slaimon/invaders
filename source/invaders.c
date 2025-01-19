@@ -35,12 +35,12 @@ void handle_sound1(uint8_t value) {
 
     // bit 0 = UFO (repeats)        SX0 0.raw
     // bit 1 = Shot                 SX1 1.raw
-    // bit 2 = Flash (player die)   SX2 2.raw
-    // bit 3 = Invader die          SX3 3.raw
+    // bit 2 = Player death         SX2 2.raw
+    // bit 3 = Invader death        SX3 3.raw
     // bit 4 = Extended play        SX4
-    // bit 5 = AMP enable           SX5
-    // bit 6 = not connected
-    // bit 7 = not connected
+    // bit 5 = Toggle amplifier     SX5
+    // bit 6 = Not connected
+    // bit 7 = Not connected
 }
 
 void handle_sound2(uint8_t value) {
@@ -51,9 +51,9 @@ void handle_sound2(uint8_t value) {
     // bit 2 = Fleet movement 3     SX8 6.raw
     // bit 3 = Fleet movement 4     SX9 7.raw
     // bit 4 = UFO Hit              SX10 8.raw
-    // bit 5 = not connected (cocktail mode control, to flip the screen)
-    // bit 6 = not connected
-    // bit 7 = not connected
+    // bit 5 = Not connected (cocktail mode control, to flip the screen)
+    // bit 6 = Not connected
+    // bit 7 = Not connected
 }
 
 // reads a value from the port
