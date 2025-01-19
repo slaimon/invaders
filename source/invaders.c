@@ -12,18 +12,49 @@ typedef struct shift {
 
 shift_register_t shift;
 
+// Initialize the shift register
 #define SHIFT_INIT          \
     shift.value = 0x0000;   \
     shift.read_offset = 0   \
 
+// Read out of the shift register
 #define SHIFT_READ \
     shift.value & (0xFF00 >> shift.read_offset)
 
+// Push a value to the shift register
 #define SHIFT_WRITE(x) \
     shift.value = ((x) << 8) | shift.value >> 8
 
+// Set the read offset for the shift register
 #define SHIFT_SETOFFSET(x) \
     shift.read_offset = (x) & 7
+
+
+void handle_sound1(uint8_t value) {
+    // TODO
+
+    // bit 0 = UFO (repeats)        SX0 0.raw
+    // bit 1 = Shot                 SX1 1.raw
+    // bit 2 = Flash (player die)   SX2 2.raw
+    // bit 3 = Invader die          SX3 3.raw
+    // bit 4 = Extended play        SX4
+    // bit 5 = AMP enable           SX5
+    // bit 6 = not connected
+    // bit 7 = not connected
+}
+
+void handle_sound2(uint8_t value) {
+    // TODO
+
+    // bit 0 = Fleet movement 1     SX6 4.raw
+    // bit 1 = Fleet movement 2     SX7 5.raw
+    // bit 2 = Fleet movement 3     SX8 6.raw
+    // bit 3 = Fleet movement 4     SX9 7.raw
+    // bit 4 = UFO Hit              SX10 8.raw
+    // bit 5 = not connected (cocktail mode control, to flip the screen)
+    // bit 6 = not connected
+    // bit 7 = not connected
+}
 
 // reads a value from the port
 uint16_t machine_IN(uint8_t port) {
@@ -43,8 +74,21 @@ void machine_OUT(uint8_t port, uint8_t value) {
         case 2:
             SHIFT_SETOFFSET(value);
             break;
+        case 3:
+            handle_sound1(value);
+            break;
         case 4:
             SHIFT_WRITE(value); 
+            break;
+        case 5:
+            handle_sound2(value);
+            break;
+        case 6:
+            // watchdog port:
+            // "The watchdog checks to see if the system has crashed. If the watchdog
+            // doesn't receive a read/write request after a certain number of clock cycles
+            // it resets the whole machine."
+            //   - akira1310 on reddit
             break;
         
         default:
