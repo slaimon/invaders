@@ -30,12 +30,14 @@ int main (int argc, char** argv) {
     
     printf("Loaded ROM: %s\n", argv[1]);
     puts("--------------------------------------------------\n");
+    size_t cycles = 0;
     while (true) {
         if (handle_cpm_calls(&machine))
-            return 0;
+            break;
         
-        i8080_execute(&machine);
+        cycles += i8080_execute(&machine);
     }
 
+    printf("Elapsed %lu cycles (%lf seconds @ 2MHz)\n\n", cycles, (double)cycles/2000000.0);
     return 0;
 }
