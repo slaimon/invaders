@@ -1,4 +1,4 @@
-#include "viewer.h"
+#include "../include/viewer.h"
 
 void viewer_init(viewer_t* viewer, const char* title, 
                  size_t width, size_t height, size_t scale, 

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "../include/safe.h"
 #include "../include/i8080.h"
+#include "../include/viewer.h"
 
 #define ROM_FILENAME "assets/INVADERS"
 
@@ -97,6 +98,51 @@ void machine_OUT(uint8_t port, uint8_t value) {
     }
 }
 
+#define GETBIT(byte,k)  (((byte)&(1<<(k))) != 0)
+
+#define COLOR_WHITE 0xFF
+#define COLOR_GREEN 0x1C
+#define COLOR_RED   0xE0
+#define GETCOLOR(i,j)                                           \
+    ((i >= 4 && i < 8) ? (COLOR_RED) :                          \
+        ((i >= 23 && i < 30) ? (COLOR_GREEN) :                  \
+            ((i >= 30 && j >= 25 && j < 136) ? (COLOR_GREEN) :  \
+                (COLOR_WHITE))))
+
+#define DISPLAY_WIDTH 224
+#define DISPLAY_HEIGHT 256
+uint8_t texture[DISPLAY_HEIGHT * DISPLAY_WIDTH];
+void invaders_display(i8080_t* machine, viewer_t* viewer) {
+    uint8_t* vram = &machine->mem[0x2400];
+    
+    // The video memory is arranged in 224 rows of 32 bytes. in texture space, each byte represents
+    // a block 1 pixel wide and 8 pixels tall. We scan the video memory starting from the upper left
+    // corner of the texture and working our way right and down, with the indices (i,j) going from
+    // (0,0) to (31,W-1). For each pair (i,j) we read the corresponding byte from video memory and
+    // obtain 8 different pixels from it: the one at position (8*i,j) in the texture and the other 7
+    // underneath it. We get its value by multiplying its state with the color overlay.
+    for (int i = 0; i < 32; ++i) {
+        for(int j = 0; j < DISPLAY_WIDTH; ++j) {
+            uint8_t byte = vram[32*j + 31-i];
+            for(int k = 0; k < 8; ++k) {
+                texture[(8*i+k)*DISPLAY_WIDTH + j] = GETBIT(byte,k) * GETCOLOR(i,j);
+            }
+        }
+    }
+
+    viewer_setFrame(viewer, texture);
+}
+
+void waitForQuitEvent(void) {
+    bool quit = false;
+    SDL_Event event;
+    while(!quit) {
+        SDL_WaitEvent(&event);
+        if (event.type == SDL_QUIT)
+            quit = true;
+    }
+}
+
 void invaders_execute(i8080_t* machine) {
     uint8_t opcode = machine->mem[machine->programCounter];
     uint8_t port = machine->mem[machine->programCounter+1];
@@ -124,6 +170,9 @@ int main (void) {
     }
     fclose(ifp);
 
+    viewer_t viewer;
+    viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332);
+
     i8080_t machine;
     i8080_init(&machine);
     i8080_memory_write(&machine, *program, 0);
@@ -135,6 +184,9 @@ int main (void) {
         if (machine.programCounter == 0x0ADD &&
             machine.A != 0) {
                 printf("Infinite loop reached. Success!\n");
+                invaders_display(&machine, &viewer);
+                viewer_update(&viewer);
+                waitForQuitEvent();
                 return 0;
             }
     }
