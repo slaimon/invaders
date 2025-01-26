@@ -256,6 +256,9 @@ int i8080_interrupt(i8080_t* machine, uint8_t restart) {
     if (restart > 7)
         return I8080_FAIL;
     
+    if (!machine->interrupts)
+        return 0;
+
     RST(restart)
     return 11;
 }
@@ -2259,7 +2262,7 @@ int i8080_execute(i8080_t* machine ) {
         case 0xFB: {
             // EI: enable interrupts
 
-            machine->interrupts= 1;
+            machine->interrupts = 1;
             cycles = 4;
             break;
         }
