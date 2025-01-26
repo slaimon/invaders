@@ -96,8 +96,7 @@ const bool sub_auxcarry_table[] = { 1, 0, 0, 0, 1, 1, 1, 0 };
 
 #define RST(x) \
             PUSH_16BIT(machine->programCounter+1);  \
-            machine->programCounter = (x);          \
-            instructionLength = 0;
+            machine->programCounter = ((x)<<3);
                 
 // RET after termination of a subroutine
 #define RETURN                                  \
@@ -251,10 +250,20 @@ void i8080_memory_write(i8080_t* machine, const bytestream_t src, uint16_t offse
     memcpy(&machine->mem[offset], src.data, src.size);
 }
 
+int i8080_interrupt(i8080_t* machine, uint8_t restart) {
+    if (machine == NULL)
+        return I8080_FAIL;
+    if (restart > 7)
+        return I8080_FAIL;
+    
+    RST(restart)
+    return 11;
+}
+
 int i8080_execute(i8080_t* machine ) {
     bool haltSignal = false;
     
-    if ( machine == NULL )
+    if (machine == NULL)
         return I8080_FAIL;
     
     const uint16_t currentProgramCounter = machine->programCounter;
@@ -1720,7 +1729,8 @@ int i8080_execute(i8080_t* machine ) {
         case 0xC7: {
             // RST 0
             
-            RST(0x0000)
+            RST(0)
+            instructionLength = 0;
             cycles = 11;
             break;
         }
@@ -1795,7 +1805,8 @@ int i8080_execute(i8080_t* machine ) {
         case 0xCF: {
             // RST 1
             
-            RST(0x0008)
+            RST(1)
+            instructionLength = 0;
             cycles = 11;
             break;
         }
@@ -1877,7 +1888,8 @@ int i8080_execute(i8080_t* machine ) {
         case 0xD7: {
             // RST 2
             
-            RST(0x0010)
+            RST(2)
+            instructionLength = 0;
             cycles = 11;
             break;
         }
@@ -1939,7 +1951,8 @@ int i8080_execute(i8080_t* machine ) {
         case 0xDF: {
             // RST 3
             
-            RST(0x0018)
+            RST(3)
+            instructionLength = 0;
             cycles = 11;
             break;
         }
@@ -2026,7 +2039,8 @@ int i8080_execute(i8080_t* machine ) {
         case 0xE7: {
             // RST 4
             
-            RST(0x0020)
+            RST(4)
+            instructionLength = 0;
             cycles = 11;
             break;
         }
@@ -2104,7 +2118,8 @@ int i8080_execute(i8080_t* machine ) {
         case 0xEF: {
             // RST 5
             
-            RST(0x0028)
+            RST(5)
+            instructionLength = 0;
             cycles = 11;
             break;
         }
@@ -2205,7 +2220,8 @@ int i8080_execute(i8080_t* machine ) {
         case 0xF7: {
             // RST 6
             
-            RST(0x0030)
+            RST(6)
+            instructionLength = 0;
             cycles = 11;
             break;
         }
@@ -2274,8 +2290,9 @@ int i8080_execute(i8080_t* machine ) {
         case 0xFF: {
             // RST 7
             
-            RST(0x0038)
+            RST(7)
             cycles = 11;
+            instructionLength = 0;
             break;
         }
     }

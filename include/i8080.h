@@ -80,5 +80,9 @@ void i8080_memory_write(i8080_t* machine, const bytestream_t src, const uint16_t
 // - I8080_FAIL if the machine is invalid
 int i8080_execute(i8080_t* machine);
 
+// Executes an RST-type interrupt; the values accepted for "restart" are 0 through 7.
+// Returns I8080_FAIL if the machine or the restart parameter is invalid, else returns
+// the number of elapsed cycles
+int i8080_interrupt(i8080_t* machine, uint8_t restart);
 
 #endif
