@@ -125,7 +125,7 @@ void invaders_display(i8080_t* machine, viewer_t* viewer) {
         for(int j = 0; j < DISPLAY_WIDTH; ++j) {
             uint8_t byte = vram[32*j + 31-i];
             for(int k = 0; k < 8; ++k) {
-                texture[(8*i+k)*DISPLAY_WIDTH + j] = GETBIT(byte,k) * GETCOLOR(i,j);
+                texture[(8*i+k)*DISPLAY_WIDTH + j] = GETBIT(byte,7-k) * GETCOLOR(i,j);
             }
         }
     }
