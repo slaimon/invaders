@@ -61,7 +61,7 @@ void handle_sound2(uint8_t value) {
 uint16_t machine_IN(uint8_t port) {
     switch (port) {
         case 1:
-            return 3<<1;
+            return 7<<1;
         case 2:
             return 0;
         case 3:
