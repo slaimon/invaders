@@ -205,14 +205,13 @@ int main (void) {
     i8080_memory_write(&machine, *program, 0);
     bytestream_destroy(program);
 
+    SDL_Event event;
+
     SHIFT_INIT;
     while (true) {
         invaders_framecycle(&machine, &viewer);
-        if (machine.programCounter == 0x0ADD &&
-            machine.A != 0) {
-                printf("Infinite loop reached. Success!\n");
-                waitForQuitEvent();
-                return 0;
-            }
+        SDL_PollEvent(&event);
+        if (event.type == SDL_QUIT)
+            return 0;
     }
 }
