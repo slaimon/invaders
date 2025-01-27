@@ -38,6 +38,6 @@ int main (int argc, char** argv) {
         cycles += i8080_execute(&machine);
     }
 
-    printf("Elapsed %llu cycles (%lf seconds @ 2MHz)\n\n", cycles, (double)cycles/2000000.0);
+    printf("Elapsed %lu cycles (%lf seconds @ 2MHz)\n\n", cycles, (double)cycles/2000000.0);
     return 0;
 }
