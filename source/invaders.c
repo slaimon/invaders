@@ -5,6 +5,16 @@
 
 #define ROM_FILENAME "assets/INVADERS"
 
+// Control mapping
+#define KEY_COIN    SDLK_c
+#define KEY_P1START SDLK_1
+#define KEY_P1FIRE  SDLK_UP
+#define KEY_P1LEFT  SDLK_LEFT
+#define KEY_P1RIGHT SDLK_RIGHT
+#define KEY_P2START SDLK_2
+#define KEY_P2FIRE  SDLK_w
+#define KEY_P2LEFT  SDLK_a
+#define KEY_P2RIGHT SDLK_d
 
 typedef struct shift {
     uint16_t value;
@@ -69,11 +79,11 @@ void handle_event(SDL_Event event) {
         return;
 
     switch (event.key.keysym.sym) {
-        case SDLK_c:
+        case KEY_COIN:
             input1 = SETBIT(input1,0);
             printf("coin! %04x\n", input1);
             break;
-        case SDLK_UP:
+        case KEY_P1START:
             input1 = SETBIT(input1,2);
             printf("start! %04x\n", input1);
             break;
