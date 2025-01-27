@@ -60,7 +60,7 @@ bytestream_t* bytestream_read(FILE* ifp) {
 
     size_t read = fread(stream->data, sizeof(uint8_t), size, ifp);
     if (read != size) {
-        fprintf(stderr,"BYTESTREAM_READ WARNING: only read %lu bytes out of %lu\n", read, size);
+        fprintf(stderr,"BYTESTREAM_READ WARNING: only read %llu bytes out of %llu\n", read, size);
     }
 
     return stream;
@@ -74,7 +74,7 @@ int bytestream_write(bytestream_t* stream, FILE* ofp) {
 
     size_t written = fwrite(stream->data, sizeof(uint8_t), stream->size, ofp);
     if (written != stream->size) {
-        fprintf(stderr,"BYTESTREAM_WRITE WARNING: only wrote %lu bytes out of %lu\n", written, stream->size);
+        fprintf(stderr,"BYTESTREAM_WRITE WARNING: only wrote %llu bytes out of %llu\n", written, stream->size);
     }
 
     return 0;
