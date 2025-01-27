@@ -31,6 +31,10 @@ shift_register_t shift;
     shift.read_offset = (x) & 7
 
 
+#define GETBIT(byte,k)      (bool)((byte)&(1<<(k)))
+#define SETBIT(byte,k)      ((byte)|(1<<(k)))
+#define CLEARBIT(byte,k)    ((byte)&!(1<<(k)))
+
 void handle_sound1(uint8_t value) {
     // TODO
 
@@ -57,16 +61,39 @@ void handle_sound2(uint8_t value) {
     // bit 7 = Not connected
 }
 
+uint8_t input1 = 0;
+uint8_t input2 = 0;
+
+void handle_event(SDL_Event event) {
+    if (event.type != SDL_KEYDOWN)
+        return;
+
+    switch (event.key.keysym.sym) {
+        case SDLK_c:
+            input1 = SETBIT(input1,0);
+            printf("coin! %04x\n", input1);
+            break;
+        case SDLK_UP:
+            input1 = SETBIT(input1,2);
+            printf("start! %04x\n", input1);
+            break;
+        
+        default:
+            break;
+    }
+
+}
+
 // reads a value from the port
 uint16_t machine_IN(uint8_t port) {
     switch (port) {
-        case 0:
-            return 1;
+        case 0: // never used
+            return 0;
         case 1:
-            return 0;
+            return input1;
         case 2:
-            return 0;
-        case 3:
+            return input2;
+        case 3: // read shift register
             return SHIFT_READ;
         
         default:
@@ -102,8 +129,6 @@ void machine_OUT(uint8_t port, uint8_t value) {
             exit(1);
     }
 }
-
-#define GETBIT(byte,k)  (((byte)&(1<<(k))) != 0)
 
 #define COLOR_WHITE 0xFF
 #define COLOR_GREEN 0x1C
@@ -212,8 +237,11 @@ int main (void) {
     SHIFT_INIT;
     while (true) {
         invaders_framecycle(&machine, &viewer);
-        SDL_PollEvent(&event);
-        if (event.type == SDL_QUIT)
-            return 0;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT)
+                return 0;
+            else
+                handle_event(event);
+        }
     }
 }
