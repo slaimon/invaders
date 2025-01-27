@@ -75,22 +75,32 @@ uint8_t input1 = 0;
 uint8_t input2 = 0;
 
 void handle_event(SDL_Event event) {
-    if (event.type != SDL_KEYDOWN)
-        return;
-
-    switch (event.key.keysym.sym) {
-        case KEY_COIN:
-            input1 = SETBIT(input1,0);
-            printf("coin! %04x\n", input1);
-            break;
-        case KEY_P1START:
-            input1 = SETBIT(input1,2);
-            printf("start! %04x\n", input1);
-            break;
-        
-        default:
-            break;
-    }
+    if (event.type == SDL_KEYDOWN)
+        switch (event.key.keysym.sym) {
+            case KEY_COIN:
+                input1 = SETBIT(input1,0);
+                printf("coin! %04x\n", input1);
+                return;
+            case KEY_P1START:
+                input1 = SETBIT(input1,2);
+                printf("start! %04x\n", input1);
+                return;
+            
+            default:
+                return;
+        }
+    else if (event.type == SDL_KEYUP)
+        switch (event.key.keysym.sym) {
+            case KEY_COIN:
+                input1 = CLEARBIT(input1,0);
+                return;
+            case KEY_P1START:
+                input1 = CLEARBIT(input1,2);
+                return;
+            
+            default:
+                return;
+        }
 
 }
 
