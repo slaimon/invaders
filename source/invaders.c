@@ -20,11 +20,11 @@ shift_register_t shift;
 
 // Read out of the shift register
 #define SHIFT_READ \
-    shift.value & (0xFF00 >> shift.read_offset)
+    ((shift.value >> (8-shift.read_offset)) & 0xFF)
 
 // Push a value to the shift register
 #define SHIFT_WRITE(x) \
-    shift.value = ((x) << 8) | shift.value >> 8
+    shift.value = ((x) << 8) | (shift.value >> 8)
 
 // Set the read offset for the shift register
 #define SHIFT_SETOFFSET(x) \
@@ -60,8 +60,10 @@ void handle_sound2(uint8_t value) {
 // reads a value from the port
 uint16_t machine_IN(uint8_t port) {
     switch (port) {
+        case 0:
+            return 1;
         case 1:
-            return 7<<1;
+            return 0;
         case 2:
             return 0;
         case 3:

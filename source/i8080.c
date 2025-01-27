@@ -259,7 +259,8 @@ int i8080_interrupt(i8080_t* machine, uint8_t restart) {
     if (!machine->interrupts)
         return 0;
 
-    RST(restart)
+    PUSH_16BIT(machine->programCounter);
+    machine->programCounter = restart << 3;
     return 11;
 }
 
