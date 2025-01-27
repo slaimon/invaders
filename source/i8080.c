@@ -92,16 +92,45 @@ const bool sub_auxcarry_table[] = { 1, 0, 0, 0, 1, 1, 1, 0 };
 #define CALL_IMMEDIATE(x)                           \
             PUSH_16BIT(machine->programCounter+3);  \
             machine->programCounter = (x);          \
-            instructionLength = 0;
+            instructionLength = 0;                  \
+            cycles = 17;
+
+#define CONDITIONAL_CALL(cond)                  \
+            if(cond){                           \
+                tmp1 = READ_16BIT_IMMEDIATE;    \
+                CALL_IMMEDIATE(tmp1)            \
+            }                                   \
+            else {                              \
+                instructionLength = 3;          \
+                cycles = 11;                    \
+            }
+
+#define CONDITIONAL_JUMP(cond)                                  \
+            if(cond)                                            \
+                machine->programCounter = READ_16BIT_IMMEDIATE; \
+            else                                                \
+                machine->programCounter += 3;                   \
+            instructionLength = 0;                              \
+            cycles = 10;
 
 #define RST(x) \
             PUSH_16BIT(machine->programCounter+1);  \
-            machine->programCounter = ((x)<<3);
+            machine->programCounter = ((x)<<3);     \
+            instructionLength = 0;                  \
+            cycles = 11;
                 
 // RET after termination of a subroutine
 #define RETURN                                  \
             POP_16BIT(machine->programCounter)  \
             instructionLength = 0;
+
+#define CONDITIONAL_RETURN(cond) \
+            if(cond) {           \
+                 RETURN          \
+                 cycles = 11;    \
+            }                    \
+            else                 \
+                cycles = 5;
 
 // INR - increment register
 #define INR(x)                              \
@@ -340,7 +369,7 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x07: {
-            // RLC A : rotate left
+            // RLC A - rotate left
             
             machine->carryFlag = machine->A >> 7;
             machine->A = machine->A << 1;
@@ -350,14 +379,14 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x09: {
-            // DAD BC: add register pair to HL
+            // DAD BC - add register pair to HL
             DAD(machine->B, machine->C)
             
             cycles = 10;
             break;
         }
         case 0x0A: {
-            // LDAX BC : load A through BC
+            // LDAX BC - load A through BC
             tmp1 = (machine->B << 8) + machine->C;
             machine->A = machine->mem[tmp1];
             
@@ -394,7 +423,7 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x0F: {
-            // RRC A : rotate right
+            // RRC A - rotate right
             
             machine->carryFlag = machine->A & 1;
             machine->A = machine->A >> 1;
@@ -405,7 +434,7 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x11: {
-            // LXI DE : load immediate to register pair
+            // LXI DE - load immediate to register pair
             
             machine->D = machine->mem[currentProgramCounter+2];
             machine->E = machine->mem[currentProgramCounter+1];
@@ -415,7 +444,7 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x12: {
-            // STAX DE : store accumulator A through register pair DE
+            // STAX DE - store accumulator A through register pair DE
             tmp1 = GET_REGISTER_PAIR(machine->D, machine->E);
             machine->mem[tmp1] = machine->A;
             
@@ -452,7 +481,7 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x17: {
-            // RAL : rotate A through carry bit
+            // RAL - rotate A through carry bit
             
             tmp1 = machine->carryFlag;
             machine->carryFlag = machine->A >> 7;
@@ -470,7 +499,7 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x1A: {
-            // LDAX DE : load A through DE
+            // LDAX DE - load A through DE
             tmp1 = (machine->D << 8) + machine->E;
             machine->A = machine->mem[tmp1];
             
@@ -508,7 +537,7 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x1F: {
-            // RAR : rotate right through carry
+            // RAR - rotate right through carry
             
             tmp1 = machine->carryFlag;
             machine->carryFlag = machine->A & 1;
@@ -519,7 +548,7 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x21: {
-            // LXI HL : load immediate to register pair HL
+            // LXI HL - load immediate to register pair HL
             
             tmp1 = READ_16BIT_IMMEDIATE;
             SET_REGISTER_PAIR(machine->H, machine->L, tmp1);
@@ -529,7 +558,7 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x22: {
-            // SHLD: store HL to immediate address
+            // SHLD - store HL to immediate address
             tmp1 = READ_16BIT_IMMEDIATE;
             machine->mem[tmp1] = machine->L;
             machine->mem[tmp1+1] = machine->H;
@@ -568,7 +597,7 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x27: {
-            // DAA - Decimal Adjust Accumulator : SZAPC
+            // DAA - Decimal Adjust Accumulator
             
             uint8_t add = 0;
             uint8_t carry = machine->carryFlag;
@@ -710,7 +739,7 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0x3A: {
-            // LDA: load A direct
+            // LDA - load A direct
             tmp1 = READ_16BIT_IMMEDIATE;
             machine->A = machine->mem[tmp1];
             
@@ -1653,15 +1682,8 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xC0: {
-            // RNZ
-            
-            if(machine->zeroFlag == 0) {
-                RETURN
-                cycles = 11;
-            }
-            else
-                cycles = 5;
-            
+            // RNZ - return if not zero
+            CONDITIONAL_RETURN(machine->zeroFlag == 0)
             break;
         }
         case 0xC1: {
@@ -1675,40 +1697,19 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xC2: {
-            // JNZ
-            
-            if(machine->zeroFlag == 0)
-                machine->programCounter = READ_16BIT_IMMEDIATE;
-            else
-                machine->programCounter += 3;
-            
-            instructionLength = 0;
-            cycles = 10;
+            // JNZ - jump if not zero
+            CONDITIONAL_JUMP(machine->zeroFlag == 0)
             break;
         }
         case 0xC3:
         case 0xCB: {
             // JMP
-            
-            machine->programCounter = READ_16BIT_IMMEDIATE;
-            
-            instructionLength = 0;
-            cycles = 10;
+            CONDITIONAL_JUMP(true)
             break;
         }
         case 0xC4: {
-            // CNZ
-            
-            if(machine->zeroFlag == 0){
-                tmp1 = READ_16BIT_IMMEDIATE;
-                CALL_IMMEDIATE(tmp1)
-                cycles = 17;
-            }
-            else {
-                instructionLength = 3;
-                cycles = 11;
-            }
-            
+            // CNZ - call if not zero
+            CONDITIONAL_CALL(machine->zeroFlag == 0)
             break;
         }
         case 0xC5: {
@@ -1734,20 +1735,11 @@ int i8080_execute(i8080_t* machine ) {
             // RST 0
             
             RST(0)
-            instructionLength = 0;
-            cycles = 11;
             break;
         }
         case 0xC8: {
-            // RZ
-            
-            if(machine->zeroFlag == 1) {
-                 RETURN
-                 cycles = 11;
-            }
-            else
-                cycles = 5;
-            
+            // RZ - return if zero
+            CONDITIONAL_RETURN(machine->zeroFlag == 1)
             break;
         }
         case 0xC9:
@@ -1759,30 +1751,13 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xCA: {
-            // JZ
-            
-            if(machine->zeroFlag == 1)
-                machine->programCounter = READ_16BIT_IMMEDIATE;
-            else
-                machine->programCounter += 3;
-                
-            instructionLength = 0;
-            cycles = 10;
+            // JZ - jump if zero
+            CONDITIONAL_JUMP(machine->zeroFlag == 1)
             break;
         }
         case 0xCC: {
-            // CZ
-            
-            if(machine->zeroFlag == 1) {
-                tmp1 = READ_16BIT_IMMEDIATE;
-                CALL_IMMEDIATE(tmp1)
-                cycles = 17;
-            }
-            else {
-                instructionLength = 3;
-                cycles = 11;
-            }
-
+            // CZ - call if zero
+            CONDITIONAL_CALL(machine->zeroFlag == 1)
             break;
         }
         case 0xCD:
@@ -1793,8 +1768,6 @@ int i8080_execute(i8080_t* machine ) {
             
             tmp1 = READ_16BIT_IMMEDIATE;
             CALL_IMMEDIATE(tmp1)
-            
-            cycles = 17;
             break;
         }
         case 0xCE: {
@@ -1810,20 +1783,11 @@ int i8080_execute(i8080_t* machine ) {
             // RST 1
             
             RST(1)
-            instructionLength = 0;
-            cycles = 11;
             break;
         }
         case 0xD0: {
-            // RNC
-            
-            if(machine->carryFlag == 0) {
-                 RETURN
-                 cycles = 11;
-            }
-            else
-                cycles = 5;
-            
+            // RNC - return if not carry
+            CONDITIONAL_RETURN(machine->carryFlag == 0)
             break;
         }
         case 0xD1: {
@@ -1837,15 +1801,8 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xD2: {
-            // JNC
-            
-            if(machine->carryFlag == 0)
-                machine->programCounter = READ_16BIT_IMMEDIATE;
-            else
-                machine->programCounter += 3;
-            
-            instructionLength= 0;
-            cycles = 10;
+            // JNC - jump if not carry
+            CONDITIONAL_JUMP(machine->carryFlag == 0)
             break;
         }
         case 0xD3: {
@@ -1856,18 +1813,8 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xD4: {
-            // CNC
-            
-            if(machine->carryFlag == 0) {
-                tmp1 = READ_16BIT_IMMEDIATE;
-                CALL_IMMEDIATE(tmp1)
-                cycles = 17;
-            }
-            else {
-                instructionLength = 3;
-                cycles = 11;
-            }
-                
+            // CNC - call if not carry
+            CONDITIONAL_CALL(machine->carryFlag == 0)
             break;
         }
         case 0xD5: {
@@ -1893,32 +1840,16 @@ int i8080_execute(i8080_t* machine ) {
             // RST 2
             
             RST(2)
-            instructionLength = 0;
-            cycles = 11;
             break;
         }
         case 0xD8: {
-            // RC
-
-            if(machine->carryFlag == 1){
-                 RETURN
-                 cycles = 11;
-            }
-            else
-                cycles = 5;
-            
+            // RC - return if carry
+            CONDITIONAL_RETURN(machine->carryFlag == 1)
             break;
         }
         case 0xDA: {
-            // JC
-            
-            if(machine->carryFlag == 1)
-                machine->programCounter = READ_16BIT_IMMEDIATE;
-            else
-                machine->programCounter += 3;
-            
-            instructionLength = 0;
-            cycles = 10;
+            // JC - jump if carry
+            CONDITIONAL_JUMP(machine->carryFlag == 1)
             break;
         }
         case 0xDB: {
@@ -1929,18 +1860,8 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xDC: {
-            // CC
-            
-            if(machine->carryFlag == 1) {
-                tmp1 = READ_16BIT_IMMEDIATE;
-                CALL_IMMEDIATE(tmp1)
-                cycles = 17;
-            }
-            else {
-                instructionLength = 3;
-                cycles = 11;
-            }
-            
+            // CC - call if carry
+            CONDITIONAL_CALL(machine->carryFlag == 1)
             break;
         }
         case 0xDE: {
@@ -1956,20 +1877,11 @@ int i8080_execute(i8080_t* machine ) {
             // RST 3
             
             RST(3)
-            instructionLength = 0;
-            cycles = 11;
             break;
         }
         case 0xE0: {
-            // RPO
-
-            if(machine->parityFlag == 0){
-                 RETURN
-                 cycles = 11;
-            }
-            else
-                cycles = 5;
-            
+            // RPO - return if parity odd
+            CONDITIONAL_RETURN(machine->parityFlag == 0)
             break;
         }
         case 0xE1: {
@@ -1983,15 +1895,8 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xE2: {
-            // JPO
-
-            if(machine->parityFlag == 0)
-                machine->programCounter = READ_16BIT_IMMEDIATE;
-            else
-                machine->programCounter += 3;
-            
-            instructionLength = 0;
-            cycles = 10;
+            // JPO - jump if parity odd
+            CONDITIONAL_JUMP(machine->parityFlag == 0)
             break;
         }
         case 0xE3: {
@@ -2007,18 +1912,8 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xE4: {
-            // CPO
-            
-            if(machine->parityFlag == 0) {
-                tmp1 = READ_16BIT_IMMEDIATE;
-                CALL_IMMEDIATE(tmp1)
-                cycles = 17;
-            }
-            else {
-                instructionLength = 3;
-                cycles = 11;
-            }
-                
+            // CPO - call if parity odd
+            CONDITIONAL_CALL(machine->parityFlag == 0)
             break;
         }
         case 0xE5: {
@@ -2044,24 +1939,15 @@ int i8080_execute(i8080_t* machine ) {
             // RST 4
             
             RST(4)
-            instructionLength = 0;
-            cycles = 11;
             break;
         }
         case 0xE8: {
-            // RPE
-
-            if(machine->parityFlag == 1){
-                 RETURN
-                 cycles = 11;
-            }
-            else
-                cycles = 5;
-            
+            // RPE - return if parity even
+            CONDITIONAL_RETURN(machine->parityFlag == 1)
             break;
         }
         case 0xE9: {
-            // PCHL: jump to [HL]
+            // PCHL - jump to [HL]
             
             machine->programCounter = (machine->H << 8) + machine->L;
             instructionLength = 0;
@@ -2070,15 +1956,8 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xEA: {
-            // JPE
-            
-            if(machine->parityFlag == 1)
-                machine->programCounter = READ_16BIT_IMMEDIATE;
-            else
-                machine->programCounter += 3;
-            
-            instructionLength = 0;
-            cycles = 10;
+            // JPE - jump if parity even
+            CONDITIONAL_JUMP(machine->parityFlag == 1)
             break;
         }
         case 0xEB: {
@@ -2096,18 +1975,8 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xEC: {
-            // CPE
-
-            if(machine->parityFlag == 1) {
-                tmp1 = READ_16BIT_IMMEDIATE;
-                CALL_IMMEDIATE(tmp1)
-                cycles = 17;
-            }
-            else {
-                instructionLength = 3;
-                cycles = 11;
-            }
-                
+            // CPE - call if parity even
+            CONDITIONAL_CALL(machine->parityFlag == 1)
             break;
         }
         case 0xEE: {
@@ -2123,20 +1992,11 @@ int i8080_execute(i8080_t* machine ) {
             // RST 5
             
             RST(5)
-            instructionLength = 0;
-            cycles = 11;
             break;
         }
         case 0xF0: {
-            // RP
-            
-            if(machine->signFlag == 0) {
-                 RETURN
-                 cycles = 11;
-            }
-            else
-                cycles = 5;
-            
+            // RP - return if plus (positive)
+            CONDITIONAL_RETURN(machine->signFlag == 0)
             break;
         }
         case 0xF1: {
@@ -2157,37 +2017,20 @@ int i8080_execute(i8080_t* machine ) {
             break;
         }
         case 0xF2: {
-            // JP
-
-            if(machine->signFlag == 0)
-                machine->programCounter = READ_16BIT_IMMEDIATE;
-            else
-                machine->programCounter += 3;
-            
-            instructionLength = 0;
-            cycles = 10;
+            // JP - jump if plus (positive)
+            CONDITIONAL_JUMP(machine->signFlag == 0)
             break;
         }
         case 0xF3: {
-            // DI: disable interrupts
+            // DI - disable interrupts
 
             machine->interrupts = 0;
             cycles = 4;
             break;
         }
         case 0xF4: {
-            // CP
-            
-            if(machine->signFlag == 0) {
-                tmp1 = READ_16BIT_IMMEDIATE;
-                CALL_IMMEDIATE(tmp1)
-                cycles = 17;
-            }
-            else {
-                instructionLength = 3;
-                cycles = 11;
-            }
-                
+            // CP - call if plus (positive)
+            CONDITIONAL_CALL(machine->signFlag == 0)
             break;
         }
         case 0xF5: {
@@ -2225,61 +2068,35 @@ int i8080_execute(i8080_t* machine ) {
             // RST 6
             
             RST(6)
-            instructionLength = 0;
-            cycles = 11;
             break;
         }
         case 0xF8: {
-            // RM
-            
-            if(machine->signFlag == 1) {
-                 RETURN
-                 cycles = 11;
-            }
-            else
-                cycles = 5;
-            
+            // RM - return if minus (negative)
+            CONDITIONAL_RETURN(machine->signFlag == 1)
             break;
         }
         case 0xF9: {
-            // SPHL: set SP to HL
+            // SPHL - set SP to HL
             
             machine->stackPointer = (machine->H << 8) + machine->L;
             cycles = 5;
             break;
         }
         case 0xFA: {
-            // JM
-            
-            if(machine->signFlag == 1)
-                machine->programCounter = READ_16BIT_IMMEDIATE;
-            else
-                machine->programCounter += 3;
-            
-            instructionLength = 0;
-            cycles = 10;
+            // JM - jump if minus (negative)
+            CONDITIONAL_JUMP(machine->signFlag == 1)
             break;
         }
         case 0xFB: {
-            // EI: enable interrupts
+            // EI - enable interrupts
 
             machine->interrupts = 1;
             cycles = 4;
             break;
         }
         case 0xFC: {
-            // CM
-            
-            if(machine->signFlag == 1) {
-                tmp1 = READ_16BIT_IMMEDIATE;
-                CALL_IMMEDIATE(tmp1)
-                cycles = 17;
-            }
-            else {
-                instructionLength = 3;
-                cycles = 11;
-            }
-                
+            // CM - call if minus (negative)
+            CONDITIONAL_CALL(machine->signFlag == 1)
             break;
         }
         case 0xFE: {
@@ -2295,8 +2112,6 @@ int i8080_execute(i8080_t* machine ) {
             // RST 7
             
             RST(7)
-            cycles = 11;
-            instructionLength = 0;
             break;
         }
     }
