@@ -79,11 +79,18 @@ void handle_event(SDL_Event event) {
         switch (event.key.keysym.sym) {
             case KEY_COIN:
                 input1 = SETBIT(input1,0);
-                printf("coin! %04x\n", input1);
                 return;
             case KEY_P1START:
                 input1 = SETBIT(input1,2);
-                printf("start! %04x\n", input1);
+                return;
+            case KEY_P1FIRE:
+                input1 = SETBIT(input1,4);
+                return;
+            case KEY_P1LEFT:
+                input1 = SETBIT(input1,5);
+                return;
+            case KEY_P1RIGHT:
+                input1 = SETBIT(input1,6);
                 return;
             
             default:
@@ -96,6 +103,15 @@ void handle_event(SDL_Event event) {
                 return;
             case KEY_P1START:
                 input1 = CLEARBIT(input1,2);
+                return;
+            case KEY_P1FIRE:
+                input1 = CLEARBIT(input1,4);
+                return;
+            case KEY_P1LEFT:
+                input1 = CLEARBIT(input1,5);
+                return;
+            case KEY_P1RIGHT:
+                input1 = CLEARBIT(input1,6);
                 return;
             
             default:
