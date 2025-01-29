@@ -74,15 +74,15 @@ bytestream_t* i8080_memory_read(const i8080_t* machine, const uint16_t size, con
 // Fails with exit() if there is insufficient memory.
 void i8080_memory_write(i8080_t* machine, const bytestream_t src, const uint16_t offset);
 
-// Executes one instruction and returns either the length in bytes of the executed instruction or
-// one of the following values:
-// - I8080_FAIL if the given machine was invalid
-// - I8080_HALT if the cpu has determined it should halt
-//
-// TODO: perché mai dovrebbe restituire la lunghezza dell'istruzione? non può semplicemente
-//       incrementare il program counter? e a quel punto potrei fargli restituire un enum anziché un
-//       int
+// Executes one instruction and returns one of the following values:
+// - the number of cycles elapsed, if the execution was successful
+// - I8080_HALT if the cpu has encountered a halt instruction
+// - I8080_FAIL if the machine is invalid
 int i8080_execute(i8080_t* machine);
 
+// Executes an RST-type interrupt; the values accepted for "restart" are 0 through 7.
+// Returns I8080_FAIL if the machine or the restart parameter is invalid, else returns
+// the number of elapsed cycles
+int i8080_interrupt(i8080_t* machine, uint8_t restart);
 
 #endif
