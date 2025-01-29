@@ -6,15 +6,15 @@
 #define ROM_FILENAME "assets/INVADERS"
 
 // Control mapping
-#define KEY_COIN    SDLK_c
-#define KEY_P1START SDLK_1
-#define KEY_P1FIRE  SDLK_UP
-#define KEY_P1LEFT  SDLK_LEFT
-#define KEY_P1RIGHT SDLK_RIGHT
-#define KEY_P2START SDLK_2
-#define KEY_P2FIRE  SDLK_w
-#define KEY_P2LEFT  SDLK_a
-#define KEY_P2RIGHT SDLK_d
+#define KEY_COIN    SDL_SCANCODE_C
+#define KEY_P1START SDL_SCANCODE_1
+#define KEY_P1FIRE  SDL_SCANCODE_UP
+#define KEY_P1LEFT  SDL_SCANCODE_LEFT
+#define KEY_P1RIGHT SDL_SCANCODE_RIGHT
+#define KEY_P2START SDL_SCANCODE_2
+#define KEY_P2FIRE  SDL_SCANCODE_W
+#define KEY_P2LEFT  SDL_SCANCODE_A
+#define KEY_P2RIGHT SDL_SCANCODE_D
 
 typedef struct shift {
     uint16_t value;
@@ -73,51 +73,37 @@ void handle_sound2(uint8_t value) {
 
 uint8_t input1 = 0;
 uint8_t input2 = 0;
+const Uint8* keystate;
 
-void handle_event(SDL_Event event) {
-    if (event.type == SDL_KEYDOWN)
-        switch (event.key.keysym.sym) {
-            case KEY_COIN:
-                input1 = SETBIT(input1,0);
-                return;
-            case KEY_P1START:
-                input1 = SETBIT(input1,2);
-                return;
-            case KEY_P1FIRE:
-                input1 = SETBIT(input1,4);
-                return;
-            case KEY_P1LEFT:
-                input1 = SETBIT(input1,5);
-                return;
-            case KEY_P1RIGHT:
-                input1 = SETBIT(input1,6);
-                return;
-            
-            default:
-                return;
-        }
-    else if (event.type == SDL_KEYUP)
-        switch (event.key.keysym.sym) {
-            case KEY_COIN:
-                input1 = CLEARBIT(input1,0);
-                return;
-            case KEY_P1START:
-                input1 = CLEARBIT(input1,2);
-                return;
-            case KEY_P1FIRE:
-                input1 = CLEARBIT(input1,4);
-                return;
-            case KEY_P1LEFT:
-                input1 = CLEARBIT(input1,5);
-                return;
-            case KEY_P1RIGHT:
-                input1 = CLEARBIT(input1,6);
-                return;
-            
-            default:
-                return;
-        }
+#define UPDATE_INPUT(key, input, bit) \
+    if (keystate[key])                \
+        input = SETBIT(input,bit);    \
+    else                              \
+        input = CLEARBIT(input,bit)
 
+// returns true if program should quit
+bool process_input(void) {
+    SDL_Event event;
+    SDL_PumpEvents();
+
+    if (keystate[KEY_COIN] && !GETBIT(input1,0))
+        input1 = SETBIT(input1,0);
+    else
+        input1 = CLEARBIT(input1,0);
+    UPDATE_INPUT(KEY_P1START, input1, 2);
+    UPDATE_INPUT(KEY_P1FIRE, input1, 4);
+    UPDATE_INPUT(KEY_P1LEFT, input1, 5);
+    UPDATE_INPUT(KEY_P1RIGHT, input1, 6);
+
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT)
+            return true;
+        if (event.type == SDL_KEYDOWN)
+            if (event.key.keysym.sym == SDLK_ESCAPE)
+                return true;
+    }
+
+    return false;
 }
 
 // reads a value from the port
@@ -199,16 +185,6 @@ void invaders_display(i8080_t* machine, viewer_t* viewer) {
     viewer_setFrame(viewer, texture);
 }
 
-void waitForQuitEvent(void) {
-    bool quit = false;
-    SDL_Event event;
-    while(!quit) {
-        SDL_WaitEvent(&event);
-        if (event.type == SDL_QUIT)
-            quit = true;
-    }
-}
-
 // Handle a single instruction
 int invaders_execute(i8080_t* machine) {
     uint8_t opcode = machine->mem[machine->programCounter];
@@ -268,16 +244,15 @@ int main (void) {
     i8080_memory_write(&machine, *program, 0);
     bytestream_destroy(program);
 
-    SDL_Event event;
+    keystate = SDL_GetKeyboardState(NULL);
 
     SHIFT_INIT;
+    machine.mem[0x20EB] = 1;
     while (true) {
         invaders_framecycle(&machine, &viewer);
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT)
-                return 0;
-            else
-                handle_event(event);
-        }
+        if (process_input())
+            break;
     }
+
+    return 0;
 }
