@@ -1,18 +1,18 @@
-# Space Invaders Emulator
+# Space Invaders Emulator  
 
-This is an emulator for the original Space Invaders machine based on the Intel 8080.
+An emulator for the original *Space Invaders* arcade machine, built around the Intel 8080 processor.  
 
-I originally wrote it in 2019 but never got it to display anything, only running a couple test programs made for the CP/M operating system. So I'm tidying it up a bit and trying to get it to work.
+Originally started in 2019, this project initially ran only a few CP/M test programs but never displayed anything. Now, I'm revisiting it, cleaning up the code, and working toward full functionality.  
 
-I tried to write it in a modular way, so as to be able to easily adapt it to other machines based on the same processor. For instance, I'd like to be able to run a simple Altair 8800 emulator.
+Designed with modularity in mind, this emulator could be adapted to other 8080-based machines, like an Altair 8800.  
 
-The programs in the `examples` folder are meant to illustrate different possible applications of the supplied functions. They are:
+### Example Programs  
 
-- `disassembler`, a disassembler program. It takes two arguments: the input filename and the output filename.
-   For instance, `./disassembler assets/INVADERS listing.txt` produces a disassembly of the original Space Invaders program. You can also do `make listing` to compile the disassembler and run said command.
+The `examples/` folder contains tools to explore and debug ROMs:
 
-- `step`, a program that takes one argument, the name of a ROM file, and executes it step by step. After each step a crude TUI (terminal user interface) is displayed showing the contents of the CPU registers and a disassembly of the instructions that will be executed next. The program quits when the user types either `Q` or `C` (case insensitive) and presses enter.
+- **`disassembler`** – Converts ROMs into human-readable assembly (e.g., `make listing`).  
+- **`step`** – Runs a ROM step by step, displaying CPU registers and upcoming instructions. Quit with `Q` or `C`.  
+- **`tester`** – Simulates CP/M execution for test programs (`make test` to run all).  
+- **`logger`** – Records every CPU step for debugging, useful for comparing against a working emulator (`make log`).  
 
-- `tester`, a program that takes the name of a ROM file and executes it like a CP/M program, handling text output. It is specifically made to run the tests in `./assets/`. You can run all of these tests in sequence by doing `make test`. 
-
-- `logger`, a program to print out a log of all the steps performed by the `tester` program, and the CPU state at each step. It takes three arguments: the input ROM file, the output log file and the maximum number of iterations to perform before halting. This program was especially useful in the early debugging phase of this emulator: if you have another program that does the same thing, but for a working emulator, then all you need to do is compare the two files they produce to find what your implementation is doing wrong. You can run a sample log by doing `make log`. Be careful playing with the `MAX_ITERATIONS` argument: execution logs tend to become very large, very quickly (computers are FAST!)
+All these programs are valid targets for `make`.
