@@ -187,11 +187,14 @@ void invaders_display(i8080_t* machine, viewer_t* viewer) {
 
 // Execute instructions until the cycles budget is spent
 void invaders_execute_cycles(i8080_t* machine, size_t max_cycles) {
-    uint8_t opcode = machine->mem[machine->programCounter];
-    uint8_t port = machine->mem[machine->programCounter+1];
-    
+    uint8_t opcode;
+    uint8_t port;
+
     size_t cycles = 0;
     while(cycles <= max_cycles) {
+        opcode = machine->mem[machine->programCounter];
+        port = machine->mem[machine->programCounter+1];
+
         // IN handler
         if (opcode == 0xDB) {
             machine->A = machine_IN(port);
