@@ -251,7 +251,7 @@ void invaders_framecycle(i8080_t* machine, viewer_t* viewer) {
     viewer_update(viewer);
 }
 
-int main (void) {
+int main (int argc, char** argv) {
     FILE* ifp = safe_fopen(ROM_FILENAME, "rb");
     bytestream_t* program = bytestream_read(ifp);
         if (program == NULL) {
