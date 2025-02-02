@@ -75,6 +75,8 @@ uint8_t input1 = 0;
 uint8_t input2 = 0;
 
 void handle_event(SDL_Event event) {
+    if (event.key.repeat)
+        return;
     if (event.type == SDL_KEYDOWN)
         switch (event.key.keysym.sym) {
             case KEY_COIN:
@@ -197,16 +199,6 @@ void invaders_display(i8080_t* machine, viewer_t* viewer) {
     }
 
     viewer_setFrame(viewer, texture);
-}
-
-void waitForQuitEvent(void) {
-    bool quit = false;
-    SDL_Event event;
-    while(!quit) {
-        SDL_WaitEvent(&event);
-        if (event.type == SDL_QUIT)
-            quit = true;
-    }
 }
 
 // Handle a single instruction
