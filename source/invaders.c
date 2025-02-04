@@ -78,8 +78,18 @@ void print_key_states() {
 
 uint8_t getInput1(void) {
     uint8_t result = 0;
+
+    // bit 0 = CREDIT (1 if deposit)
+    // bit 1 = 2P start (1 if pressed)
+    // bit 2 = 1P start (1 if pressed)
+    // bit 3 = Always 1
+    // bit 4 = 1P shot (1 if pressed)
+    // bit 5 = 1P left (1 if pressed)
+    // bit 6 = 1P right (1 if pressed)
+    // bit 7 = Not connected
     
     ENCODE_KEYSTATE(result, keystates.coin, 0);
+    ENCODE_KEYSTATE(result, keystates.p2_start, 1);
     ENCODE_KEYSTATE(result, keystates.p1_start, 2);
     ENCODE_KEYSTATE(result, keystates.p1_fire, 4);
     ENCODE_KEYSTATE(result, keystates.p1_left, 5);
@@ -90,6 +100,15 @@ uint8_t getInput1(void) {
 
 uint8_t getInput2(void) {
     uint8_t result = 0;
+
+    // bit 0 = DIP3 00 = 3 ships  10 = 5 ships
+    // bit 1 = DIP5 01 = 4 ships  11 = 6 ships
+    // bit 2 = Tilt
+    // bit 3 = DIP6 0 = extra ship at 1500, 1 = extra ship at 1000
+    // bit 4 = P2 shot (1 if pressed)
+    // bit 5 = P2 left (1 if pressed)
+    // bit 6 = P2 right (1 if pressed)
+    // bit 7 = DIP7 Coin info displayed in demo screen 0=ON
 
     ENCODE_KEYSTATE(result, keystates.tilt, 2);
 
