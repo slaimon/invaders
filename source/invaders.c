@@ -7,6 +7,7 @@
 
 // Control mapping
 #define KEY_COIN    SDLK_c
+#define KEY_TILT    SDLK_DELETE
 #define KEY_P1START SDLK_1
 #define KEY_P1FIRE  SDLK_UP
 #define KEY_P1LEFT  SDLK_LEFT
@@ -42,6 +43,7 @@ shift_register_t shift;
 
 typedef struct key_states {
     bool coin;
+    bool tilt;
 
     bool p1_start;
     bool p1_fire;
@@ -87,7 +89,11 @@ uint8_t getInput1(void) {
 }
 
 uint8_t getInput2(void) {
-    return 0;
+    uint8_t result = 0;
+
+    ENCODE_KEYSTATE(result, keystates.tilt, 2);
+
+    return result;
 }
 
 void handle_sound1(uint8_t value) {
@@ -132,6 +138,9 @@ void handle_keyboard_event(SDL_Event event) {
     switch (event.key.keysym.sym) {
         case KEY_COIN:
             keystates.coin = new_state;
+            break;
+        case KEY_TILT:
+            keystates.tilt = new_state;
             break;
         case KEY_P1START:
             keystates.p1_start = new_state;
