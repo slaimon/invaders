@@ -116,7 +116,8 @@ void handle_sound2(uint8_t value) {
     // bit 7 = Not connected
 }
 
-void handle_event(SDL_Event event) {
+// Given a keyboard event, use it to update the program's state
+void handle_keyboard_event(SDL_Event event) {
     if (event.key.repeat)
         return;
 
@@ -150,8 +151,9 @@ void handle_event(SDL_Event event) {
     }
 }
 
-// returns true if program should quit
-bool process_input(void) {
+// Polls for all events in the SDL queue.
+// Returns true if the program should quit.
+bool process_events(void) {
     SDL_Event event;
 
     while (SDL_PollEvent(&event)) {
@@ -161,13 +163,13 @@ bool process_input(void) {
             if (event.key.keysym.sym == SDLK_ESCAPE)
                 return true;
         
-        handle_event(event);
+        handle_keyboard_event(event);
     }
 
     return false;
 }
 
-// reads a value from the port
+// Reads a value from the port
 uint16_t machine_IN(uint8_t port) {
     switch (port) {
         case 0: // never used
@@ -185,6 +187,7 @@ uint16_t machine_IN(uint8_t port) {
     }
 }
 
+// Writes a value to the port
 void machine_OUT(uint8_t port, uint8_t value) {
     switch (port) {
         case 2:
@@ -216,25 +219,30 @@ void machine_OUT(uint8_t port, uint8_t value) {
 #define COLOR_WHITE 0xFF
 #define COLOR_GREEN 0x1C
 #define COLOR_RED   0xE0
-#define GETBIT(byte,k)      (bool)((byte)&(1<<(k)))
 #define GETCOLOR(i,j)                                           \
     ((i >= 4 && i < 8) ? (COLOR_RED) :                          \
         ((i >= 23 && i < 30) ? (COLOR_GREEN) :                  \
             ((i >= 30 && j >= 25 && j < 136) ? (COLOR_GREEN) :  \
                 (COLOR_WHITE))))
 
+#define GETBIT(byte,k) \
+    (bool) ((byte)&(1<<(k)))
+
 #define DISPLAY_WIDTH 224
 #define DISPLAY_HEIGHT 256
 uint8_t texture[DISPLAY_HEIGHT * DISPLAY_WIDTH];
+
+// Update the viewer with the machine's state
 void invaders_display(i8080_t* machine, viewer_t* viewer) {
     uint8_t* vram = &machine->mem[0x2400];
-    
-    // The video memory is arranged in 224 rows of 32 bytes. in texture space, each byte represents
-    // a block 1 pixel wide and 8 pixels tall. We scan the video memory starting from the upper left
-    // corner of the texture and working our way right and down, with the indices (i,j) going from
-    // (0,0) to (31,W-1). For each pair (i,j) we read the corresponding byte from video memory and
-    // obtain 8 different pixels from it: the one at position (8*i,j) in the texture and the other 7
-    // underneath it. We get its value by multiplying its state with the color overlay.
+    /*
+        The video memory is arranged in 224 rows of 32 bytes. in texture space, each byte represents
+        a block 1 pixel wide and 8 pixels tall. We scan the video memory starting from the upper left
+        corner of the texture and working our way right and down, with the indices (i,j) going from
+        (0,0) to (31,W-1). For each pair (i,j) we read the corresponding byte from video memory and
+        obtain 8 different pixels from it: the one at position (8*i,j) in the texture and the other 7
+        underneath it. We get its value by multiplying its state with the color overlay.
+    */
     for (int i = 0; i < 32; ++i) {
         for(int j = 0; j < DISPLAY_WIDTH; ++j) {
             uint8_t byte = vram[32*j + 31-i];
@@ -309,7 +317,7 @@ int main (void) {
     KEYSTATES_INIT;
     while (true) {
         invaders_frame(&machine, &viewer);
-        if (process_input())
+        if (process_events())
             break;
     }
 
