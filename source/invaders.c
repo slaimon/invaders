@@ -16,7 +16,7 @@
 #define KEY_P2LEFT  SDLK_a
 #define KEY_P2RIGHT SDLK_d
 
-typedef struct shift {
+typedef struct shift_register {
     uint16_t value;
     uint8_t read_offset;
 } shift_register_t;
@@ -40,10 +40,55 @@ shift_register_t shift;
 #define SHIFT_SETOFFSET(x) \
     shift.read_offset = (x) & 7
 
+typedef struct key_states {
+    bool coin;
 
-#define GETBIT(byte,k)      (bool)((byte)&(1<<(k)))
-#define SETBIT(byte,k)      ((byte)|(1<<(k)))
-#define CLEARBIT(byte,k)    ((byte)&!(1<<(k)))
+    bool p1_start;
+    bool p1_fire;
+    bool p1_left;
+    bool p1_right;
+
+    bool p2_start;
+    bool p2_fire;
+    bool p2_left;
+    bool p2_right;
+} key_states_t;
+
+key_states_t keystates;
+
+// Initialize the keyboard state
+#define KEYSTATES_INIT      \
+    memset(&keystates, 0, sizeof(key_states_t))
+
+// Encode a key's state into the kth bit of byte
+#define ENCODE_KEYSTATE(byte, state, k)   \
+    if(state) byte |= (1<<(k)); else byte &= ~(1<<(k))
+
+void print_key_states() {
+    printf("%d %d %d %d %d\n",
+        keystates.coin,
+        keystates.p1_start,
+        keystates.p1_fire,
+        keystates.p1_left,
+        keystates.p1_right
+    );
+}
+
+uint8_t getInput1(void) {
+    uint8_t result = 0;
+    
+    ENCODE_KEYSTATE(result, keystates.coin, 0);
+    ENCODE_KEYSTATE(result, keystates.p1_start, 2);
+    ENCODE_KEYSTATE(result, keystates.p1_fire, 4);
+    ENCODE_KEYSTATE(result, keystates.p1_left, 5);
+    ENCODE_KEYSTATE(result, keystates.p1_right, 6);
+    
+    return result;       
+}
+
+uint8_t getInput2(void) {
+    return 0;
+}
 
 void handle_sound1(uint8_t value) {
     // TODO
@@ -71,55 +116,38 @@ void handle_sound2(uint8_t value) {
     // bit 7 = Not connected
 }
 
-uint8_t input1 = 0;
-uint8_t input2 = 0;
-
 void handle_event(SDL_Event event) {
     if (event.key.repeat)
         return;
-    if (event.type == SDL_KEYDOWN)
-        switch (event.key.keysym.sym) {
-            case KEY_COIN:
-                input1 = SETBIT(input1,0);
-                return;
-            case KEY_P1START:
-                input1 = SETBIT(input1,2);
-                return;
-            case KEY_P1FIRE:
-                input1 = SETBIT(input1,4);
-                return;
-            case KEY_P1LEFT:
-                input1 = SETBIT(input1,5);
-                return;
-            case KEY_P1RIGHT:
-                input1 = SETBIT(input1,6);
-                return;
-            
-            default:
-                return;
-        }
-    else if (event.type == SDL_KEYUP)
-        switch (event.key.keysym.sym) {
-            case KEY_COIN:
-                input1 = CLEARBIT(input1,0);
-                return;
-            case KEY_P1START:
-                input1 = CLEARBIT(input1,2);
-                return;
-            case KEY_P1FIRE:
-                input1 = CLEARBIT(input1,4);
-                return;
-            case KEY_P1LEFT:
-                input1 = CLEARBIT(input1,5);
-                return;
-            case KEY_P1RIGHT:
-                input1 = CLEARBIT(input1,6);
-                return;
-            
-            default:
-                return;
-        }
 
+    bool new_state;
+    if (event.type == SDL_KEYDOWN)
+        new_state = true;
+    else if (event.type == SDL_KEYUP)
+        new_state = false;
+    else
+        return;
+    
+    switch (event.key.keysym.sym) {
+        case KEY_COIN:
+            keystates.coin = new_state;
+            break;
+        case KEY_P1START:
+            keystates.p1_start = new_state;
+            break;
+        case KEY_P1FIRE:
+            keystates.p1_fire = new_state;
+            break;
+        case KEY_P1LEFT:
+            keystates.p1_left = new_state;
+            break;
+        case KEY_P1RIGHT:
+            keystates.p1_right = new_state;
+            break;
+        
+        default:
+            return;
+    }
 }
 
 // reads a value from the port
@@ -128,9 +156,9 @@ uint16_t machine_IN(uint8_t port) {
         case 0: // never used
             return 0;
         case 1:
-            return input1;
+            return getInput1();
         case 2:
-            return input2;
+            return getInput2();
         case 3: // read shift register
             return SHIFT_READ;
         
@@ -171,6 +199,7 @@ void machine_OUT(uint8_t port, uint8_t value) {
 #define COLOR_WHITE 0xFF
 #define COLOR_GREEN 0x1C
 #define COLOR_RED   0xE0
+#define GETBIT(byte,k)      (bool)((byte)&(1<<(k)))
 #define GETCOLOR(i,j)                                           \
     ((i >= 4 && i < 8) ? (COLOR_RED) :                          \
         ((i >= 23 && i < 30) ? (COLOR_GREEN) :                  \
@@ -263,6 +292,7 @@ int main (void) {
     SDL_Event event;
 
     SHIFT_INIT;
+    KEYSTATES_INIT;
     while (true) {
         invaders_framecycle(&machine, &viewer);
         while (SDL_PollEvent(&event)) {
