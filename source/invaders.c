@@ -62,9 +62,15 @@ key_states_t keystates;
 #define KEYSTATES_INIT      \
     memset(&keystates, 0, sizeof(key_states_t))
 
-// Encode a key's state into the kth bit of byte
-#define ENCODE_KEYSTATE(byte, state, k)   \
-    if(state) byte |= (1<<(k)); else byte &= ~(1<<(k))
+#define SETBIT(byte,k)  \
+    byte |= (1<<(k))
+
+#define CLRBIT(byte,k)  \
+    byte &= ~(1<<(k))
+
+// Encode a boolean condition into the kth bit of byte
+#define ENCODE_BOOLEAN(byte, condition, k)   \
+    if(condition) SETBIT(byte,k); else CLRBIT(byte,k)
 
 void print_key_states() {
     printf("%d %d %d %d %d\n",
@@ -74,6 +80,76 @@ void print_key_states() {
         keystates.p1_left,
         keystates.p1_right
     );
+}
+
+typedef struct config {
+    uint8_t max_lives;
+    bool bonus_ship_at_1k_points;
+    bool coin_info_on_menu;
+} config_t;
+
+config_t config;
+
+void config_init(uint8_t max_lives, bool bonus, bool coin_info) {
+    config.max_lives = max_lives;
+    config.bonus_ship_at_1k_points = bonus;
+    config.coin_info_on_menu = coin_info;
+}
+
+void config_fromFile(char* fname) {
+    FILE* ifp = safe_fopen(fname, "r");
+
+    int _maxlives;
+    char _bonus;
+    char _coin_info;
+
+    int scan = fscanf(ifp, "max lives: %d\nbonus at 1k points: %c\ncoin info on menu: %c\n",
+        &_maxlives,
+        &_bonus,
+        &_coin_info
+    );
+
+    if (scan != 3) {
+        fprintf(stderr, "ERROR: config_fromFile: failed parsing file %s\n", fname);
+        exit(EXIT_FAILURE);
+    }
+
+    if(_maxlives < 3 && _maxlives > 6) {
+        fprintf(stderr, "ERROR: config_fromFile: invalid max lives value: %d.\nOnly range 3-6 is accepted.\n", _maxlives);
+        exit(EXIT_FAILURE);
+    }
+    else
+        config.max_lives = _maxlives;
+    
+    if (_bonus == 'Y')
+        config.bonus_ship_at_1k_points = true;
+    else if (_bonus == 'N')
+        config.bonus_ship_at_1k_points = false;
+    else {
+        fprintf(stderr, "ERROR: config_fromFile: failed to parse truth value: %c\n", _bonus);
+        exit(EXIT_FAILURE);
+    }
+
+    if (_coin_info == 'Y')
+        config.coin_info_on_menu = true;
+    else if (_coin_info == 'N')
+        config.coin_info_on_menu = false;
+    else {
+        fprintf(stderr, "ERROR: config_fromFile: failed to parse truth value: %c\n", _coin_info);
+        exit(EXIT_FAILURE);
+    }
+    
+    fclose(ifp);
+}
+
+void config_toFile(char* fname) {
+    FILE* ofp = safe_fopen(fname, "w");
+    fprintf(ofp, "max lives: %d\nbonus at 1k points: %c\ncoin info on menu: %c\n",
+        config.max_lives,
+        (config.bonus_ship_at_1k_points) ? ('Y') : ('N'),
+        (config.coin_info_on_menu) ? ('Y') : ('N')
+    );
+    fclose(ofp);
 }
 
 uint8_t getInput1(void) {
@@ -88,12 +164,12 @@ uint8_t getInput1(void) {
     // bit 6 = 1P right (1 if pressed)
     // bit 7 = Not connected
     
-    ENCODE_KEYSTATE(result, keystates.coin, 0);
-    ENCODE_KEYSTATE(result, keystates.p2_start, 1);
-    ENCODE_KEYSTATE(result, keystates.p1_start, 2);
-    ENCODE_KEYSTATE(result, keystates.p1_fire, 4);
-    ENCODE_KEYSTATE(result, keystates.p1_left, 5);
-    ENCODE_KEYSTATE(result, keystates.p1_right, 6);
+    ENCODE_BOOLEAN(result, keystates.coin, 0);
+    ENCODE_BOOLEAN(result, keystates.p2_start, 1);
+    ENCODE_BOOLEAN(result, keystates.p1_start, 2);
+    ENCODE_BOOLEAN(result, keystates.p1_fire, 4);
+    ENCODE_BOOLEAN(result, keystates.p1_left, 5);
+    ENCODE_BOOLEAN(result, keystates.p1_right, 6);
     
     return result;       
 }
@@ -110,7 +186,29 @@ uint8_t getInput2(void) {
     // bit 6 = P2 right (1 if pressed)
     // bit 7 = DIP7 Coin info displayed in demo screen 0=ON
 
-    ENCODE_KEYSTATE(result, keystates.tilt, 2);
+    ENCODE_BOOLEAN(result, keystates.tilt, 2);
+
+    switch(config.max_lives) {
+        case 3:
+            break;
+        case 4:
+            SETBIT(result,0);
+            break;
+        case 5:
+            SETBIT(result,1);
+            break;
+        case 6:
+            SETBIT(result,0);
+            SETBIT(result,1);
+            break;
+        
+        default:
+            fprintf(stderr, "ERROR: getInput2: invalid max_lives value %d\n", config.max_lives);
+            exit(EXIT_FAILURE);
+    }
+
+    ENCODE_BOOLEAN(result, config.bonus_ship_at_1k_points, 3);
+    ENCODE_BOOLEAN(result, !config.coin_info_on_menu, 7);
 
     return result;
 }
@@ -340,6 +438,8 @@ int main (void) {
     i8080_init(&machine);
     i8080_memory_write(&machine, *program, 0);
     bytestream_destroy(program);
+
+    config_fromFile("config.cfg");
 
     SHIFT_INIT;
     KEYSTATES_INIT;
