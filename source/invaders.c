@@ -103,14 +103,14 @@ void config_fromFile(char* fname) {
     char _bonus;
     char _coin_info;
 
-    int scan = fscanf(ifp, "max lives: %d\nbonus at 1k points: %c\ncoin info on menu: %c\n",
+    int scan = fscanf(ifp, "max lives (3-6): %d\nbonus at 1k points (Y/N): %c\ncoin info on demo screen (Y/N): %c\n",
         &_maxlives,
         &_bonus,
         &_coin_info
     );
 
     if (scan != 3) {
-        fprintf(stderr, "ERROR: config_fromFile: failed parsing file %s\n", fname);
+        fprintf(stderr, "ERROR: config_fromFile: failed to parse file %s\n", fname);
         exit(EXIT_FAILURE);
     }
 
@@ -144,7 +144,7 @@ void config_fromFile(char* fname) {
 
 void config_toFile(char* fname) {
     FILE* ofp = safe_fopen(fname, "w");
-    fprintf(ofp, "max lives: %d\nbonus at 1k points: %c\ncoin info on menu: %c\n",
+    fprintf(ofp, "max lives (3-6): %d\nbonus at 1k points (Y/N): %c\ncoin info on demo screen (Y/N): %c\n",
         config.max_lives,
         (config.bonus_ship_at_1k_points) ? ('Y') : ('N'),
         (config.coin_info_on_menu) ? ('Y') : ('N')
