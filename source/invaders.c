@@ -188,24 +188,12 @@ uint8_t getInput2(void) {
 
     ENCODE_BOOLEAN(result, keystates.tilt, 2);
 
-    switch(config.max_lives) {
-        case 3:
-            break;
-        case 4:
-            SETBIT(result,0);
-            break;
-        case 5:
-            SETBIT(result,1);
-            break;
-        case 6:
-            SETBIT(result,0);
-            SETBIT(result,1);
-            break;
-        
-        default:
-            fprintf(stderr, "ERROR: getInput2: invalid max_lives value %d\n", config.max_lives);
-            exit(EXIT_FAILURE);
+    if (config.max_lives < 3 && config.max_lives > 6) {
+        fprintf(stderr, "ERROR: getInput2: invalid max_lives value %d\n", config.max_lives);
+        exit(EXIT_FAILURE);
     }
+    else
+        result |= config.max_lives - 3;
 
     ENCODE_BOOLEAN(result, config.bonus_ship_at_1k_points, 3);
     ENCODE_BOOLEAN(result, !config.coin_info_on_menu, 7);
