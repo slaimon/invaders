@@ -316,10 +316,13 @@ void invaders_execute_cycles(i8080_t* machine, size_t max_cycles) {
 void invaders_frame(i8080_t* machine, viewer_t* viewer) {
     size_t half_frame = 8.333*2000; // CPU cycles between two interrupts
 
+    // emulate one whole frame
     invaders_execute_cycles(machine, half_frame);
     i8080_interrupt(machine, 1);
     invaders_execute_cycles(machine, half_frame);
     i8080_interrupt(machine, 2);
+
+    // update the view
     invaders_display(machine, viewer);
     viewer_update(viewer);
 }
