@@ -62,8 +62,8 @@ key_states_t keystates;
 #define KEYSTATES_INIT      \
     memset(&keystates, 0, sizeof(key_states_t))
 
-// Encode a key's state into the kth bit of byte
-#define ENCODE_KEYSTATE(byte, state, k)   \
+// Encode a boolean condition into the kth bit of byte
+#define WRITE_TO_BIT(byte, state, k)   \
     if(state) byte |= (1<<(k)); else byte &= ~(1<<(k))
 
 void print_key_states() {
@@ -88,12 +88,12 @@ uint8_t getInput1(void) {
     // bit 6 = 1P right (1 if pressed)
     // bit 7 = Not connected
     
-    ENCODE_KEYSTATE(result, keystates.coin, 0);
-    ENCODE_KEYSTATE(result, keystates.p2_start, 1);
-    ENCODE_KEYSTATE(result, keystates.p1_start, 2);
-    ENCODE_KEYSTATE(result, keystates.p1_fire, 4);
-    ENCODE_KEYSTATE(result, keystates.p1_left, 5);
-    ENCODE_KEYSTATE(result, keystates.p1_right, 6);
+    WRITE_TO_BIT(result, keystates.coin, 0);
+    WRITE_TO_BIT(result, keystates.p2_start, 1);
+    WRITE_TO_BIT(result, keystates.p1_start, 2);
+    WRITE_TO_BIT(result, keystates.p1_fire, 4);
+    WRITE_TO_BIT(result, keystates.p1_left, 5);
+    WRITE_TO_BIT(result, keystates.p1_right, 6);
     
     return result;       
 }
@@ -110,7 +110,7 @@ uint8_t getInput2(void) {
     // bit 6 = P2 right (1 if pressed)
     // bit 7 = DIP7 Coin info displayed in demo screen 0=ON
 
-    ENCODE_KEYSTATE(result, keystates.tilt, 2);
+    WRITE_TO_BIT(result, keystates.tilt, 2);
 
     return result;
 }
