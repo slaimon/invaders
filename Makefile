@@ -1,4 +1,4 @@
-CC = gcc
+CC = g++
 CFLAGS = -Wall -pedantic -g
 
 BIN = bin
@@ -10,7 +10,7 @@ EXAMPLES = examples
 
 ifeq ($(OS),Windows_NT)
     # link against SDL...
-	SDL = boh
+	SDL = -I SDL2/include -L SDL2/lib
 else
 	SDL = `sdl2-config --cflags --libs`
 endif
