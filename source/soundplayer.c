@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 
-#include "safe.h"
-#include "soundplayer.h"
+#include "../include/safe.h"
+#include "../include/soundplayer.h"
 
 sound_buffer_t* load_file(const char* fname) {
     sound_buffer_t* sound = safe_malloc(sizeof(sound_buffer_t));
