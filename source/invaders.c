@@ -140,6 +140,15 @@ uint8_t sound2 = 0;
 void handle_sound1(uint8_t value) {
     uint8_t* prev = &sound1;
 
+    if (GETBIT(value, 0)) {
+        soundplayer_play(sp, UFO_FLYING);
+        WRITE_TO_BIT(sound1, true, 0);
+    }
+    else if (GETBIT(sound1, 0)) {
+        SDL_ClearQueuedAudio(sp.device);
+        WRITE_TO_BIT(sound1, false, 0);
+    }
+
     PLAY_SOUND(PLAYER_SHOOT, 1);
     PLAY_SOUND(PLAYER_DEATH, 2);
     PLAY_SOUND(INVADER_DEATH, 3);
