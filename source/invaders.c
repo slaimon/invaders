@@ -86,11 +86,11 @@ typedef struct key_states {
 key_states_t keystates;
 
 // Initialize the keyboard state
-#define KEYSTATES_INIT      \
+#define KEYSTATES_INIT \
     memset(&keystates, 0, sizeof(key_states_t))
 
 // Encode a boolean condition into the kth bit of byte
-#define WRITE_TO_BIT(byte, state, k)   \
+#define WRITE_TO_BIT(byte, state, k) \
     if(state) byte |= (1<<(k)); else byte &= ~(1<<(k))
 
 // Returns the kth bit of byte
@@ -128,30 +128,31 @@ uint8_t getInput2(void) {
 }
 
 soundplayer_t sp;
+uint8_t sound1 = 0;
+uint8_t sound2 = 0;
+
+#define PLAY_SOUND(sound_id, k)                      \
+    if (!(GETBIT(*prev, k)) && (GETBIT(value, k))) { \
+        soundplayer_play(sp, sound_id);              \
+    }                                                \
+    WRITE_TO_BIT(*prev, GETBIT(value,k), k)
 
 void handle_sound1(uint8_t value) {
-    // TODO
+    uint8_t* prev = &sound1;
 
-    // bit 0 = UFO (repeats)        SX0 0.raw
-    // bit 1 = Shot                 SX1 1.raw
-    // bit 2 = Player death         SX2 2.raw
-    // bit 3 = Invader death        SX3 3.raw
-    // bit 4 = Extended play        SX4
-    // bit 5 = Toggle amplifier     SX5
-
-    if (GETBIT(value, 1)) {
-        soundplayer_play(sp, PLAYER_SHOOT);
-    }
+    PLAY_SOUND(PLAYER_SHOOT, 1);
+    PLAY_SOUND(PLAYER_DEATH, 2);
+    PLAY_SOUND(INVADER_DEATH, 3);
 }
 
 void handle_sound2(uint8_t value) {
-    // TODO
+    uint8_t* prev = &sound2;
 
-    // bit 0 = Fleet movement 1     SX6 4.raw
-    // bit 1 = Fleet movement 2     SX7 5.raw
-    // bit 2 = Fleet movement 3     SX8 6.raw
-    // bit 3 = Fleet movement 4     SX9 7.raw
-    // bit 4 = UFO Hit              SX10 8.raw
+    PLAY_SOUND(STEP1, 0);
+    PLAY_SOUND(STEP2, 1);
+    PLAY_SOUND(STEP3, 2);
+    PLAY_SOUND(STEP4, 3);
+    PLAY_SOUND(UFO_HIT, 4);
 }
 
 // Given a keyboard event, use it to update the program's state
