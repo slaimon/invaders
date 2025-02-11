@@ -18,6 +18,18 @@ const char* sfx_files[] = {
     "assets/sound/ufo_hit.wav"
 };
 
+typedef enum sfx {
+    PLAYER_SHOOT,
+    PLAYER_DEATH,
+    STEP1,
+    STEP2,
+    STEP3,
+    STEP4,
+    INVADER_DEATH,
+    UFO_FLYING,
+    UFO_HIT
+} sfx_t;
+
 // Control mapping
 #define KEY_COIN    SDLK_c
 #define KEY_TILT    SDLK_DELETE
@@ -79,6 +91,10 @@ key_states_t keystates;
 #define WRITE_TO_BIT(byte, state, k)   \
     if(state) byte |= (1<<(k)); else byte &= ~(1<<(k))
 
+// Returns the kth bit of byte
+#define GETBIT(byte,k) \
+    (bool) ((byte)&(1<<(k)))
+
 void print_key_states() {
     printf("%d %d %d %d %d\n",
         keystates.coin,
@@ -91,15 +107,6 @@ void print_key_states() {
 
 uint8_t getInput1(void) {
     uint8_t result = 0;
-
-    // bit 0 = CREDIT (1 if deposit)
-    // bit 1 = 2P start (1 if pressed)
-    // bit 2 = 1P start (1 if pressed)
-    // bit 3 = Always 1
-    // bit 4 = 1P shot (1 if pressed)
-    // bit 5 = 1P left (1 if pressed)
-    // bit 6 = 1P right (1 if pressed)
-    // bit 7 = Not connected
     
     WRITE_TO_BIT(result, keystates.coin, 0);
     WRITE_TO_BIT(result, keystates.p2_start, 1);
@@ -128,6 +135,8 @@ uint8_t getInput2(void) {
     return result;
 }
 
+soundplayer_t sp;
+
 void handle_sound1(uint8_t value) {
     // TODO
 
@@ -137,8 +146,10 @@ void handle_sound1(uint8_t value) {
     // bit 3 = Invader death        SX3 3.raw
     // bit 4 = Extended play        SX4
     // bit 5 = Toggle amplifier     SX5
-    // bit 6 = Not connected
-    // bit 7 = Not connected
+
+    if (GETBIT(value, 1)) {
+        soundplayer_play(sp, PLAYER_SHOOT);
+    }
 }
 
 void handle_sound2(uint8_t value) {
@@ -149,9 +160,6 @@ void handle_sound2(uint8_t value) {
     // bit 2 = Fleet movement 3     SX8 6.raw
     // bit 3 = Fleet movement 4     SX9 7.raw
     // bit 4 = UFO Hit              SX10 8.raw
-    // bit 5 = Not connected (cocktail mode control, to flip the screen)
-    // bit 6 = Not connected
-    // bit 7 = Not connected
 }
 
 // Given a keyboard event, use it to update the program's state
@@ -266,9 +274,6 @@ void machine_OUT(uint8_t port, uint8_t value) {
             ((i >= 30 && j >= 25 && j < 136) ? (COLOR_GREEN) :  \
                 (COLOR_WHITE))))
 
-#define GETBIT(byte,k) \
-    (bool) ((byte)&(1<<(k)))
-
 #define DISPLAY_WIDTH 224
 #define DISPLAY_HEIGHT 256
 uint8_t texture[DISPLAY_HEIGHT * DISPLAY_WIDTH];
@@ -351,6 +356,7 @@ int main (void) {
 
     viewer_t viewer;
     viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332);
+    soundplayer_init(&sp, sfx_files, sizeof(sfx_files)/sizeof(sfx_files[0]));
 
     i8080_t machine;
     i8080_init(&machine);

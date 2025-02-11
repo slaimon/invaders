@@ -20,7 +20,7 @@ test: ./tester
 log: ./logger
 	./logger ./assets/8080EX1.COM ./mylog.txt 1000
 
-./invaders: $(BIN)/invaders.o $(BIN)/viewer.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
+./invaders: $(BIN)/invaders.o $(BIN)/soundplayer.o $(BIN)/viewer.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
 	$(CC) $(CFLAGS) $^ -o $@ `sdl2-config --cflags --libs`
 
 ./logger: $(BIN)/logger.o $(BIN)/i8080_cpm.o $(BIN)/i8080_debug.o $(BIN)/i8080_disassembler.o $(BIN)/i8080.o $(BIN)/bytestream.o $(BIN)/safe.o
@@ -38,6 +38,7 @@ log: ./logger
 $(BIN)/%.o: $(SRC)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 $(BIN)/invaders.o: $(HDR)/i8080.h $(HDR)/safe.h
+$(BIN)/soundplayer.o: $(HDR)/soundplayer.h $(HDR)/safe.h
 $(BIN)/viewer.o: $(HDR)/viewer.h
 $(BIN)/logger.o: $(EXAMPLES)/logger.c $(HDR)/i8080_cpm.h $(HDR)/i8080_debug.h $(HDR)/i8080.h $(HDR)/bytestream.h $(HDR)/safe.h
 	$(CC) $(CFLAGS) -c $< -o $@
