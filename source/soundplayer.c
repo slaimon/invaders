@@ -8,8 +8,9 @@ sound_buffer_t* load_file(const char* fname) {
     sound_buffer_t* sound = safe_malloc(sizeof(sound_buffer_t));
 
     SDL_AudioSpec* r;
+    SDL_AudioSpec s;
     SDL_ClearError();
-    r = SDL_LoadWAV(fname, &sound->spec, &sound->buffer, &sound->length);
+    r = SDL_LoadWAV(fname, &s, &sound->buffer, &sound->length);
 
     if (r == NULL) {
         fprintf(stderr, "ERROR: failed to load file \"%s\": %s\n", fname, SDL_GetError());
@@ -19,7 +20,7 @@ sound_buffer_t* load_file(const char* fname) {
     return sound;
 }
 
-void soundplayer_init(soundplayer_t* sp, const char** fnames, const size_t num_files) {
+void soundplayer_init(soundplayer_t* sp, SDL_AudioSpec spec, const char** fnames, size_t num_files) {
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         fprintf(stderr, "ERROR: failed to initialize SDL audio\n");
         exit(EXIT_FAILURE);
@@ -32,7 +33,7 @@ void soundplayer_init(soundplayer_t* sp, const char** fnames, const size_t num_f
     }
 
     SDL_AudioDeviceID dev_id;
-    dev_id = SDL_OpenAudioDevice(NULL, 0, &sp->sound[0]->spec, NULL, 0);
+    dev_id = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
 
     if (dev_id == 0) {
         fprintf(stderr, "ERROR: failed to open audio device\n");
