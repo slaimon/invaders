@@ -23,15 +23,16 @@ bool handle_cpm_calls_file(i8080_t* machine, FILE* ofp) {
     // supervisor call
     if (pc == 0x05) {
         const uint16_t svc = machine->C;
+        uint16_t address;
+        char c;
         switch (svc) {
             case 2:
                 // print character in register A
                 fputc(machine->A, ofp);
                 break;
-            case 9:;
+            case 9:
                 // print string found at $DE and terminating with '$'
-                uint16_t address = i8080_get_de(machine);
-                char c;
+                address = i8080_get_de(machine);
                 do {
                     c = machine->mem[address];
                     if (c != '$')

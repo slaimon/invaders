@@ -17,8 +17,8 @@ bytestream_t* bytestream_new(size_t size) {
     if (size == 0)
         return NULL;
     
-    bytestream_t* stream = safe_malloc(sizeof(bytestream_t));
-    stream->data = safe_malloc(sizeof(uint8_t)*size);
+    bytestream_t* stream = (bytestream_t*) safe_malloc(sizeof(bytestream_t));
+    stream->data = (uint8_t*) safe_malloc(sizeof(uint8_t)*size);
     stream->size = size;
     
     memset(stream->data, 0, size);
@@ -37,7 +37,7 @@ bytestream_t* bytestream_fromString(const char* string) {
 
 char* bytestream_toString(bytestream_t* stream) {
     size_t length = 5*stream->size;
-    char* string = safe_malloc(sizeof(char)*length);
+    char* string = (char*) safe_malloc(sizeof(char)*length);
     string[length-1] = '\0';
     
     size_t pointer = 0;
@@ -60,7 +60,7 @@ bytestream_t* bytestream_read(FILE* ifp) {
 
     size_t read = fread(stream->data, sizeof(uint8_t), size, ifp);
     if (read != size) {
-        fprintf(stderr,"BYTESTREAM_READ WARNING: only read %lu bytes out of %lu\n", read, size);
+        fprintf(stderr,"BYTESTREAM_READ WARNING: only read %zu bytes out of %zu\n", read, size);
     }
 
     return stream;
@@ -74,7 +74,7 @@ int bytestream_write(bytestream_t* stream, FILE* ofp) {
 
     size_t written = fwrite(stream->data, sizeof(uint8_t), stream->size, ofp);
     if (written != stream->size) {
-        fprintf(stderr,"BYTESTREAM_WRITE WARNING: only wrote %lu bytes out of %lu\n", written, stream->size);
+        fprintf(stderr,"BYTESTREAM_WRITE WARNING: only wrote %zu bytes out of %zu\n", written, stream->size);
     }
 
     return 0;

@@ -7,7 +7,7 @@
 #include "../include/i8080_disassembler.h"
 
 #define FORMAT \
-"N:%lu | %s\t | A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%02X s:%1u z:%1u a:%1u p:%1u c:%1u | $HL:%02X $SP:%02X\n"
+"N:%zu | %s\t | A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%02X s:%1u z:%1u a:%1u p:%1u c:%1u | $HL:%02X $SP:%02X\n"
 // example:
 // N:6 | 21 C0 20       LXI   HL, #20C0 | A:FF B:1A C:00 D:00 E:01 H:5B L:0F SP:FFEC PC:0019 s:0 z:1 a:0 p:1 c:0 | $HL:9E $SP:4F
 void printstate(const size_t iteration, const i8080_t machine, FILE* ofp) {
@@ -48,8 +48,8 @@ int main (int argc, char** argv) {
     size_t iteration = 0;
     size_t current_page = 0;
     size_t max_iter, page_num;
-    sscanf(argv[3], "%lu", &max_iter);
-    if (argc == 5) sscanf(argv[4], "%lu", &page_num);
+    sscanf(argv[3], "%zu", &max_iter);
+    if (argc == 5) sscanf(argv[4], "%zu", &page_num);
     else page_num = 0;
     while (true) {
         if (current_page == page_num)
