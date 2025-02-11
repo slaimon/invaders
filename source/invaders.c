@@ -2,8 +2,21 @@
 #include "../include/safe.h"
 #include "../include/i8080.h"
 #include "../include/viewer.h"
+#include "../include/soundplayer.h"
 
 #define ROM_FILENAME "assets/INVADERS"
+
+const char* sfx_files[] = {
+    "assets/sound/player_shoot.wav",
+    "assets/sound/player_death.wav",
+    "assets/sound/step1.wav",
+    "assets/sound/step2.wav",
+    "assets/sound/step3.wav",
+    "assets/sound/step4.wav",
+    "assets/sound/invader_death.wav",
+    "assets/sound/ufo_flying.wav",
+    "assets/sound/ufo_hit.wav"
+};
 
 // Control mapping
 #define KEY_COIN    SDLK_c
