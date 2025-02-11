@@ -95,16 +95,6 @@ key_states_t keystates;
 #define GETBIT(byte,k) \
     (bool) ((byte)&(1<<(k)))
 
-void print_key_states() {
-    printf("%d %d %d %d %d\n",
-        keystates.coin,
-        keystates.p1_start,
-        keystates.p1_fire,
-        keystates.p1_left,
-        keystates.p1_right
-    );
-}
-
 uint8_t getInput1(void) {
     uint8_t result = 0;
     
