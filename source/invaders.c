@@ -27,7 +27,9 @@ typedef enum sfx {
     STEP4,
     INVADER_DEATH,
     UFO_FLYING,
-    UFO_HIT
+    UFO_HIT,
+
+    NUMBER_OF_SFX
 } sfx_t;
 
 // Control mapping
@@ -346,7 +348,14 @@ int main (void) {
 
     viewer_t viewer;
     viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332);
-    soundplayer_init(&sp, sfx_files, sizeof(sfx_files)/sizeof(sfx_files[0]));
+
+    SDL_AudioSpec spec;
+    spec.freq = 11025;
+    spec.format = AUDIO_U8;
+    spec.channels = 1;
+    spec.samples = 128;
+    spec.callback = NULL;
+    soundplayer_init(&sp, spec, sfx_files, NUMBER_OF_SFX);
 
     i8080_t machine;
     i8080_init(&machine);
