@@ -43,7 +43,7 @@ shift_register_t shift;
 
 #define GETBIT(byte,k)      (bool)((byte)&(1<<(k)))
 #define SETBIT(byte,k)      ((byte)|(1<<(k)))
-#define CLEARBIT(byte,k)    ((byte)&!(1<<(k)))
+#define CLEARBIT(byte,k)    ((byte)&~(1<<(k)))
 
 void handle_sound1(uint8_t value) {
     // TODO
