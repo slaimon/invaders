@@ -2,9 +2,9 @@
 
 An emulator for the original *Space Invaders* arcade machine, built around the Intel 8080 processor.  
 
-Originally started in 2019, this project initially ran only a few CP/M test programs but never displayed anything. Now, I'm revisiting it, cleaning up the code, and working toward full functionality.  
+I originally started developing it in 2019 and I've been working on it on and off since then.  
 
-Designed with modularity in mind, this emulator could be adapted to other 8080-based machines, like an Altair 8800.
+This project is fairly modular and could easily be adapted to other 8080-based machines, like an Altair 8800.
 
 ### Playing the Game
 
