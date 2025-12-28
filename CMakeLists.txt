@@ -53,4 +53,4 @@ add_executable(
     source/bytestream.c
     source/safe.c
 )
-target_link_libraries(invaders ${SDL2_LIBRARY} ${SDL2MAIN_LIBRARY})
+target_link_libraries(invaders ${SDL2_LIBRARIES})
