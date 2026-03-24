@@ -173,10 +173,8 @@ void handle_sound2(uint8_t value) {
 
 // Given a keyboard event, use it to update the program's state
 void handle_keyboard_event(SDL_Event event) {
-    if (event.key.repeat)
-        return;
-
     bool new_state;
+
     if (event.type == SDL_KEYDOWN)
         new_state = true;
     else if (event.type == SDL_KEYUP)
