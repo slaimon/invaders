@@ -65,12 +65,40 @@ add_executable(
 
 # i8080 cpu tests
 enable_testing()
-add_test(NAME test_lite COMMAND tester ${ROMS}/TEST.COM)
-set_property(TEST test_lite PROPERTY PASS_REGULAR_EXPRESSION "CPU IS OPERATIONAL")
-add_test(NAME test_pre COMMAND tester ${ROMS}/8080PRE.COM)
-set_property(TEST test_pre PROPERTY PASS_REGULAR_EXPRESSION "8080 Preliminary tests complete")
-add_test(NAME test_full COMMAND tester ${ROMS}/8080EX1.COM)
-set_property(TEST test_full PROPERTY FAIL_REGULAR_EXPRESSION "ERROR")
+add_test(
+    NAME test_pre
+    COMMAND tester ${ROMS}/8080PRE.COM
+)
+set_property(
+    TEST test_pre
+    PROPERTY PASS_REGULAR_EXPRESSION "8080 Preliminary tests complete"
+)
+
+add_test(
+    NAME test_lite
+    COMMAND tester ${ROMS}/TEST.COM
+)
+set_property(
+    TEST test_lite
+    PROPERTY PASS_REGULAR_EXPRESSION "CPU IS OPERATIONAL"
+)
+set_property(
+    TEST test_lite
+    PROPERTY DEPENDS test_pre
+)
+
+add_test(
+    NAME test_full
+    COMMAND tester ${ROMS}/8080EX1.COM
+)
+set_property(
+    TEST test_full
+    PROPERTY FAIL_REGULAR_EXPRESSION "ERROR"
+)
+set_property(
+    TEST test_full
+    PROPERTY DEPENDS test_pre
+)
 
 # space invaders
 add_executable(
