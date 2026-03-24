@@ -10,7 +10,7 @@
 
 const char* DEFAULT_ASSETS_PATH = "./assets";
 const char* AUDIO_ASSETS_DIR = "sound";
-const char* ROM_FILES_DIR = "";
+const char* ROM_FILES_DIR = "rom";
 const char* ROM_FILENAME = "INVADERS";
 
 const char* sfx_files[] = {

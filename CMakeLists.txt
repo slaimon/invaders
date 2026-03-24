@@ -5,7 +5,7 @@ project(emu8080 VERSION 0.0.0)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}")
 set(SOURCE ${CMAKE_SOURCE_DIR}/source)
 set(EXAMPLES ${CMAKE_SOURCE_DIR}/examples)
-set(ROMS ${CMAKE_SOURCE_DIR}/assets)
+set(ROMS ${CMAKE_SOURCE_DIR}/assets/rom)
 
 find_package(SDL2 REQUIRED)
 include_directories(include ${SDL2_INCLUDE_DIR})
