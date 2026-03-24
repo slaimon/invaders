@@ -44,6 +44,15 @@ add_executable(
     source/safe.c
 )
 
+# i8080 cpu tests
+enable_testing()
+add_test(NAME test_lite COMMAND tester ../assets/TEST.COM)
+set_property(TEST test_lite PROPERTY PASS_REGULAR_EXPRESSION "CPU IS OPERATIONAL")
+add_test(NAME test_pre COMMAND tester ../assets/8080PRE.COM)
+set_property(TEST test_pre PROPERTY PASS_REGULAR_EXPRESSION "8080 Preliminary tests complete")
+add_test(NAME test_full COMMAND tester ../assets/8080EX1.COM)
+set_property(TEST test_full PROPERTY FAIL_REGULAR_EXPRESSION "ERROR")
+
 # space invaders
 add_executable(
     invaders
