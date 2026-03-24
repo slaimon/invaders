@@ -111,3 +111,7 @@ add_executable(
     ${SOURCE}/safe.c
 )
 target_link_libraries(invaders ${SDL2_LIBRARIES})
+add_custom_target(
+    launch
+    COMMAND invaders ../assets
+)

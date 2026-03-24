@@ -1,21 +1,28 @@
+#include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../include/safe.h"
 #include "../include/i8080.h"
 #include "../include/viewer.h"
 #include "../include/soundplayer.h"
 
-#define ROM_FILENAME "assets/INVADERS"
+#define MAX_BASEDIR_LENGTH 128
+
+const char* DEFAULT_ASSETS_PATH = "./assets";
+const char* AUDIO_ASSETS_DIR = "sound";
+const char* ROM_FILES_DIR = "";
+const char* ROM_FILENAME = "INVADERS";
 
 const char* sfx_files[] = {
-    "assets/sound/player_shoot.wav",
-    "assets/sound/player_death.wav",
-    "assets/sound/step1.wav",
-    "assets/sound/step2.wav",
-    "assets/sound/step3.wav",
-    "assets/sound/step4.wav",
-    "assets/sound/invader_death.wav",
-    "assets/sound/ufo_flying.wav",
-    "assets/sound/ufo_hit.wav"
+    "player_shoot.wav",
+    "player_death.wav",
+    "step1.wav",
+    "step2.wav",
+    "step3.wav",
+    "step4.wav",
+    "invader_death.wav",
+    "ufo_flying.wav",
+    "ufo_hit.wav"
 };
 
 typedef enum sfx {
@@ -347,17 +354,32 @@ void invaders_frame(i8080_t* machine, viewer_t* viewer) {
     viewer_update(viewer);
 }
 
-int main (void) {
-    FILE* ifp = safe_fopen(ROM_FILENAME, "rb");
-    bytestream_t* program = bytestream_read(ifp);
-        if (program == NULL) {
-        printf("No valid program found\n");
-        return -1;
-    }
-    fclose(ifp);
+/*
+    Write a file-system path to the variable `dest` by concatenating `n` names.
+    The previous content of the variable `dest` is overwritten.
 
-    viewer_t viewer;
-    viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332);
+    E.g.: `write_path(dest, 3, "folder", "subdir", "file.txt")` will place in
+    `dest` the string: `folder/subdir/file.txt`.
+
+*/
+void write_path(char* dest, int n, ...) {
+    va_list args;
+    va_start(args, n);
+    strcpy(dest, va_arg(args, char*));
+    for (int i = 0; i < n-1; i++) {
+        strcat(dest, "/");
+        strcat(dest, va_arg(args, char*));
+    }
+    va_end(args);
+}
+
+void sfx_init(soundplayer_t* sp, const char* base_dir) {
+    char** fpaths = safe_malloc(NUMBER_OF_SFX * sizeof(char*));
+    for (int i = 0; i < NUMBER_OF_SFX; i++) {
+        fpaths[i] = safe_malloc(strlen(AUDIO_ASSETS_DIR) + strlen(base_dir) + strlen(sfx_files[i]) + 3);
+        write_path(fpaths[i], 3, base_dir, AUDIO_ASSETS_DIR, sfx_files[i]);
+    }
+    const char** fpaths_ = (const char**) fpaths;
 
     SDL_AudioSpec spec;
     spec.freq = 11025;
@@ -365,7 +387,45 @@ int main (void) {
     spec.channels = 1;
     spec.samples = 128;
     spec.callback = NULL;
-    soundplayer_init(&sp, spec, sfx_files, NUMBER_OF_SFX);
+    soundplayer_init(sp, spec, fpaths_, NUMBER_OF_SFX);
+
+    free(fpaths_);
+}
+
+void print_usage(const char* program_name) {
+    printf("usage: %s [assets_dir]\n", program_name);
+    printf("Play Space Invaders!\n");
+    printf("Optionally provide a path to the assets folder (the default location is ./assets)\n");
+}
+
+int main (int argc, char** argv) {
+
+    const char* base_dir;
+    if (argc == 1) {
+        base_dir = DEFAULT_ASSETS_PATH;
+    } else if (argc == 2) {
+        base_dir = argv[1];
+    } else {
+        print_usage(argv[0]);
+        return -1;
+    }
+
+    char* rom_path = safe_malloc(strlen(base_dir) + strlen(ROM_FILES_DIR) + strlen(ROM_FILENAME) + 3);
+    write_path(rom_path, 3, base_dir, ROM_FILES_DIR, ROM_FILENAME);
+
+    FILE* ifp = safe_fopen(rom_path, "rb");
+    bytestream_t* program = bytestream_read(ifp);
+        if (program == NULL) {
+        printf("No valid program found\n");
+        return -1;
+    }
+    fclose(ifp);
+    free(rom_path);
+
+    viewer_t viewer;
+    viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332);
+
+    sfx_init(&sp, base_dir);
 
     i8080_t machine;
     i8080_init(&machine);
