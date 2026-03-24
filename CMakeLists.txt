@@ -27,14 +27,6 @@ add_executable(
     ${SOURCE}/bytestream.c
     ${SOURCE}/safe.c
 )
-add_custom_target(
-    listing
-    COMMAND disassembler ${ROMS}/INVADERS > ./listing.txt
-)
-set_property(
-    TARGET listing
-    APPEND PROPERTY ADDITIONAL_CLEAN_FILES listing.txt
-)
 add_executable(
     logger
     ${EXAMPLES}/logger.c
@@ -45,14 +37,6 @@ add_executable(
     ${SOURCE}/bytestream.c
     ${SOURCE}/safe.c
 )
-add_custom_target(
-    log_example
-    COMMAND logger ${ROMS}/8080EX1.COM sample_log.txt 1000
-)
-set_property(
-    TARGET log_example
-    APPEND PROPERTY ADDITIONAL_CLEAN_FILES sample_log.txt
-)
 add_executable(
     step
     ${EXAMPLES}/step.c
@@ -62,6 +46,18 @@ add_executable(
     ${SOURCE}/bytestream.c
     ${SOURCE}/safe.c
 )
+
+# space invaders
+add_executable(
+    invaders
+    ${SOURCE}/invaders.c
+    ${SOURCE}/soundplayer.c
+    ${SOURCE}/viewer.c
+    ${SOURCE}/i8080.c
+    ${SOURCE}/bytestream.c
+    ${SOURCE}/safe.c
+)
+target_link_libraries(invaders ${SDL2_LIBRARIES})
 
 # i8080 cpu tests
 enable_testing()
@@ -100,17 +96,23 @@ set_property(
     PROPERTY DEPENDS test_pre
 )
 
-# space invaders
-add_executable(
-    invaders
-    ${SOURCE}/invaders.c
-    ${SOURCE}/soundplayer.c
-    ${SOURCE}/viewer.c
-    ${SOURCE}/i8080.c
-    ${SOURCE}/bytestream.c
-    ${SOURCE}/safe.c
+# custom targets
+add_custom_target(
+    listing
+    COMMAND disassembler ${ROMS}/INVADERS > ./listing.txt
 )
-target_link_libraries(invaders ${SDL2_LIBRARIES})
+set_property(
+    TARGET listing
+    APPEND PROPERTY ADDITIONAL_CLEAN_FILES listing.txt
+)
+add_custom_target(
+    log_example
+    COMMAND logger ${ROMS}/8080EX1.COM sample_log.txt 1000
+)
+set_property(
+    TARGET log_example
+    APPEND PROPERTY ADDITIONAL_CLEAN_FILES sample_log.txt
+)
 add_custom_target(
     launch
     COMMAND invaders ../assets
