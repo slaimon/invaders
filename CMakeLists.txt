@@ -27,6 +27,14 @@ add_executable(
     ${SOURCE}/bytestream.c
     ${SOURCE}/safe.c
 )
+add_custom_target(
+    listing
+    COMMAND disassembler ${ROMS}/INVADERS > ./listing.txt
+)
+set_property(
+    TARGET listing
+    APPEND PROPERTY ADDITIONAL_CLEAN_FILES listing.txt
+)
 add_executable(
     logger
     ${EXAMPLES}/logger.c
@@ -36,6 +44,14 @@ add_executable(
     ${SOURCE}/i8080.c
     ${SOURCE}/bytestream.c
     ${SOURCE}/safe.c
+)
+add_custom_target(
+    log_example
+    COMMAND logger ${ROMS}/8080EX1.COM sample_log.txt 1000
+)
+set_property(
+    TARGET log_example
+    APPEND PROPERTY ADDITIONAL_CLEAN_FILES sample_log.txt
 )
 add_executable(
     step
