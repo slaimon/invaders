@@ -2,27 +2,25 @@
 #include "../include/bytestream.h"
 #include "../include/safe.h"
 
-// A disassembler utility that takes two filenames as input, IN and OUT, and writes into OUT the
-// disassembly of the Intel 8080 machine code found in file IN.
+// A utility program that prints out a disassembly of the Intel 8080 machine code found in the input file.
 int main(int argc, char** argv) {
-    FILE *ofp, *ifp;
+    FILE *ifp;
 
-    if (argc != 3) {
-        printf("usage: %s INPUT_FILE OUTPUT_FILE\n", argv[0]);
+    if (argc != 2) {
+        printf("usage: %s <input_file>\n", argv[0]);
+        printf("prints out a disassembly of the i8080 machine code found in the input file.\n");
         return 0;
     }
 
     ifp = safe_fopen(argv[1], "rb");
-    ofp = safe_fopen(argv[2], "w");
     
     bytestream_t* program = bytestream_read(ifp);
     if (program == NULL) {
         printf("No valid program found\n");
         return 0;
     }
-    disassemble_program(*program, ofp);
+    disassemble_program(*program, stdout);
     
-    fclose(ofp);
     fclose(ifp);
     bytestream_destroy(program);
     
