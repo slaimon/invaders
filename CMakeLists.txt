@@ -104,6 +104,7 @@ set_property(
 add_executable(
     invaders
     ${SOURCE}/invaders.c
+    ${SOURCE}/soundplayer.c
     ${SOURCE}/viewer.c
     ${SOURCE}/i8080.c
     ${SOURCE}/bytestream.c
