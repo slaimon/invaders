@@ -22,6 +22,7 @@ const char* ROM_FILENAME = "INVADERS";
 
 shift_register_t shift;
 gamepad_t gamepad;
+soundplayer_t sp;
 
 const char* sfx_files[] = {
     "player_shoot.wav",
@@ -99,41 +100,49 @@ uint8_t getInput2(void) {
     return result;
 }
 
-soundplayer_t sp;
+// These store the old values of the gamestate bytes that control sound.
 uint8_t sound1 = 0;
 uint8_t sound2 = 0;
 
-#define PLAY_SOUND(sound_id, k)                      \
-    if (!(GETBIT(*prev, k)) && (GETBIT(value, k))) { \
-        soundplayer_play(sp, sound_id);              \
-    }                                                \
-    WRITE_TO_BIT(*prev, GETBIT(value,k), k)
-
-void handle_sound1(uint8_t value) {
-    uint8_t* prev = &sound1;
-
-    if (GETBIT(value, 0)) {
-        soundplayer_repeat(sp, UFO_FLYING);
-        WRITE_TO_BIT(sound1, true, 0);
+// Check the kth bit of both `curr` and `prev`. If a rising edge is detected
+// (i.e. the bit is on in `curr` and off `prev`), the sound corresponding to
+// `sound_id` is played.
+// In every case, `prev` is overwritten with the value of `curr`.
+void play_sound(int sound_id, uint8_t k, uint8_t* prev, uint8_t curr) {
+    if (!(GETBIT(*prev, k)) && (GETBIT(curr, k))) {
+        soundplayer_play(sp, sound_id);
     }
-    else if (GETBIT(sound1, 0)) {
-        soundplayer_stop(sp, UFO_FLYING);
-        WRITE_TO_BIT(sound1, false, 0);
-    }
-
-    PLAY_SOUND(PLAYER_SHOOT, 1);
-    PLAY_SOUND(PLAYER_DEATH, 2);
-    PLAY_SOUND(INVADER_DEATH, 3);
+    WRITE_TO_BIT(*prev, GETBIT(curr, k), k);
 }
 
-void handle_sound2(uint8_t value) {
-    uint8_t* prev = &sound2;
+// Plays sound effects according to the game state.
+// Since there are two gamestate bytes that control sound,
+// you need to tell the function which one you want to use.
+void handle_sound(uint8_t curr, bool is_sound1) {
+    if (is_sound1) {
+        uint8_t* prev = &sound1;
 
-    PLAY_SOUND(STEP1, 0);
-    PLAY_SOUND(STEP2, 1);
-    PLAY_SOUND(STEP3, 2);
-    PLAY_SOUND(STEP4, 3);
-    PLAY_SOUND(UFO_HIT, 4);
+        if (GETBIT(curr, 0)) {
+            soundplayer_repeat(sp, UFO_FLYING);
+            WRITE_TO_BIT(sound1, true, 0);
+        }
+        else if (GETBIT(sound1, 0)) {
+            soundplayer_stop(sp, UFO_FLYING);
+            WRITE_TO_BIT(sound1, false, 0);
+        }
+    
+        play_sound(PLAYER_SHOOT, 1, prev, curr);
+        play_sound(PLAYER_DEATH, 2, prev, curr);
+        play_sound(INVADER_DEATH, 3, prev, curr);
+    } else {
+        uint8_t* prev = &sound2;
+        
+        play_sound(STEP1, 0, prev, curr);
+        play_sound(STEP2, 1, prev, curr);
+        play_sound(STEP3, 2, prev, curr);
+        play_sound(STEP4, 3, prev, curr);
+        play_sound(UFO_HIT, 4, prev, curr);
+    }
 }
 
 // Given a keyboard event, use it to update the program's state
@@ -215,13 +224,13 @@ void machine_OUT(uint8_t port, uint8_t value) {
             shift_register_set_offset(&shift, value);
             break;
         case 3:
-            handle_sound1(value);
+            handle_sound(value, true);
             break;
         case 4:
             shift_register_push(&shift, value);
             break;
         case 5:
-            handle_sound2(value);
+            handle_sound(value, false);
             break;
         case 6:
             // watchdog port:
