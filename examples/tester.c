@@ -1,24 +1,44 @@
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #include "../include/safe.h"
 #include "../include/bytestream.h"
 #include "../include/i8080_cpm.h"
+
+void fail_with_msg(const char* error_msg, const char* name) {
+    printf("usage: %s ROM_FILE\n", name);
+    if (error_msg != NULL) {
+        printf("%s\n", error_msg);
+    }
+    exit(EXIT_FAILURE);
+}
 
 // Takes one filename as argument and executes it like a CP/M program. The ROM is loaded at the
 // correct address in memory and some supervisor calls are handled, which allows the program to
 // output text to the console.
 int main (int argc, char** argv) {
     if (argc != 2) {
-        printf("usage: %s ROM_FILE\n", argv[0]);
+        fail_with_msg("Exactly one argument expected.", argv[0]);
     }
 
-    FILE* ifp = safe_fopen(argv[1], "rb");
-    bytestream_t* program = bytestream_read(ifp);
-        if (program == NULL) {
-        printf("No valid program found\n");
-        return -1;
+    const char* path = argv[1];
+
+    // Make sure that we're dealing with a regular file!
+    struct stat st;
+    stat(path, &st);
+    if (!S_ISREG(st.st_mode)) {
+        fail_with_msg(
+            "The ROM file must be a regular file; a directory or other file type was found instead.",
+            argv[0]
+        );
     }
+
+    FILE* ifp = safe_fopen(path, "rb");
+    bytestream_t* program = bytestream_read(ifp);
     fclose(ifp);
+    if (program == NULL) {
+        fail_with_msg("No valid program found.", argv[0]);
+    }
 
     i8080_t machine;
     i8080_init(&machine);
