@@ -7,6 +7,7 @@
 #include "i8080.h"
 #include "viewer.h"
 #include "soundplayer.h"
+#include "shift_register.h"
 
 #define MAX_BASEDIR_LENGTH 128
 
@@ -53,29 +54,7 @@ typedef enum sfx {
 #define KEY_P2LEFT  SDLK_A
 #define KEY_P2RIGHT SDLK_D
 
-typedef struct shift_register {
-    uint16_t value;
-    uint8_t read_offset;
-} shift_register_t;
-
 shift_register_t shift;
-
-// Initialize the shift register
-#define SHIFT_INIT          \
-    shift.value = 0x0000;   \
-    shift.read_offset = 0   \
-
-// Read out of the shift register
-#define SHIFT_READ \
-    ((shift.value >> (8-shift.read_offset)) & 0xFF)
-
-// Push a value to the shift register
-#define SHIFT_WRITE(x) \
-    shift.value = ((x) << 8) | (shift.value >> 8)
-
-// Set the read offset for the shift register
-#define SHIFT_SETOFFSET(x) \
-    shift.read_offset = (x) & 7
 
 typedef struct key_states {
     bool coin;
@@ -236,8 +215,8 @@ uint16_t machine_IN(uint8_t port) {
             return getInput1();
         case 2:
             return getInput2();
-        case 3: // read shift register
-            return SHIFT_READ;
+        case 3:
+            return shift_register_read(shift);
         
         default:
             fprintf(stderr, "ERROR! Unexpected instruction IN %02Xh\n", port);
@@ -249,13 +228,13 @@ uint16_t machine_IN(uint8_t port) {
 void machine_OUT(uint8_t port, uint8_t value) {
     switch (port) {
         case 2:
-            SHIFT_SETOFFSET(value);
+            shift_register_set_offset(&shift, value);
             break;
         case 3:
             handle_sound1(value);
             break;
         case 4:
-            SHIFT_WRITE(value); 
+            shift_register_push(&shift, value);
             break;
         case 5:
             handle_sound2(value);
@@ -408,29 +387,31 @@ int main (int argc, char** argv) {
         return -1;
     }
 
+    // open the ROM file using the given directory path
     char* rom_path = safe_malloc(strlen(base_dir) + strlen(ROM_FILES_DIR) + strlen(ROM_FILENAME) + 3);
     write_path(rom_path, 3, base_dir, ROM_FILES_DIR, ROM_FILENAME);
-
     FILE* ifp = safe_fopen(rom_path, "rb");
+    free(rom_path);
+    
     bytestream_t* program = bytestream_read(ifp);
-        if (program == NULL) {
+    fclose(ifp);
+    if (program == NULL) {
         printf("No valid program found\n");
         return -1;
     }
-    fclose(ifp);
-    free(rom_path);
 
-    viewer_t viewer;
-    viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332);
-
-    sfx_init(&sp, base_dir);
-
+    // initialize the CPU
     i8080_t machine;
     i8080_init(&machine);
     i8080_memory_write(&machine, *program, 0);
     bytestream_destroy(program);
 
-    SHIFT_INIT;
+    // initialize video and audio
+    viewer_t viewer;
+    viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332);
+    sfx_init(&sp, base_dir);
+
+    shift_register_init(&shift);
     KEYSTATES_INIT;
     while (true) {
         invaders_frame(&machine, &viewer);
