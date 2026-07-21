@@ -7,23 +7,25 @@
 #include "safe.h"
 #include "i8080.h"
 
+// Video and audio devices
 #include "viewer.h"
 #include "soundplayer.h"
 
+// Shift register hardware and player controls
 #include "shift_register.h"
 #include "gamepad.h"
 
-#define MAX_BASEDIR_LENGTH 128
-
-const char* DEFAULT_ASSETS_PATH = "./assets";
-const char* AUDIO_ASSETS_DIR = "sound";
-const char* ROM_FILES_DIR = "rom";
-const char* ROM_FILENAME = "INVADERS";
-
+// Some useful devices
 shift_register_t shift;
 gamepad_t gamepad;
 soundplayer_t sp;
 
+// Asset files names and paths
+#define MAX_BASEDIR_LENGTH 128
+const char* DEFAULT_ASSETS_PATH = "./assets";
+const char* AUDIO_ASSETS_DIR = "sound";
+const char* ROM_FILES_DIR = "rom";
+const char* ROM_FILENAME = "INVADERS";
 const char* sfx_files[] = {
     "player_shoot.wav",
     "player_death.wav",
@@ -36,6 +38,7 @@ const char* sfx_files[] = {
     "ufo_hit.wav"
 };
 
+// Sound effect identifiers
 typedef enum sfx {
     PLAYER_SHOOT,
     PLAYER_DEATH,
