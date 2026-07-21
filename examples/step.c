@@ -1,6 +1,6 @@
-#include "../include/safe.h"
-#include "../include/bytestream.h"
-#include "../include/i8080_debug.h"
+#include "safe.h"
+#include "bytestream.h"
+#include "i8080_debug.h"
 
 // A program that takes one filename as input, IN, and begins execution of the Intel 8080 machine
 // code found therein. The execution proceeds one step at a time, and after each step a crude TUI

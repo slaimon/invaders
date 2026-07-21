@@ -1,6 +1,6 @@
-#include "../include/i8080_disassembler.h"
-#include "../include/bytestream.h"
-#include "../include/safe.h"
+#include "i8080_disassembler.h"
+#include "bytestream.h"
+#include "safe.h"
 
 // A utility program that prints out a disassembly of the Intel 8080 machine code found in the input file.
 int main(int argc, char** argv) {

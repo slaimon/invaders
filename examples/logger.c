@@ -1,10 +1,10 @@
 #include <stdlib.h>
 
-#include "../include/safe.h"
-#include "../include/bytestream.h"
-#include "../include/i8080_cpm.h"
-#include "../include/i8080_debug.h"
-#include "../include/i8080_disassembler.h"
+#include "safe.h"
+#include "bytestream.h"
+#include "i8080_cpm.h"
+#include "i8080_debug.h"
+#include "i8080_disassembler.h"
 
 #define FORMAT \
 "N:%lu | %s\t | A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%02X s:%1u z:%1u a:%1u p:%1u c:%1u | $HL:%02X $SP:%02X\n"

@@ -1,7 +1,7 @@
 #ifndef __I8080_DEBUG_H__
 #define __I8080_DEBUG_H__
 
-#include "../include/i8080.h"
+#include "i8080.h"
 
 // Prints information about the current machine state. The output is formatted thus:
 // - First the instruction about to be executed is printed between two strokes

@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "../include/i8080.h"
+#include "i8080.h"
 
 const char separator[] = "\n\n--------------------------------------------------\n";
 

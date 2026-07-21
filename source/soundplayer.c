@@ -1,9 +1,8 @@
 #include <SDL3/SDL_audio.h>
-#include <SDL3/SDL_oldnames.h>
 #include <stdlib.h>
 
-#include "../include/safe.h"
-#include "../include/soundplayer.h"
+#include "safe.h"
+#include "soundplayer.h"
 
 /// Tries to load the given sound file and store it at sound_ptr.
 /// If the loading process fails, the function returns false and sets sound_ptr to NULL.

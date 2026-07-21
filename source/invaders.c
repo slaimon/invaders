@@ -1,12 +1,12 @@
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../include/safe.h"
-#include "../include/i8080.h"
-#include "../include/viewer.h"
-#include "../include/soundplayer.h"
+#include "safe.h"
+#include "i8080.h"
+#include "viewer.h"
+#include "soundplayer.h"
 
 #define MAX_BASEDIR_LENGTH 128
 

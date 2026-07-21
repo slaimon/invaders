@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include <dirent.h>
 
-#include "../include/safe.h"
+#include "safe.h"
 
 FILE* safe_fopen(const char* fname, const char* mode) {
 	FILE* ptr = fopen(fname, mode);

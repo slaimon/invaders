@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <string.h> // for memset
 
-#include "../include/bytestream.h"
-#include "../include/safe.h"
+#include "bytestream.h"
+#include "safe.h"
 
 size_t fsize(FILE* ifp) {
     int tmp = fseek(ifp, 0, SEEK_CUR);

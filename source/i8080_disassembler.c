@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
-#include "../include/i8080_disassembler.h"
+#include "i8080_disassembler.h"
 
 void disassemble_program(const bytestream_t program, FILE* ofp) {
     char result[I8080_LINE_LENGTH * program.size];

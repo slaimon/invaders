@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
-#include "../include/i8080_debug.h"
-#include "../include/i8080_disassembler.h"
+#include "i8080_debug.h"
+#include "i8080_disassembler.h"
 
 #define PRINTLINE(instr, outfile) \
     fputs(i8080_instruction_toString(instr, true).string, outfile);

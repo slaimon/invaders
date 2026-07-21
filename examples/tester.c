@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#include "../include/safe.h"
-#include "../include/bytestream.h"
-#include "../include/i8080_cpm.h"
+#include "safe.h"
+#include "bytestream.h"
+#include "i8080_cpm.h"
 
 void fail_with_msg(const char* error_msg, const char* name) {
     printf("usage: %s ROM_FILE\n", name);
