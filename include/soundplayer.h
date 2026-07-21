@@ -3,14 +3,15 @@
 // Some wrapper functions for playing sound effects in SDL
 // Only supports .wav files
 
-typedef struct sound_buffer {
+typedef struct sound {
     Uint32 length;
     Uint8* buffer;
-} sound_buffer_t;
+    SDL_AudioStream* stream;
+} sound_t;
 
 typedef struct soundplayer {
     SDL_AudioDeviceID device;
-    sound_buffer_t** sound;
+    sound_t** sound;
     size_t num_sounds;
 } soundplayer_t;
 
@@ -18,5 +19,14 @@ typedef struct soundplayer {
 // Each sound you is assigned a progressive sound_id starting at 0.  
 void soundplayer_init(soundplayer_t* sp, SDL_AudioSpec spec, const char** fnames, const size_t num_files);
 
-// Play a sound
+// Play a sound once
 void soundplayer_play(soundplayer_t sp, const int sound_id);
+
+// Play a sound in loop.
+// Keep calling this function as long as you need the sound playing.
+// The time between function calls should be less than the length of the audio.
+void soundplayer_repeat(soundplayer_t sp, const int sound_id);
+
+// Stop playing the sound immediately.
+// Will do nothing if the sound is not playing.
+void soundplayer_stop(soundplayer_t sp, const int sound_id);

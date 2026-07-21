@@ -150,11 +150,11 @@ void handle_sound1(uint8_t value) {
     uint8_t* prev = &sound1;
 
     if (GETBIT(value, 0)) {
-        soundplayer_play(sp, UFO_FLYING);
+        soundplayer_repeat(sp, UFO_FLYING);
         WRITE_TO_BIT(sound1, true, 0);
     }
     else if (GETBIT(sound1, 0)) {
-        //SDL_ClearQueuedAudio(sp.device); // SDL2 function
+        soundplayer_stop(sp, UFO_FLYING);
         WRITE_TO_BIT(sound1, false, 0);
     }
 
