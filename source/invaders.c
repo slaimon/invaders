@@ -3,11 +3,15 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "safe.h"
 #include "i8080.h"
+
 #include "viewer.h"
 #include "soundplayer.h"
+
 #include "shift_register.h"
+#include "gamepad.h"
 
 #define MAX_BASEDIR_LENGTH 128
 
@@ -15,6 +19,9 @@ const char* DEFAULT_ASSETS_PATH = "./assets";
 const char* AUDIO_ASSETS_DIR = "sound";
 const char* ROM_FILES_DIR = "rom";
 const char* ROM_FILENAME = "INVADERS";
+
+shift_register_t shift;
+gamepad_t gamepad;
 
 const char* sfx_files[] = {
     "player_shoot.wav",
@@ -54,29 +61,6 @@ typedef enum sfx {
 #define KEY_P2LEFT  SDLK_A
 #define KEY_P2RIGHT SDLK_D
 
-shift_register_t shift;
-
-typedef struct key_states {
-    bool coin;
-    bool tilt;
-
-    bool p1_start;
-    bool p1_fire;
-    bool p1_left;
-    bool p1_right;
-
-    bool p2_start;
-    bool p2_fire;
-    bool p2_left;
-    bool p2_right;
-} key_states_t;
-
-key_states_t keystates;
-
-// Initialize the keyboard state
-#define KEYSTATES_INIT \
-    memset(&keystates, 0, sizeof(key_states_t))
-
 // Encode a boolean condition into the kth bit of byte
 #define WRITE_TO_BIT(byte, state, k) \
     if(state) byte |= (1<<(k)); else byte &= ~(1<<(k))
@@ -88,12 +72,12 @@ key_states_t keystates;
 uint8_t getInput1(void) {
     uint8_t result = 0;
     
-    WRITE_TO_BIT(result, keystates.coin, 0);
-    WRITE_TO_BIT(result, keystates.p2_start, 1);
-    WRITE_TO_BIT(result, keystates.p1_start, 2);
-    WRITE_TO_BIT(result, keystates.p1_fire, 4);
-    WRITE_TO_BIT(result, keystates.p1_left, 5);
-    WRITE_TO_BIT(result, keystates.p1_right, 6);
+    WRITE_TO_BIT(result, gamepad.coin, 0);
+    WRITE_TO_BIT(result, gamepad.p2_start, 1);
+    WRITE_TO_BIT(result, gamepad.p1_start, 2);
+    WRITE_TO_BIT(result, gamepad.p1_fire, 4);
+    WRITE_TO_BIT(result, gamepad.p1_left, 5);
+    WRITE_TO_BIT(result, gamepad.p1_right, 6);
     
     return result;       
 }
@@ -110,7 +94,7 @@ uint8_t getInput2(void) {
     // bit 6 = P2 right (1 if pressed)
     // bit 7 = DIP7 Coin info displayed in demo screen 0=ON
 
-    WRITE_TO_BIT(result, keystates.tilt, 2);
+    WRITE_TO_BIT(result, gamepad.tilt, 2);
 
     return result;
 }
@@ -165,22 +149,22 @@ void handle_keyboard_event(SDL_Event event) {
     
     switch (event.key.key) {
         case KEY_COIN:
-            keystates.coin = new_state;
+            gamepad.coin = new_state;
             break;
         case KEY_TILT:
-            keystates.tilt = new_state;
+            gamepad.tilt = new_state;
             break;
         case KEY_P1START:
-            keystates.p1_start = new_state;
+            gamepad.p1_start = new_state;
             break;
         case KEY_P1FIRE:
-            keystates.p1_fire = new_state;
+            gamepad.p1_fire = new_state;
             break;
         case KEY_P1LEFT:
-            keystates.p1_left = new_state;
+            gamepad.p1_left = new_state;
             break;
         case KEY_P1RIGHT:
-            keystates.p1_right = new_state;
+            gamepad.p1_right = new_state;
             break;
         
         default:
@@ -412,7 +396,7 @@ int main (int argc, char** argv) {
     sfx_init(&sp, base_dir);
 
     shift_register_init(&shift);
-    KEYSTATES_INIT;
+    gamepad_init(&gamepad);
     while (true) {
         invaders_frame(&machine, &viewer);
         if (process_events())
