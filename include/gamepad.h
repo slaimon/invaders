@@ -19,6 +19,12 @@ typedef struct gamepad {
 } gamepad_t;
 
 // Initialize the gamepad, no buttons are pressed
-void gamepad_init(gamepad_t* gp);
+void gamepad_init(gamepad_t* gamepad);
+
+// Returns a byte that represents the current state of the gamepad. This byte is
+// what the Space Invaders machine expects to read when it executes an IN
+// instruction. Since there are two bytes that represent the player controls
+// (`input1` and `input2`), you need to tell the function which one you want.
+uint8_t getInput(gamepad_t gamepad, bool is_input1);
 
 #endif
