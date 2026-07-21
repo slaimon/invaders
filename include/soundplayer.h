@@ -1,4 +1,4 @@
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 // Some wrapper functions for playing sound effects in SDL
 // Only supports .wav files

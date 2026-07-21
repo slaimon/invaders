@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 // Some wrapper functions for a hardware-accelerated SDL window, optimized for texture streaming.
 //

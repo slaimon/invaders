@@ -7,8 +7,8 @@ set(SOURCE ${CMAKE_SOURCE_DIR}/source)
 set(EXAMPLES ${CMAKE_SOURCE_DIR}/examples)
 set(ROMS ${CMAKE_SOURCE_DIR}/assets/rom)
 
-find_package(SDL2 REQUIRED)
-include_directories(include ${SDL2_INCLUDE_DIR})
+find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
+include_directories(include ${SDL3_INCLUDE_DIR})
 
 # example programs
 add_executable(
@@ -57,7 +57,7 @@ add_executable(
     ${SOURCE}/bytestream.c
     ${SOURCE}/safe.c
 )
-target_link_libraries(invaders ${SDL2_LIBRARIES})
+target_link_libraries(invaders PRIVATE SDL3::SDL3)
 
 # i8080 cpu tests
 enable_testing()

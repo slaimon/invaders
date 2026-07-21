@@ -1,9 +1,11 @@
 #include "../include/viewer.h"
+#include <SDL3/SDL_render.h>
+#include <stdio.h>
 
 void viewer_init(viewer_t* viewer, const char* title, 
                  size_t width, size_t height, size_t scale, 
                  int pixelformat) {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
         fprintf(stderr, "ERROR: failed to initialize SDL video\n");
         exit(EXIT_FAILURE);
     }
@@ -13,24 +15,20 @@ void viewer_init(viewer_t* viewer, const char* title,
     viewer->scale = scale;
 
     // create a window with scaled dimensions
-    viewer->window =
-        SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                         width*scale, height*scale, SDL_WINDOW_SHOWN);
+    viewer->window = SDL_CreateWindow(title, width*scale, height*scale, 0);
     
-    // set up the hardware renderer and the texture we'll stream to
-    viewer->renderer =
-        SDL_CreateRenderer(viewer->window, -1,
-                           SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    
+    // set up the renderer with vsync on
+    viewer->renderer = SDL_CreateRenderer(viewer->window, NULL);
+    SDL_SetRenderVSync(viewer->renderer, 1);
     SDL_SetRenderDrawColor(viewer->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    viewer->texture =
-        SDL_CreateTexture(viewer->renderer, pixelformat,
+    // create a texture for streaming access
+    viewer->texture = SDL_CreateTexture(viewer->renderer, pixelformat,
                           SDL_TEXTUREACCESS_STREAMING, width, height);
 }
 
 void viewer_update(viewer_t* viewer) {
-    SDL_RenderCopy(viewer->renderer, viewer->texture, NULL, NULL);
+    SDL_RenderTexture(viewer->renderer, viewer->texture, NULL, NULL);
     SDL_RenderPresent(viewer->renderer);
 }
 

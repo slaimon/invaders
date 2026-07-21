@@ -1,3 +1,5 @@
+#include <SDL3/SDL.h>
+
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,16 +42,16 @@ typedef enum sfx {
 } sfx_t;
 
 // Control mapping
-#define KEY_COIN    SDLK_c
+#define KEY_COIN    SDLK_C
 #define KEY_TILT    SDLK_DELETE
 #define KEY_P1START SDLK_1
 #define KEY_P1FIRE  SDLK_UP
 #define KEY_P1LEFT  SDLK_LEFT
 #define KEY_P1RIGHT SDLK_RIGHT
 #define KEY_P2START SDLK_2
-#define KEY_P2FIRE  SDLK_w
-#define KEY_P2LEFT  SDLK_a
-#define KEY_P2RIGHT SDLK_d
+#define KEY_P2FIRE  SDLK_W
+#define KEY_P2LEFT  SDLK_A
+#define KEY_P2RIGHT SDLK_D
 
 typedef struct shift_register {
     uint16_t value;
@@ -152,7 +154,7 @@ void handle_sound1(uint8_t value) {
         WRITE_TO_BIT(sound1, true, 0);
     }
     else if (GETBIT(sound1, 0)) {
-        SDL_ClearQueuedAudio(sp.device);
+        //SDL_ClearQueuedAudio(sp.device); // SDL2 function
         WRITE_TO_BIT(sound1, false, 0);
     }
 
@@ -175,14 +177,14 @@ void handle_sound2(uint8_t value) {
 void handle_keyboard_event(SDL_Event event) {
     bool new_state;
 
-    if (event.type == SDL_KEYDOWN)
+    if (event.type == SDL_EVENT_KEY_DOWN)
         new_state = true;
-    else if (event.type == SDL_KEYUP)
+    else if (event.type == SDL_EVENT_KEY_UP)
         new_state = false;
     else
         return;
     
-    switch (event.key.keysym.sym) {
+    switch (event.key.key) {
         case KEY_COIN:
             keystates.coin = new_state;
             break;
@@ -213,10 +215,10 @@ bool process_events(void) {
     SDL_Event event;
 
     while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT)
+        if (event.type == SDL_EVENT_QUIT)
             return true;
-        if (event.type == SDL_KEYDOWN)
-            if (event.key.keysym.sym == SDLK_ESCAPE)
+        if (event.type == SDL_EVENT_KEY_UP)
+            if (event.key.key == SDLK_ESCAPE)
                 return true;
         
         handle_keyboard_event(event);
@@ -381,10 +383,8 @@ void sfx_init(soundplayer_t* sp, const char* base_dir) {
 
     SDL_AudioSpec spec;
     spec.freq = 11025;
-    spec.format = AUDIO_U8;
+    spec.format = SDL_AUDIO_U8;
     spec.channels = 1;
-    spec.samples = 128;
-    spec.callback = NULL;
     soundplayer_init(sp, spec, fpaths_, NUMBER_OF_SFX);
 
     free(fpaths_);
