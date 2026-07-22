@@ -3,9 +3,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "safe.h"
 #include "i8080.h"
+#include "flags.h"
 
 // Video and audio devices
 #include "viewer.h"
@@ -65,44 +65,6 @@ typedef enum sfx {
 #define KEY_P2LEFT  SDLK_A
 #define KEY_P2RIGHT SDLK_D
 
-// Encode a boolean condition into the kth bit of byte
-#define WRITE_TO_BIT(byte, state, k) \
-    if(state) byte |= (1<<(k)); else byte &= ~(1<<(k))
-
-// Returns the kth bit of byte
-#define GETBIT(byte,k) \
-    (bool) ((byte)&(1<<(k)))
-
-uint8_t getInput1(void) {
-    uint8_t result = 0;
-    
-    WRITE_TO_BIT(result, gamepad.coin, 0);
-    WRITE_TO_BIT(result, gamepad.p2_start, 1);
-    WRITE_TO_BIT(result, gamepad.p1_start, 2);
-    WRITE_TO_BIT(result, gamepad.p1_fire, 4);
-    WRITE_TO_BIT(result, gamepad.p1_left, 5);
-    WRITE_TO_BIT(result, gamepad.p1_right, 6);
-    
-    return result;       
-}
-
-uint8_t getInput2(void) {
-    uint8_t result = 0;
-
-    // bit 0 = DIP3 00 = 3 ships  10 = 5 ships
-    // bit 1 = DIP5 01 = 4 ships  11 = 6 ships
-    // bit 2 = Tilt
-    // bit 3 = DIP6 0 = extra ship at 1500, 1 = extra ship at 1000
-    // bit 4 = P2 shot (1 if pressed)
-    // bit 5 = P2 left (1 if pressed)
-    // bit 6 = P2 right (1 if pressed)
-    // bit 7 = DIP7 Coin info displayed in demo screen 0=ON
-
-    WRITE_TO_BIT(result, gamepad.tilt, 2);
-
-    return result;
-}
-
 // These store the old values of the gamestate bytes that control sound.
 uint8_t sound1 = 0;
 uint8_t sound2 = 0;
@@ -112,10 +74,13 @@ uint8_t sound2 = 0;
 // `sound_id` is played.
 // In every case, `prev` is overwritten with the value of `curr`.
 void play_sound(int sound_id, uint8_t k, uint8_t* prev, uint8_t curr) {
-    if (!(GETBIT(*prev, k)) && (GETBIT(curr, k))) {
+    bool curr_flag = flag_get(k, curr);
+
+    if (curr_flag && !flag_get(k, *prev)) {
         soundplayer_play(sp, sound_id);
     }
-    WRITE_TO_BIT(*prev, GETBIT(curr, k), k);
+
+    flag_set(k, prev, curr_flag);
 }
 
 // Plays sound effects according to the game state.
@@ -125,13 +90,13 @@ void handle_sound(uint8_t curr, bool is_sound1) {
     if (is_sound1) {
         uint8_t* prev = &sound1;
 
-        if (GETBIT(curr, 0)) {
+        if (flag_get(0, curr)) {
             soundplayer_repeat(sp, UFO_FLYING);
-            WRITE_TO_BIT(sound1, true, 0);
+            flag_set(0, prev, true);
         }
-        else if (GETBIT(sound1, 0)) {
+        else if (flag_get(0, *prev)) {
             soundplayer_stop(sp, UFO_FLYING);
-            WRITE_TO_BIT(sound1, false, 0);
+            flag_set(0, prev, false);
         }
     
         play_sound(PLAYER_SHOOT, 1, prev, curr);
@@ -208,9 +173,9 @@ uint16_t machine_IN(uint8_t port) {
         case 0: // never used
             return 0;
         case 1:
-            return getInput1();
+            return gamepad_getInput(gamepad, true);
         case 2:
-            return getInput2();
+            return gamepad_getInput(gamepad, false);
         case 3:
             return shift_register_read(shift);
         
@@ -277,7 +242,7 @@ void invaders_display(i8080_t* machine, viewer_t* viewer) {
         for(int j = 0; j < DISPLAY_WIDTH; ++j) {
             uint8_t byte = vram[32*j + 31-i];
             for(int k = 0; k < 8; ++k) {
-                texture[(8*i+k)*DISPLAY_WIDTH + j] = GETBIT(byte,7-k) * GETCOLOR(i,j);
+                texture[(8*i+k)*DISPLAY_WIDTH + j] = flag_get(7-k, byte) ? GETCOLOR(i,j) : 0;
             }
         }
     }

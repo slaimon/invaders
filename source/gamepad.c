@@ -6,7 +6,7 @@ inline void gamepad_init(gamepad_t* gamepad) {
     memset(gamepad, 0, sizeof(gamepad_t));
 }
 
-uint8_t getInput(gamepad_t gamepad, bool is_input1) {
+uint8_t gamepad_getInput(gamepad_t gamepad, bool is_input1) {
     uint8_t result = 0;
     
     if (is_input1) {

@@ -25,6 +25,6 @@ void gamepad_init(gamepad_t* gamepad);
 // what the Space Invaders machine expects to read when it executes an IN
 // instruction. Since there are two bytes that represent the player controls
 // (`input1` and `input2`), you need to tell the function which one you want.
-uint8_t getInput(gamepad_t gamepad, bool is_input1);
+uint8_t gamepad_getInput(gamepad_t gamepad, bool is_input1);
 
 #endif
