@@ -41,9 +41,8 @@ void viewer_setFrame(viewer_t* viewer, uint8_t* pixelmatrix) {
     SDL_UnlockTexture(viewer->texture);
 }
 
-void viewer_destroy(viewer_t* viewer) {
-    SDL_DestroyTexture(viewer->texture);
-    SDL_DestroyRenderer(viewer->renderer);
-    SDL_DestroyWindow(viewer->window);
-    SDL_Quit();
+void viewer_destroy(viewer_t viewer) {
+    SDL_DestroyTexture(viewer.texture);
+    SDL_DestroyRenderer(viewer.renderer);
+    SDL_DestroyWindow(viewer.window);
 }

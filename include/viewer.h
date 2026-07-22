@@ -29,5 +29,5 @@ void viewer_update(viewer_t* viewer);
 // format (e.g. SDL_PIXELFORMAT_RGB24)
 void viewer_setFrame(viewer_t* viewer, uint8_t* pixelmatrix);
 
-// destroy a viewer
-void viewer_destroy(viewer_t* viewer);
+// Dispose of the viewer's resources.
+void viewer_destroy(viewer_t viewer);
