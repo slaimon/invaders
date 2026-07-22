@@ -12,6 +12,17 @@
 #include <string.h>
 #include "flags.h"
 
+#define KEY_COIN        SDLK_C
+#define KEY_TILT        SDLK_DELETE
+#define KEY_P1START     SDLK_1
+#define KEY_P1FIRE      SDLK_UP
+#define KEY_P1LEFT      SDLK_LEFT
+#define KEY_P1RIGHT     SDLK_RIGHT
+#define KEY_P2START     SDLK_2
+#define KEY_P2FIRE      SDLK_W
+#define KEY_P2LEFT      SDLK_A
+#define KEY_P2RIGHT     SDLK_D
+
 typedef struct gamepad {
     bool coin;
     bool tilt;
