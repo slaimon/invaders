@@ -1,6 +1,12 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+// The following macros are used for portability.
+// They are taken from curl 7.21.5 (setup.h).
+#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
+#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#endif
+
 #include "safe.h"
 #include "bytestream.h"
 #include "i8080_cpm.h"

@@ -3,7 +3,7 @@
 #include "i8080_disassembler.h"
 
 void disassemble_program(const bytestream_t program, FILE* ofp) {
-    char result[I8080_LINE_LENGTH * program.size];
+    char* result = malloc(I8080_LINE_LENGTH * program.size);
 
     size_t programPointer = 0;
     size_t stringPointer = 0;
@@ -16,6 +16,7 @@ void disassemble_program(const bytestream_t program, FILE* ofp) {
     }
 
     fprintf(ofp, result);
+    free(result);
 }
 
 

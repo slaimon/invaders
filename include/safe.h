@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <errno.h>
-#include <dirent.h>
 
 #define SAFE_NULL(exp, msg)   \
    if ( (exp) == NULL ) {     \

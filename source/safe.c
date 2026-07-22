@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <pthread.h>
-#include <dirent.h>
 
 #include "safe.h"
 
@@ -32,6 +30,14 @@ void* safe_malloc(size_t bytes) {
 	}
 	
 	return ptr;
+}
+
+static void* reallocarray(void *ptr, size_t nmemb, size_t size) {
+    if (nmemb && size > SIZE_MAX / nmemb) {
+        errno = ENOMEM;
+        return NULL;
+    }
+    return realloc(ptr, nmemb * size);
 }
 
 void* safe_realloc(void* ptr, size_t nmemb, size_t size) {
