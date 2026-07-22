@@ -311,12 +311,7 @@ void sfx_init(soundplayer_t* sp, const char* base_dir) {
     }
     const char** fpaths_ = (const char**) fpaths;
 
-    SDL_AudioSpec spec;
-    spec.freq = 11025;
-    spec.format = SDL_AUDIO_U8;
-    spec.channels = 1;
-    soundplayer_init(sp, spec, fpaths_, NUMBER_OF_SFX);
-
+    soundplayer_init(sp, fpaths_, NUMBER_OF_SFX);
     free(fpaths_);
 }
 

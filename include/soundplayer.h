@@ -16,10 +16,10 @@ typedef struct soundplayer {
 } soundplayer_t;
 
 // Initialize the soundplayer and SDL's audio subsystem. Load all .wav files into memory.
-// Each sound you is assigned a progressive sound_id starting at 0.  
-void soundplayer_init(soundplayer_t* sp, SDL_AudioSpec spec, const char** fnames, const size_t num_files);
+// Each sound you load is assigned a progressive sound_id starting at 0.  
+void soundplayer_init(soundplayer_t* sp, const char** fnames, const size_t num_files);
 
-// Play a sound once
+// Play a sound once.
 void soundplayer_play(soundplayer_t sp, const int sound_id);
 
 // Play a sound in loop.

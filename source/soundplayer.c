@@ -37,7 +37,7 @@ bool load_file(soundplayer_t* sp, const char* fname, sound_t** sound_ptr) {
     return false;
 }
 
-void soundplayer_init(soundplayer_t* sp, SDL_AudioSpec spec, const char** fnames, size_t num_files) {
+void soundplayer_init(soundplayer_t* sp, const char** fnames, size_t num_files) {
     if (!SDL_Init(SDL_INIT_AUDIO)) {
         fprintf(stderr, "ERROR: failed to initialize SDL audio: %s\n", SDL_GetError());
         exit(EXIT_FAILURE);
