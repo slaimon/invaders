@@ -1,13 +1,10 @@
-#ifndef __BITFLAGS_H__
-#define __BITFLAGS_H__
+#ifndef __FLAGS_H__
+#define __FLAGS_H__
 
 /*
-    Yes, this header file contains implementations. Oh no!
+    HEADER-ONLY
 
-    It's actually quite harmless and allows the compiler to inline calls to
-    these pervasive functions, avoiding a significant amount of overhead.
-
-    In theory, at least.
+    Set or get a single bit from a byte.
 */
 
 #include <stdbool.h>

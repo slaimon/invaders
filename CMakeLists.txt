@@ -51,8 +51,6 @@ add_executable(
 add_executable(
     invaders
     ${SOURCE}/invaders.c
-    ${SOURCE}/gamepad.c
-    ${SOURCE}/shift_register.c
     ${SOURCE}/soundplayer.c
     ${SOURCE}/viewer.c
     ${SOURCE}/i8080.c
