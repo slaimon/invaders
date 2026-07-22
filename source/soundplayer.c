@@ -88,3 +88,14 @@ void soundplayer_stop(soundplayer_t sp, const int sound_id) {
 
     SDL_ClearAudioStream(sound->stream);
 }
+
+void soundplayer_destroy(soundplayer_t sp) {
+    for (int i = 0; i < sp.num_sounds; i++) {
+        sound_t* sound = sp.sound[i];
+        soundplayer_stop(sp, i);
+        SDL_DestroyAudioStream(sound->stream);
+        SDL_free(sound->buffer);
+    }
+    SDL_CloseAudioDevice(sp.device);
+    SDL_free(sp.sound);
+}

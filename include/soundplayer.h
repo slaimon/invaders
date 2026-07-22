@@ -30,3 +30,6 @@ void soundplayer_repeat(soundplayer_t sp, const int sound_id);
 // Stop playing the sound immediately.
 // Will do nothing if the sound is not playing.
 void soundplayer_stop(soundplayer_t sp, const int sound_id);
+
+// Dispose of the soundplayer's resources.
+void soundplayer_destroy(soundplayer_t sp);
