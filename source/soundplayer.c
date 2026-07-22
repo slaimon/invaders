@@ -61,26 +61,23 @@ bool soundplayer_init(soundplayer_t* sp, const char** fnames, size_t num_files) 
     return true;
 }
 
-void soundplayer_play(soundplayer_t sp, const int sound_id) {
-    if (!sp.active)
-        return;
+#define CHECK_IS_ACTIVE(sp) \
+    if (!sp.active) return;
 
-    sound_t* sound = sp.sound[sound_id];
-    if (sound == NULL) {
-        return;
-    }
+#define GET_SOUND(sound_id) \
+    sp.sound[sound_id];     \
+    if (sound == NULL) return;
+
+void soundplayer_play(soundplayer_t sp, const int sound_id) {
+    CHECK_IS_ACTIVE(sp);
+    sound_t* sound = GET_SOUND(sound_id);
 
     SDL_PutAudioStreamData(sound->stream, sound->buffer, sound->length);
 }
 
 void soundplayer_repeat(soundplayer_t sp, const int sound_id) {
-    if (!sp.active)
-        return;
-
-    sound_t* sound = sp.sound[sound_id];
-    if (sound == NULL) {
-        return;
-    }
+    CHECK_IS_ACTIVE(sp);
+    sound_t* sound = GET_SOUND(sound_id);
 
     // add another copy of the sound if needed
     if (SDL_GetAudioStreamQueued(sound->stream) < sound->length) {
@@ -89,20 +86,21 @@ void soundplayer_repeat(soundplayer_t sp, const int sound_id) {
 }
 
 void soundplayer_stop(soundplayer_t sp, const int sound_id) {
-    if (!sp.active)
-        return;
-
-    sound_t* sound = sp.sound[sound_id];
-    if (sound == NULL) {
-        return;
-    }
+    CHECK_IS_ACTIVE(sp);
+    sound_t* sound = GET_SOUND(sound_id);
 
     SDL_ClearAudioStream(sound->stream);
 }
 
+void soundplayer_set_gain(soundplayer_t sp, const int sound_id, const float gain) {
+    CHECK_IS_ACTIVE(sp);
+    sound_t* sound = GET_SOUND(sound_id);
+
+    SDL_SetAudioStreamGain(sound->stream, gain);
+}
+
 void soundplayer_destroy(soundplayer_t sp) {
-    if(!sp.active)
-        return;
+    CHECK_IS_ACTIVE(sp);
     
     for (int i = 0; i < sp.num_sounds; i++) {
         sound_t* sound = sp.sound[i];

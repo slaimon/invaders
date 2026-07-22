@@ -252,6 +252,12 @@ void sfx_init(soundplayer_t* sp, const char* base_dir) {
     for (int i = 0; i < NUMBER_OF_SFX; i++)
         SDL_free(fpaths[i]);
     SDL_free(fpaths_);
+
+    // adjust relative sfx volume
+    soundplayer_set_gain(*sp, PLAYER_SHOOT, 0.4);
+    soundplayer_set_gain(*sp, INVADER_DEATH, 0.4);
+    soundplayer_set_gain(*sp, UFO_FLYING, 0.2);
+    soundplayer_set_gain(*sp, UFO_HIT, 0.2);
 }
 
 void print_usage(const char* program_name) {

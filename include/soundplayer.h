@@ -35,5 +35,9 @@ void soundplayer_repeat(soundplayer_t sp, const int sound_id);
 // Will do nothing if the sound is not playing.
 void soundplayer_stop(soundplayer_t sp, const int sound_id);
 
+// Set the volume that the given audio sample should be played at.
+// Maximum gain is 1.0 (default). 
+void soundplayer_set_gain(soundplayer_t sp, const int sound_id, const float gain);
+
 // Dispose of the soundplayer's resources.
 void soundplayer_destroy(soundplayer_t sp);
