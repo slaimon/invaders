@@ -1,29 +1,27 @@
 #include <SDL3/SDL_audio.h>
 #include <stdlib.h>
 
-#include "safe.h"
 #include "soundplayer.h"
 
-/// Tries to load the given sound file and store it at sound_ptr.
-/// If the loading process fails, the function returns false and sets sound_ptr to NULL.
-/// \retval true iff loading is successful. 
+// Tries to load the given sound file and store it at sound_ptr.
+// If the loading process fails, the function returns false and sets sound_ptr to NULL.
 bool load_file(soundplayer_t* sp, const char* fname, sound_t** sound_ptr) {
     SDL_AudioSpec s;
     bool success = true;
-    sound_t* sound = safe_malloc(sizeof(sound_t));
+    sound_t* sound = SDL_malloc(sizeof(sound_t));
 
     if (!SDL_LoadWAV(fname, &s, &sound->buffer, &sound->length)) {
-        fprintf(stderr, "ERROR: failed to load file \"%s\": %s\n", fname, SDL_GetError());
+        SDL_Log("Failed to load file \"%s\": %s", fname, SDL_GetError());
         success = false;
     }
 
     sound->stream = SDL_CreateAudioStream(&s, NULL);
     if (sound->stream == NULL) {
-        fprintf(stderr, "ERROR: failed to create stream: %s\n", SDL_GetError());
+        SDL_Log("Failed to create stream: %s", SDL_GetError());
         success = false;
     }
     if (!SDL_BindAudioStream(sp->device, sound->stream)) {
-        fprintf(stderr, "ERROR: failed to bind stream: %s\n", SDL_GetError());
+        SDL_Log("Failed to bind stream: %s", SDL_GetError());
         success = false;
     }
 
@@ -32,34 +30,41 @@ bool load_file(soundplayer_t* sp, const char* fname, sound_t** sound_ptr) {
         return true;
     }
 
-    free(sound);
+    SDL_free(sound);
     *sound_ptr = NULL;
     return false;
 }
 
-void soundplayer_init(soundplayer_t* sp, const char** fnames, size_t num_files) {
+bool soundplayer_init(soundplayer_t* sp, const char** fnames, size_t num_files) {
+    sp->active = false;
+
     if (!SDL_Init(SDL_INIT_AUDIO)) {
-        fprintf(stderr, "ERROR: failed to initialize SDL audio: %s\n", SDL_GetError());
-        exit(EXIT_FAILURE);
+        SDL_Log("Failed to initialize SDL audio: %s", SDL_GetError());
+        return false;
     }
 
-    SDL_AudioDeviceID dev_id;
-    dev_id = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
+    SDL_AudioDeviceID dev_id = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
 
     if (dev_id == 0) {
-        fprintf(stderr, "ERROR: failed to open audio device: %s\n", SDL_GetError());
-        exit(EXIT_FAILURE);
+        SDL_Log("Failed to open audio device: %s", SDL_GetError());
+        return false;
     }
 
     sp->device = dev_id;
     sp->num_sounds = num_files;
-    sp->sound = safe_malloc(num_files * sizeof(sound_t*));
+    sp->sound = SDL_malloc(num_files * sizeof(sound_t*));
     for (size_t i = 0; i < num_files; ++i) {
         load_file(sp, fnames[i], &sp->sound[i]);
     }
+
+    sp->active = true;
+    return true;
 }
 
 void soundplayer_play(soundplayer_t sp, const int sound_id) {
+    if (!sp.active)
+        return;
+
     sound_t* sound = sp.sound[sound_id];
     if (sound == NULL) {
         return;
@@ -69,6 +74,9 @@ void soundplayer_play(soundplayer_t sp, const int sound_id) {
 }
 
 void soundplayer_repeat(soundplayer_t sp, const int sound_id) {
+    if (!sp.active)
+        return;
+
     sound_t* sound = sp.sound[sound_id];
     if (sound == NULL) {
         return;
@@ -81,6 +89,9 @@ void soundplayer_repeat(soundplayer_t sp, const int sound_id) {
 }
 
 void soundplayer_stop(soundplayer_t sp, const int sound_id) {
+    if (!sp.active)
+        return;
+
     sound_t* sound = sp.sound[sound_id];
     if (sound == NULL) {
         return;
@@ -90,11 +101,15 @@ void soundplayer_stop(soundplayer_t sp, const int sound_id) {
 }
 
 void soundplayer_destroy(soundplayer_t sp) {
+    if(!sp.active)
+        return;
+    
     for (int i = 0; i < sp.num_sounds; i++) {
         sound_t* sound = sp.sound[i];
         soundplayer_stop(sp, i);
         SDL_DestroyAudioStream(sound->stream);
         SDL_free(sound->buffer);
+        SDL_free(sound);
     }
     SDL_CloseAudioDevice(sp.device);
     SDL_free(sp.sound);

@@ -1,3 +1,4 @@
+#include <SDL3/SDL.h>
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
@@ -117,8 +118,9 @@ uint16_t handle_IN(uint8_t port) {
             return shift_register_read(shift);
         
         default:
-            fprintf(stderr, "ERROR! Unexpected instruction IN %02Xh\n", port);
-            exit(1);
+            SDL_Log("ERROR! Unexpected instruction IN %02Xh\n", port);
+            SDL_AppQuit(NULL, SDL_APP_FAILURE);
+            return 0; // unreachable
     }
 }
 
@@ -146,8 +148,8 @@ void handle_OUT(uint8_t port, uint8_t value) {
             break;
         
         default:
-            fprintf(stderr, "ERROR! Unexpected instruction OUT %02Xh\n", port);
-            exit(1);
+            SDL_Log("ERROR! Unexpected instruction OUT %02Xh\n", port);
+            SDL_AppQuit(NULL, SDL_APP_FAILURE);
     }
 }
 
@@ -185,6 +187,7 @@ void update_viewer() {
     }
 
     viewer_setFrame(&viewer, texture);
+    viewer_update(&viewer);
 }
 
 // Execute instructions until the cycles budget is spent
@@ -234,15 +237,21 @@ void write_path(char* dest, int n, ...) {
 }
 
 void sfx_init(soundplayer_t* sp, const char* base_dir) {
-    char** fpaths = safe_malloc(NUMBER_OF_SFX * sizeof(char*));
+    char** fpaths = SDL_malloc(NUMBER_OF_SFX * sizeof(char*));
     for (int i = 0; i < NUMBER_OF_SFX; i++) {
-        fpaths[i] = safe_malloc(strlen(AUDIO_ASSETS_DIR) + strlen(base_dir) + strlen(sfx_files[i]) + 3);
+        fpaths[i] = SDL_malloc(strlen(base_dir) + strlen(AUDIO_ASSETS_DIR) + strlen(sfx_files[i]) + 3);
+        if (fpaths[i] == NULL) {
+            SDL_Log("Unable to allocate memory for audio files.");
+            SDL_AppQuit(NULL, SDL_APP_FAILURE);
+        }
         write_path(fpaths[i], 3, base_dir, AUDIO_ASSETS_DIR, sfx_files[i]);
     }
     const char** fpaths_ = (const char**) fpaths;
-
     soundplayer_init(sp, fpaths_, NUMBER_OF_SFX);
-    free(fpaths_);
+
+    for (int i = 0; i < NUMBER_OF_SFX; i++)
+        SDL_free(fpaths[i]);
+    SDL_free(fpaths_);
 }
 
 void print_usage(const char* program_name) {
@@ -250,6 +259,9 @@ void print_usage(const char* program_name) {
     printf("Play Space Invaders!\n");
     printf("Optionally provide a path to the assets folder (the default location is ./assets)\n");
 }
+
+bool cleanup_viewer = false;
+bool cleanup_sound = false;
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     const char* base_dir;
@@ -267,15 +279,15 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     // Note that libraries like bytestream and i8080 also use libc and safe.h
 
     // open the ROM file using the given directory path
-    char* rom_path = safe_malloc(strlen(base_dir) + strlen(ROM_FILES_DIR) + strlen(ROM_FILENAME) + 3);
+    char* rom_path = SDL_malloc(strlen(base_dir) + strlen(ROM_FILES_DIR) + strlen(ROM_FILENAME) + 3);
     write_path(rom_path, 3, base_dir, ROM_FILES_DIR, ROM_FILENAME);
     FILE* ifp = safe_fopen(rom_path, "rb");
-    free(rom_path);
+    SDL_free(rom_path);
     
     bytestream_t* program = bytestream_read(ifp);
     fclose(ifp);
     if (program == NULL) {
-        SDL_Log("No valid program found\n");
+        SDL_Log("No valid program found.");
         return SDL_APP_FAILURE;
     }
 
@@ -286,7 +298,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
 
     // initialize other devices
     viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332);
+    cleanup_viewer = true;
     sfx_init(&soundplayer, base_dir);
+    cleanup_sound = true;
     shift_register_init(&shift);
     gamepad_init(&gamepad);
 
@@ -351,12 +365,14 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
     execute_cycles(half_frame);
     i8080_interrupt(&cpu, 2);
 
-    // update the view
     update_viewer();
-    viewer_update(&viewer);
-
     return SDL_APP_CONTINUE;
 }
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result) {
+    if (cleanup_viewer)
+        viewer_destroy(viewer);
+    if (cleanup_sound)
+        soundplayer_destroy(soundplayer);
+    SDL_Quit();
 }

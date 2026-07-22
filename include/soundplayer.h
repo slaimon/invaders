@@ -13,11 +13,15 @@ typedef struct soundplayer {
     SDL_AudioDeviceID device;
     sound_t** sound;
     size_t num_sounds;
+    bool active;
 } soundplayer_t;
 
 // Initialize the soundplayer and SDL's audio subsystem. Load all .wav files into memory.
-// Each sound you load is assigned a progressive sound_id starting at 0.  
-void soundplayer_init(soundplayer_t* sp, const char** fnames, const size_t num_files);
+// Each sound you load is assigned a progressive sound_id starting at 0.
+// Returns true iff the initialization has succeeded.
+// If false is returned, the soundplayer will be inactive and all calls to it will
+// safely return without producting any effect.
+bool soundplayer_init(soundplayer_t* sp, const char** fnames, const size_t num_files);
 
 // Play a sound once.
 void soundplayer_play(soundplayer_t sp, const int sound_id);
