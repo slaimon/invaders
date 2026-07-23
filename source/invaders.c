@@ -347,6 +347,18 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
         case KEY_P1RIGHT:
             gamepad.p1_right = new_state;
             break;
+        case KEY_P2START:
+            gamepad.p2_start = new_state;
+            break;
+        case KEY_P2FIRE:
+            gamepad.p2_fire = new_state;
+            break;
+        case KEY_P2LEFT:
+            gamepad.p2_left = new_state;
+            break;
+        case KEY_P2RIGHT:
+            gamepad.p2_right = new_state;
+            break;
         
         default:
             return SDL_APP_CONTINUE;

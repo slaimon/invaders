@@ -48,15 +48,15 @@ static void gamepad_init(gamepad_t* gamepad) {
 // instruction. Since there are two bytes that represent the player controls
 // (`input1` and `input2`), you need to tell the function which one you want.
 static uint8_t gamepad_getInput(gamepad_t gamepad, bool is_input1) {
-    uint8_t result = 0;
+    uint8_t flag = 0;
     
     if (is_input1) {
-        flag_set(0, &result, gamepad.coin);
-        flag_set(1, &result, gamepad.p2_start);
-        flag_set(2, &result, gamepad.p1_start);
-        flag_set(4, &result, gamepad.p1_fire);
-        flag_set(5, &result, gamepad.p1_left);
-        flag_set(6, &result, gamepad.p1_right);
+        flag_set(0, &flag, gamepad.coin);
+        flag_set(1, &flag, gamepad.p2_start);
+        flag_set(2, &flag, gamepad.p1_start);
+        flag_set(4, &flag, gamepad.p1_fire);
+        flag_set(5, &flag, gamepad.p1_left);
+        flag_set(6, &flag, gamepad.p1_right);
     } else {
         // bit 0 = DIP3 00 = 3 ships  10 = 5 ships
         // bit 1 = DIP5 01 = 4 ships  11 = 6 ships
@@ -67,10 +67,13 @@ static uint8_t gamepad_getInput(gamepad_t gamepad, bool is_input1) {
         // bit 6 = P2 right (1 if pressed)
         // bit 7 = DIP7 Coin info displayed in demo screen 0=ON
         
-        flag_set(2, &result, gamepad.tilt);
+        flag_set(4, &flag, gamepad.p2_fire);
+        flag_set(5, &flag, gamepad.p2_left);
+        flag_set(6, &flag, gamepad.p2_right);
+        flag_set(2, &flag, gamepad.tilt);
     }
     
-    return result;       
+    return flag;       
 }
 
 #endif
