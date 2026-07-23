@@ -24,6 +24,7 @@ viewer_t viewer;
 
 // Asset files names and paths
 const char* ROM_PATH = "data/INVADERS";
+const char* SAVE_PATH = "data/save.b";
 const char* SOUND_DIR = "data/sound";
 const char* sfx_files[] = {
     "player_shoot.wav",
@@ -55,6 +56,8 @@ typedef enum sfx {
 // These store the old values of the gamestate bytes that control sound.
 uint8_t sound1 = 0;
 uint8_t sound2 = 0;
+
+const uint16_t HISCORE_LOCATION = 0x20f4;
 
 // Check the kth bit of both `curr` and `prev`. If a rising edge is detected
 // (i.e. the bit is on in `curr` and off `prev`), the sound corresponding to
@@ -280,6 +283,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     write_path(rom_path, 2, base_dir, ROM_PATH);
     char* sound_dir = SDL_malloc(strlen(base_dir) + strlen(SOUND_DIR) + 2);
     write_path(sound_dir, 2, base_dir, SOUND_DIR);
+    char* save_path = SDL_malloc(strlen(base_dir) + strlen(SAVE_PATH) + 2);
+    write_path(save_path, 2, base_dir, SAVE_PATH);
 
     // read the ROM file
     size_t rom_size;
@@ -306,6 +311,22 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     cleanup_sound = true;
     shift_register_init(&shift);
     gamepad_init(&gamepad);
+
+    // read savefile and restore it
+    size_t save_size;
+    uint8_t* save = (uint8_t*) SDL_LoadFile(save_path, &save_size);
+    if (save != NULL) {
+        if (save_size == 2) {
+            cpu.mem[HISCORE_LOCATION] = save[0];
+            cpu.mem[HISCORE_LOCATION + 1] = save[1];
+        } else {
+            SDL_Log("Corrupted savefile! High-scores cannot be restored.");
+        }
+        SDL_free(save);
+    } else {
+        SDL_Log("No savefile found at %s", save_path);
+    }
+    SDL_free(save_path);
 
     return SDL_APP_CONTINUE;
 }
@@ -384,22 +405,11 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
     return SDL_APP_CONTINUE;
 }
 
-int convert_hiscore(const uint8_t* hiscore_ptr) {
-    int hiscore = 0;
-    hiscore += hiscore_ptr[0] & 0x0F;
-    hiscore += 10 * (int) (hiscore_ptr[0] >> 4);
-    hiscore += 100 * (int) (hiscore_ptr[1] & 0x0F);
-    hiscore += 1000 * (int) (hiscore_ptr[1] >> 4);
-    return hiscore;
-}
-
 void SDL_AppQuit(void* appstate, SDL_AppResult result) {
     if (cleanup_viewer)
         viewer_destroy(viewer);
     if (cleanup_sound)
         soundplayer_destroy(soundplayer);
 
-    int hiscore = convert_hiscore(&cpu.mem[0x20f4]);
-    SDL_Log("hiscore: %d", hiscore);
     SDL_Quit();
 }
