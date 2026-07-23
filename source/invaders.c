@@ -384,10 +384,22 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
     return SDL_APP_CONTINUE;
 }
 
+int convert_hiscore(const uint8_t* hiscore_ptr) {
+    int hiscore = 0;
+    hiscore += hiscore_ptr[0] & 0x0F;
+    hiscore += 10 * (int) (hiscore_ptr[0] >> 4);
+    hiscore += 100 * (int) (hiscore_ptr[1] & 0x0F);
+    hiscore += 1000 * (int) (hiscore_ptr[1] >> 4);
+    return hiscore;
+}
+
 void SDL_AppQuit(void* appstate, SDL_AppResult result) {
     if (cleanup_viewer)
         viewer_destroy(viewer);
     if (cleanup_sound)
         soundplayer_destroy(soundplayer);
+
+    int hiscore = convert_hiscore(&cpu.mem[0x20f4]);
+    SDL_Log("hiscore: %d", hiscore);
     SDL_Quit();
 }
