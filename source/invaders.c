@@ -3,9 +3,7 @@
 #include <SDL3/SDL_main.h>
 
 #include <stdarg.h>
-#include <stdlib.h>
 #include <string.h>
-#include "safe.h"
 #include "i8080.h"
 #include "flags.h"
 
@@ -25,11 +23,8 @@ soundplayer_t soundplayer;
 viewer_t viewer;
 
 // Asset files names and paths
-#define MAX_BASEDIR_LENGTH 128
-const char* DEFAULT_ASSETS_PATH = "./assets";
-const char* AUDIO_ASSETS_DIR = "sound";
-const char* ROM_FILES_DIR = "rom";
-const char* ROM_FILENAME = "INVADERS";
+const char* ROM_PATH = "data/INVADERS";
+const char* SOUND_DIR = "data/sound";
 const char* sfx_files[] = {
     "player_shoot.wav",
     "player_death.wav",
@@ -236,15 +231,11 @@ void write_path(char* dest, int n, ...) {
     va_end(args);
 }
 
-void sfx_init(soundplayer_t* sp, const char* base_dir) {
+void sfx_init(soundplayer_t* sp, const char* sound_dir) {
     char** fpaths = SDL_malloc(NUMBER_OF_SFX * sizeof(char*));
     for (int i = 0; i < NUMBER_OF_SFX; i++) {
-        fpaths[i] = SDL_malloc(strlen(base_dir) + strlen(AUDIO_ASSETS_DIR) + strlen(sfx_files[i]) + 3);
-        if (fpaths[i] == NULL) {
-            SDL_Log("Unable to allocate memory for audio files.");
-            SDL_AppQuit(NULL, SDL_APP_FAILURE);
-        }
-        write_path(fpaths[i], 3, base_dir, AUDIO_ASSETS_DIR, sfx_files[i]);
+        fpaths[i] = SDL_malloc(strlen(sound_dir) + strlen(sfx_files[i]) + 3);
+        write_path(fpaths[i], 2, sound_dir, sfx_files[i]);
     }
     const char** fpaths_ = (const char**) fpaths;
     soundplayer_init(sp, fpaths_, NUMBER_OF_SFX);
@@ -263,7 +254,7 @@ void sfx_init(soundplayer_t* sp, const char* base_dir) {
 void print_usage(const char* program_name) {
     printf("usage: %s [assets_dir]\n", program_name);
     printf("Play Space Invaders!\n");
-    printf("Optionally provide a path to the assets folder (the default location is ./assets)\n");
+    printf("Optionally provide a path to the assets folder (the default location is .)\n");
 }
 
 bool cleanup_viewer = false;
@@ -273,7 +264,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     const char* base_dir;
 
     if (argc == 1) {
-        base_dir = DEFAULT_ASSETS_PATH;
+        base_dir = SDL_GetBasePath();
     } else if (argc == 2) {
         base_dir = argv[1];
     } else {
@@ -284,28 +275,34 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     // TODO: use SDL functions instead of libc or safe.h e.g. SDL_free, SDL_malloc etc.
     // Note that libraries like bytestream and i8080 also use libc and safe.h
 
-    // open the ROM file using the given directory path
-    char* rom_path = SDL_malloc(strlen(base_dir) + strlen(ROM_FILES_DIR) + strlen(ROM_FILENAME) + 3);
-    write_path(rom_path, 3, base_dir, ROM_FILES_DIR, ROM_FILENAME);
-    FILE* ifp = safe_fopen(rom_path, "rb");
+    // obtain asset file paths
+    char* rom_path = SDL_malloc(strlen(base_dir) + strlen(ROM_PATH) + 2);
+    write_path(rom_path, 2, base_dir, ROM_PATH);
+    char* sound_dir = SDL_malloc(strlen(base_dir) + strlen(SOUND_DIR) + 2);
+    write_path(sound_dir, 2, base_dir, SOUND_DIR);
+
+    // read the ROM file
+    size_t rom_size;
+    void* rom = SDL_LoadFile(rom_path, &rom_size);
     SDL_free(rom_path);
-    
-    bytestream_t* program = bytestream_read(ifp);
-    fclose(ifp);
-    if (program == NULL) {
-        SDL_Log("No valid program found.");
+    if (rom == NULL) {
+        SDL_Log("Error loading ROM file: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
     // initialize the CPU
     i8080_init(&cpu);
-    i8080_memory_write(&cpu, *program, 0);
-    bytestream_destroy(program);
+    bytestream_t program;
+    program.data = rom;
+    program.size = rom_size;
+    i8080_memory_write(&cpu, program, 0);
+    SDL_free(program.data);
 
     // initialize other devices
     viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332);
     cleanup_viewer = true;
-    sfx_init(&soundplayer, base_dir);
+    sfx_init(&soundplayer, sound_dir);
+    SDL_free(sound_dir);
     cleanup_sound = true;
     shift_register_init(&shift);
     gamepad_init(&gamepad);

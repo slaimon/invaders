@@ -113,7 +113,3 @@ set_property(
     TARGET log_example
     APPEND PROPERTY ADDITIONAL_CLEAN_FILES sample_log.txt
 )
-add_custom_target(
-    launch
-    COMMAND invaders ../assets
-)

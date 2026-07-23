@@ -11,28 +11,27 @@ bool load_file(soundplayer_t* sp, const char* fname, sound_t** sound_ptr) {
     sound_t* sound = SDL_malloc(sizeof(sound_t));
 
     if (!SDL_LoadWAV(fname, &s, &sound->buffer, &sound->length)) {
-        SDL_Log("Failed to load file \"%s\": %s", fname, SDL_GetError());
+        SDL_Log("Error loading file: %s", SDL_GetError());
         success = false;
-    }
-
-    sound->stream = SDL_CreateAudioStream(&s, NULL);
-    if (sound->stream == NULL) {
-        SDL_Log("Failed to create stream: %s", SDL_GetError());
-        success = false;
-    }
-    if (!SDL_BindAudioStream(sp->device, sound->stream)) {
-        SDL_Log("Failed to bind stream: %s", SDL_GetError());
-        success = false;
+    } else {
+        sound->stream = SDL_CreateAudioStream(&s, NULL);
+        if (sound->stream == NULL) {
+            SDL_Log("Failed to create stream: %s", SDL_GetError());
+            success = false;
+        } else if (!SDL_BindAudioStream(sp->device, sound->stream)) {
+            SDL_Log("Failed to bind stream: %s", SDL_GetError());
+            success = false;
+        }
     }
 
     if (success) {
         *sound_ptr = sound;
         return true;
+    } else {
+        SDL_free(sound);
+        *sound_ptr = NULL;
+        return false;
     }
-
-    SDL_free(sound);
-    *sound_ptr = NULL;
-    return false;
 }
 
 bool soundplayer_init(soundplayer_t* sp, const char** fnames, size_t num_files) {
@@ -54,7 +53,9 @@ bool soundplayer_init(soundplayer_t* sp, const char** fnames, size_t num_files) 
     sp->num_sounds = num_files;
     sp->sound = SDL_malloc(num_files * sizeof(sound_t*));
     for (size_t i = 0; i < num_files; ++i) {
-        load_file(sp, fnames[i], &sp->sound[i]);
+        if (!load_file(sp, fnames[i], &sp->sound[i])) {
+            SDL_Log("A sound file failed to load, so it will be muted.");
+        }
     }
 
     sp->active = true;
