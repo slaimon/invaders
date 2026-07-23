@@ -24,7 +24,7 @@ viewer_t viewer;
 
 // Asset files names and paths
 const char* ROM_PATH = "data/INVADERS";
-const char* SAVE_PATH = "data/save.b";
+const char* SAVE_PATH = "data/score.b";
 const char* SOUND_DIR = "data/sound";
 const char* sfx_files[] = {
     "player_shoot.wav",
@@ -57,7 +57,14 @@ typedef enum sfx {
 uint8_t sound1 = 0;
 uint8_t sound2 = 0;
 
-const uint16_t HISCORE_LOCATION = 0x20f4;
+// Notice that we keep track of two different locations for the hiscore:
+// The one in ROM and the one in RAM. It would be useless to patch the RAM
+// because it will be overwritten at startup. Likewise, the location in ROM
+// is never updated by the game so it's useless to read from it.
+// In simpler terms: write to ROM, read from RAM.
+const uint16_t HISCORE_LOCATION_ROM = 0x1bf4;
+const uint16_t HISCORE_LOCATION_RAM = 0x20f4;
+char* save_path;
 
 // Check the kth bit of both `curr` and `prev`. If a rising edge is detected
 // (i.e. the bit is on in `curr` and off `prev`), the sound corresponding to
@@ -283,7 +290,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     write_path(rom_path, 2, base_dir, ROM_PATH);
     char* sound_dir = SDL_malloc(strlen(base_dir) + strlen(SOUND_DIR) + 2);
     write_path(sound_dir, 2, base_dir, SOUND_DIR);
-    char* save_path = SDL_malloc(strlen(base_dir) + strlen(SAVE_PATH) + 2);
+    save_path = SDL_malloc(strlen(base_dir) + strlen(SAVE_PATH) + 2);
     write_path(save_path, 2, base_dir, SAVE_PATH);
 
     // read the ROM file
@@ -316,9 +323,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     size_t save_size;
     uint8_t* save = (uint8_t*) SDL_LoadFile(save_path, &save_size);
     if (save != NULL) {
-        if (save_size == 2) {
-            cpu.mem[HISCORE_LOCATION] = save[0];
-            cpu.mem[HISCORE_LOCATION + 1] = save[1];
+        if (save_size == 2 || save[0] > 0x9 || save[1] > 0x9) {
+            cpu.mem[HISCORE_LOCATION_ROM] = save[0];
+            cpu.mem[HISCORE_LOCATION_ROM + 1] = save[1];
         } else {
             SDL_Log("Corrupted savefile! High-scores cannot be restored.");
         }
@@ -326,7 +333,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     } else {
         SDL_Log("No savefile found at %s", save_path);
     }
-    SDL_free(save_path);
 
     return SDL_APP_CONTINUE;
 }
@@ -410,6 +416,12 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result) {
         viewer_destroy(viewer);
     if (cleanup_sound)
         soundplayer_destroy(soundplayer);
+
+    uint8_t* hiscore = &cpu.mem[HISCORE_LOCATION_RAM];
+    if (!SDL_SaveFile(save_path, hiscore, 2)){
+        SDL_Log("Failed to save high-scores file: %s", SDL_GetError());
+    }
+    SDL_free(save_path);
 
     SDL_Quit();
 }
