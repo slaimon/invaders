@@ -32,7 +32,7 @@ static void hiscore_load(i8080_t* cpu, const char* path) {
     size_t save_size;
     uint8_t* save = (uint8_t*) SDL_LoadFile(path, &save_size);
     if (save == NULL) {
-        SDL_Log("No savefile found at %s", path);
+        SDL_Log("No savefile found at %s. First time playing?", path);
         return;
     }
 
