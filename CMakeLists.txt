@@ -13,7 +13,7 @@ set(RELEASE ${BUILD}/release)
 
 file(MAKE_DIRECTORY ${DATA})
 file(MAKE_DIRECTORY ${DATA}/sound)
-file(COPY_FILE ${ROMS}/INVADERS ${DATA}/INVADERS)
+file(COPY_FILE ${ROMS}/INVADERS.ROM ${DATA}/INVADERS.ROM)
 file(GLOB SOUND_FILES ${SOUND}/*wav)
 file(COPY ${SOUND_FILES} DESTINATION ${DATA}/sound)
 
@@ -132,7 +132,7 @@ add_custom_target(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE}/data
     COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE}/data/sound
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:invaders> ${RELEASE}/invaders.exe
-    COMMAND ${CMAKE_COMMAND} -E copy ${ROMS}/INVADERS ${RELEASE}/data/INVADERS
+    COMMAND ${CMAKE_COMMAND} -E copy ${ROMS}/INVADERS.ROM ${RELEASE}/data/INVADERS.ROM
     COMMAND ${CMAKE_COMMAND} -E copy ${SOUND_FILES} ${RELEASE}/data/sound
 )
 if(WIN32) # SDL3.dll needed for windows build

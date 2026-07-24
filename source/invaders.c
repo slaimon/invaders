@@ -27,8 +27,8 @@ static soundplayer_t soundplayer;
 static viewer_t viewer;
 
 // Asset files names and paths
-static const char* ROM_PATH = "data/INVADERS";
-static const char* SAVE_PATH = "data/score.b";
+static const char* ROM_PATH = "data/INVADERS.ROM";
+static const char* SAVE_PATH = "data/score.bin";
 static const char* SOUND_DIR = "data/sound";
 static const char* sfx_files[] = {
     "player_shoot.wav",
