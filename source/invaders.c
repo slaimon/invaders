@@ -17,20 +17,20 @@
 
 // Savefiles
 #include "hiscore.h"
-char* save_path;
+static char* save_path;
 
 // Virtual devices
-i8080_t cpu;
-shift_register_t shift;
-gamepad_t gamepad;
-soundplayer_t soundplayer;
-viewer_t viewer;
+static i8080_t cpu;
+static shift_register_t shift;
+static gamepad_t gamepad;
+static soundplayer_t soundplayer;
+static viewer_t viewer;
 
 // Asset files names and paths
-const char* ROM_PATH = "data/INVADERS";
-const char* SAVE_PATH = "data/score.b";
-const char* SOUND_DIR = "data/sound";
-const char* sfx_files[] = {
+static const char* ROM_PATH = "data/INVADERS";
+static const char* SAVE_PATH = "data/score.b";
+static const char* SOUND_DIR = "data/sound";
+static const char* sfx_files[] = {
     "player_shoot.wav",
     "player_death.wav",
     "step1.wav",
@@ -58,14 +58,14 @@ typedef enum sfx {
 } sfx_t;
 
 // These store the old values of the gamestate bytes that control sound.
-uint8_t sound1 = 0;
-uint8_t sound2 = 0;
+static uint8_t sound1 = 0;
+static uint8_t sound2 = 0;
 
 // Check the kth bit of both `curr` and `prev`. If a rising edge is detected
 // (i.e. the bit is on in `curr` and off `prev`), the sound corresponding to
 // `sound_id` is played.
 // In every case, `prev` is overwritten with the value of `curr`.
-void play_sound(int sound_id, uint8_t k, uint8_t* prev, uint8_t curr) {
+static void play_sound(int sound_id, uint8_t k, uint8_t* prev, uint8_t curr) {
     bool curr_flag = flag_get(k, curr);
 
     if (curr_flag && !flag_get(k, *prev)) {
@@ -78,7 +78,7 @@ void play_sound(int sound_id, uint8_t k, uint8_t* prev, uint8_t curr) {
 // Plays sound effects according to the game state.
 // Since there are two gamestate bytes that control sound,
 // you need to tell the function which one you want to use.
-void handle_sound(uint8_t curr, bool is_sound1) {
+static void handle_sound(uint8_t curr, bool is_sound1) {
     if (is_sound1) {
         uint8_t* prev = &sound1;
 
@@ -106,7 +106,7 @@ void handle_sound(uint8_t curr, bool is_sound1) {
 }
 
 // Reads a value from the port
-uint16_t handle_IN(uint8_t port) {
+static uint16_t handle_IN(uint8_t port) {
     switch (port) {
         case 0: // never used
             return 0;
@@ -125,7 +125,7 @@ uint16_t handle_IN(uint8_t port) {
 }
 
 // Writes a value to the port
-void handle_OUT(uint8_t port, uint8_t value) {
+static void handle_OUT(uint8_t port, uint8_t value) {
     switch (port) {
         case 2:
             shift_register_set_offset(&shift, value);
@@ -164,19 +164,19 @@ void handle_OUT(uint8_t port, uint8_t value) {
 
 #define DISPLAY_WIDTH 224
 #define DISPLAY_HEIGHT 256
-uint8_t texture[DISPLAY_HEIGHT * DISPLAY_WIDTH];
+static uint8_t texture[DISPLAY_HEIGHT * DISPLAY_WIDTH];
 
 // Update the viewer with the machine's state
-void update_viewer() {
+static void update_viewer() {
     uint8_t* vram = &cpu.mem[0x2400];
-    /*
-        The video memory is arranged in 224 rows of 32 bytes. in texture space, each byte represents
-        a block 1 pixel wide and 8 pixels tall. We scan the video memory starting from the upper left
-        corner of the texture and working our way right and down, with the indices (i,j) going from
-        (0,0) to (31,W-1). For each pair (i,j) we read the corresponding byte from video memory and
-        obtain 8 different pixels from it: the one at position (8*i,j) in the texture and the other 7
-        underneath it. We get its value by multiplying its state with the color overlay.
-    */
+    
+    // The video memory is arranged in 224 rows of 32 bytes. in texture space, each byte represents
+    // a block 1 pixel wide and 8 pixels tall. We scan the video memory starting from the upper left
+    // corner of the texture and working our way right and down, with the indices (i,j) going from
+    // (0,0) to (31,W-1). For each pair (i,j) we read the corresponding byte from video memory and
+    // obtain 8 different pixels from it: the one at position (8*i,j) in the texture and the other 7
+    // underneath it. We get its value by multiplying its state with the color overlay.
+
     for (int i = 0; i < 32; ++i) {
         for(int j = 0; j < DISPLAY_WIDTH; ++j) {
             uint8_t byte = vram[32*j + 31-i];
@@ -191,7 +191,7 @@ void update_viewer() {
 }
 
 // Execute instructions until the cycles budget is spent
-void execute_cycles(size_t max_cycles) {
+static void execute_cycles(size_t max_cycles) {
     uint8_t opcode;
     uint8_t port;
 
@@ -217,15 +217,11 @@ void execute_cycles(size_t max_cycles) {
     }
 }
 
-/*
-    Write a file-system path to the variable `dest` by concatenating `n` names.
-    The previous content of the variable `dest` is overwritten.
-
-    E.g.: `write_path(dest, 3, "folder", "subdir", "file.txt")` will place in
-    `dest` the string: `folder/subdir/file.txt`.
-
-*/
-void write_path(char* dest, int n, ...) {
+// Write a file-system path to the variable `dest` by concatenating `n` names.
+// The previous content of the variable `dest` is overwritten.
+// E.g.: `write_path(dest, 3, "folder", "subdir", "file.txt")` will place in
+// `dest` the string: `folder/subdir/file.txt`.
+static void write_path(char* dest, int n, ...) {
     va_list args;
     va_start(args, n);
     strcpy(dest, va_arg(args, char*));
@@ -236,7 +232,7 @@ void write_path(char* dest, int n, ...) {
     va_end(args);
 }
 
-void sfx_init(soundplayer_t* sp, const char* sound_dir) {
+static void sfx_init(soundplayer_t* sp, const char* sound_dir) {
     char** fpaths = SDL_malloc(NUMBER_OF_SFX * sizeof(char*));
     for (int i = 0; i < NUMBER_OF_SFX; i++) {
         fpaths[i] = SDL_malloc(strlen(sound_dir) + strlen(sfx_files[i]) + 3);
@@ -256,14 +252,14 @@ void sfx_init(soundplayer_t* sp, const char* sound_dir) {
     soundplayer_set_gain(*sp, UFO_HIT, 0.2);
 }
 
-void print_usage(const char* program_name) {
+static void print_usage(const char* program_name) {
     printf("usage: %s [assets_dir]\n", program_name);
     printf("Play Space Invaders!\n");
     printf("Optionally provide a path to the assets folder (the default location is .)\n");
 }
 
-bool cleanup_viewer = false;
-bool cleanup_sound = false;
+static bool cleanup_viewer = false;
+static bool cleanup_sound = false;
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     const char* base_dir;
