@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(emu8080 VERSION 0.0.0)
+set(INVADERS_RELEASE_VERSION 0)
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}")
 set(SOURCE ${CMAKE_SOURCE_DIR}/source)
@@ -8,9 +9,10 @@ set(EXAMPLES ${CMAKE_SOURCE_DIR}/examples)
 set(ROMS ${CMAKE_SOURCE_DIR}/assets/rom)
 set(SOUND ${CMAKE_SOURCE_DIR}/assets/sound)
 set(BUILD ${CMAKE_BINARY_DIR})
-set(DATA ${BUILD}/data) # game assets for testing
+set(DATA ${BUILD}/data)
 set(RELEASE ${BUILD}/release)
 
+# copy game assets to the build directory for testing
 file(MAKE_DIRECTORY ${DATA})
 file(MAKE_DIRECTORY ${DATA}/sound)
 file(COPY_FILE ${ROMS}/INVADERS.ROM ${DATA}/INVADERS.ROM)
@@ -128,6 +130,7 @@ set_property(
 add_custom_target(
     release
     DEPENDS invaders
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${RELEASE}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE}/data
     COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE}/data/sound
@@ -142,4 +145,10 @@ if(WIN32) # SDL3.dll needed for windows build
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:SDL3::SDL3-shared> ${RELEASE}
     )
     target_compile_options(invaders PRIVATE -mwindows)
+else()
+    add_custom_command(
+        TARGET release
+        POST_BUILD
+        COMMAND tar -zcvf invaders-${INVADERS_RELEASE_VERSION}-linux-x86_64.tar.gz -C release .
+    )
 endif()
