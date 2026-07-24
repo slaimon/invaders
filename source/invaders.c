@@ -66,6 +66,41 @@ const uint16_t HISCORE_LOCATION_ROM = 0x1bf4;
 const uint16_t HISCORE_LOCATION_RAM = 0x20f4;
 char* save_path;
 
+// Check that the input represents two valid binary-coded decimal digits.
+static bool valid_bcd(uint8_t bcd) {
+    return ((bcd & 0x0f) < 0x9) && ((bcd >> 8) < 0x9);
+}
+
+// Load hiscores from a file into the machine's memory.
+static void hiscore_load(i8080_t* cpu, const char* path) {
+    size_t save_size;
+    uint8_t* save = (uint8_t*) SDL_LoadFile(path, &save_size);
+    if (save == NULL) {
+        SDL_Log("No savefile found at %s", path);
+        return;
+    }
+
+    bool valid =
+        save_size == 2
+        && valid_bcd(save[0])
+        && valid_bcd(save[1]);
+    if (!valid) {
+        SDL_Log("Corrupted savefile! High-scores might be weird...");
+    }
+
+    cpu->mem[HISCORE_LOCATION_ROM] = save[0];
+    cpu->mem[HISCORE_LOCATION_ROM + 1] = save[1];
+    SDL_free(save);
+}
+
+// Save hiscores from the machine's memory to a file.
+static void hiscore_save(i8080_t* cpu, const char* path) {
+    uint8_t* hiscore = &cpu->mem[HISCORE_LOCATION_RAM];
+    if (!SDL_SaveFile(path, hiscore, 2)){
+        SDL_Log("Failed to save high-scores file: %s", SDL_GetError());
+    }
+}
+
 // Check the kth bit of both `curr` and `prev`. If a rising edge is detected
 // (i.e. the bit is on in `curr` and off `prev`), the sound corresponding to
 // `sound_id` is played.
@@ -309,6 +344,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     program.size = rom_size;
     i8080_memory_write(&cpu, program, 0);
     SDL_free(program.data);
+    hiscore_load(&cpu, save_path);
 
     // initialize other devices
     viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332);
@@ -319,20 +355,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     shift_register_init(&shift);
     gamepad_init(&gamepad);
 
-    // read savefile and restore it
-    size_t save_size;
-    uint8_t* save = (uint8_t*) SDL_LoadFile(save_path, &save_size);
-    if (save != NULL) {
-        if (save_size == 2 || save[0] > 0x9 || save[1] > 0x9) {
-            cpu.mem[HISCORE_LOCATION_ROM] = save[0];
-            cpu.mem[HISCORE_LOCATION_ROM + 1] = save[1];
-        } else {
-            SDL_Log("Corrupted savefile! High-scores cannot be restored.");
-        }
-        SDL_free(save);
-    } else {
-        SDL_Log("No savefile found at %s", save_path);
-    }
 
     return SDL_APP_CONTINUE;
 }
@@ -417,10 +439,7 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result) {
     if (cleanup_sound)
         soundplayer_destroy(soundplayer);
 
-    uint8_t* hiscore = &cpu.mem[HISCORE_LOCATION_RAM];
-    if (!SDL_SaveFile(save_path, hiscore, 2)){
-        SDL_Log("Failed to save high-scores file: %s", SDL_GetError());
-    }
+    hiscore_save(&cpu, save_path);
     SDL_free(save_path);
 
     SDL_Quit();
