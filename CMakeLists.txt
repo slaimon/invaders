@@ -138,17 +138,18 @@ add_custom_target(
     COMMAND ${CMAKE_COMMAND} -E copy ${ROMS}/INVADERS.ROM ${RELEASE}/data/INVADERS.ROM
     COMMAND ${CMAKE_COMMAND} -E copy ${SOUND_FILES} ${RELEASE}/data/sound
 )
-if(WIN32) # SDL3.dll needed for windows build
+if(WIN32)
     add_custom_command(
         TARGET release
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:SDL3::SDL3-shared> ${RELEASE}
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:SDL3::SDL3-shared> ${RELEASE} # SDL3.dll needed for windows build
+        COMMAND ${CMAKE_COMMAND} -E chdir ${RELEASE} tar -zcvf ../invaders-${INVADERS_RELEASE_VERSION}-win-x86_64.zip -- .
     )
     target_compile_options(invaders PRIVATE -mwindows)
 else()
     add_custom_command(
         TARGET release
         POST_BUILD
-        COMMAND tar -zcvf invaders-${INVADERS_RELEASE_VERSION}-linux-x86_64.tar.gz -C release .
+        COMMAND ${CMAKE_COMMAND} -E chdir ${RELEASE} tar -zcvf ../invaders-${INVADERS_RELEASE_VERSION}-linux-x86_64.tar.gz -- .
     )
 endif()
