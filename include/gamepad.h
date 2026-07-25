@@ -7,6 +7,7 @@
     The Space Invaders gamepad and control mappings.
 */
 
+#include <SDL3/SDL.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -74,6 +75,53 @@ static uint8_t gamepad_getInput(gamepad_t gamepad, bool is_input1) {
     }
     
     return flag;       
+}
+
+static void gamepad_handle_event(gamepad_t* gamepad, SDL_Event* event) {
+    bool new_state;
+
+    if (event->type == SDL_EVENT_KEY_DOWN)
+        new_state = true;
+    else if (event->type == SDL_EVENT_KEY_UP)
+        new_state = false;
+    else
+        return;
+    
+    switch (event->key.key) {
+        case KEY_COIN:
+            gamepad->coin = new_state;
+            return;
+        case KEY_TILT:
+            gamepad->tilt = new_state;
+            return;
+        case KEY_P1START:
+            gamepad->p1_start = new_state;
+            return;
+        case KEY_P2START:
+            gamepad->p2_start = new_state;
+            return;
+        
+        // Since the two players never use the gamepad at the same time, it's more
+        // practical to make it so that each player can use either set of controls
+        case KEY_P1FIRE:
+        case KEY_P2FIRE:
+            gamepad->p1_fire = new_state;
+            gamepad->p2_fire = new_state;
+            return;
+        case KEY_P1LEFT:
+        case KEY_P2LEFT:
+            gamepad->p2_left = new_state;
+            gamepad->p1_left = new_state;
+            return;
+        case KEY_P1RIGHT:
+        case KEY_P2RIGHT:
+            gamepad->p1_right = new_state;
+            gamepad->p2_right = new_state;
+            return;
+        
+        default:
+            return;
+    }
 }
 
 #endif

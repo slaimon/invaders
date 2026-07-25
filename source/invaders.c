@@ -1,4 +1,5 @@
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_events.h>
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
@@ -324,50 +325,8 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
         if (event->key.key == SDLK_ESCAPE)
             return SDL_APP_SUCCESS;
     
-    bool new_state;
-
-    if (event->type == SDL_EVENT_KEY_DOWN)
-        new_state = true;
-    else if (event->type == SDL_EVENT_KEY_UP)
-        new_state = false;
-    else
-        return SDL_APP_CONTINUE;
-    
-    switch (event->key.key) {
-        case KEY_COIN:
-            gamepad.coin = new_state;
-            break;
-        case KEY_TILT:
-            gamepad.tilt = new_state;
-            break;
-        case KEY_P1START:
-            gamepad.p1_start = new_state;
-            break;
-        case KEY_P1FIRE:
-            gamepad.p1_fire = new_state;
-            break;
-        case KEY_P1LEFT:
-            gamepad.p1_left = new_state;
-            break;
-        case KEY_P1RIGHT:
-            gamepad.p1_right = new_state;
-            break;
-        case KEY_P2START:
-            gamepad.p2_start = new_state;
-            break;
-        case KEY_P2FIRE:
-            gamepad.p2_fire = new_state;
-            break;
-        case KEY_P2LEFT:
-            gamepad.p2_left = new_state;
-            break;
-        case KEY_P2RIGHT:
-            gamepad.p2_right = new_state;
-            break;
-        
-        default:
-            return SDL_APP_CONTINUE;
-    }
+    if (event->type == SDL_EVENT_KEY_UP || event->type == SDL_EVENT_KEY_DOWN)
+        gamepad_handle_event(&gamepad, event);
 
     return SDL_APP_CONTINUE;
 }
