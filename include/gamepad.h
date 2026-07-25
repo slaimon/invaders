@@ -23,6 +23,10 @@
 #define KEY_P2FIRE      SDLK_W
 #define KEY_P2LEFT      SDLK_A
 #define KEY_P2RIGHT     SDLK_D
+#define KEY_DIP_SHIPS1  SDLK_0
+#define KEY_DIP_SHIPS2  SDLK_9
+#define KEY_DIP_EXTRA   SDLK_8
+#define KEY_DIP_COIN    SDLK_7
 
 typedef struct gamepad {
     bool coin;
@@ -37,6 +41,11 @@ typedef struct gamepad {
     bool p2_fire;
     bool p2_left;
     bool p2_right;
+
+    bool DIP_ships1;
+    bool DIP_ships2;
+    bool DIP_extra;
+    bool DIP_coin_info;
 } gamepad_t;
 
 // Initialize the gamepad, no buttons are pressed
@@ -68,10 +77,14 @@ static uint8_t gamepad_getInput(gamepad_t gamepad, bool is_input1) {
         // bit 6 = P2 right (1 if pressed)
         // bit 7 = DIP7 Coin info displayed in demo screen 0=ON
         
+        flag_set(0, &flag, gamepad.DIP_ships1);
+        flag_set(1, &flag, gamepad.DIP_ships2);
+        flag_set(2, &flag, gamepad.tilt);
+        flag_set(3, &flag, gamepad.DIP_extra);
         flag_set(4, &flag, gamepad.p2_fire);
         flag_set(5, &flag, gamepad.p2_left);
         flag_set(6, &flag, gamepad.p2_right);
-        flag_set(2, &flag, gamepad.tilt);
+        flag_set(7, &flag, gamepad.DIP_coin_info);
     }
     
     return flag;       
@@ -117,6 +130,20 @@ static void gamepad_handle_event(gamepad_t* gamepad, SDL_Event* event) {
         case KEY_P2RIGHT:
             gamepad->p1_right = new_state;
             gamepad->p2_right = new_state;
+            return;
+        
+        // DIP switches
+        case KEY_DIP_SHIPS1:
+            gamepad->DIP_ships1 = new_state;
+            return;
+        case KEY_DIP_SHIPS2:
+            gamepad->DIP_ships2 = new_state;
+            return;
+        case KEY_DIP_EXTRA:
+            gamepad->DIP_extra = new_state;
+            return;
+        case KEY_DIP_COIN:
+            gamepad->DIP_coin_info = new_state;
             return;
         
         default:
