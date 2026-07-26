@@ -19,6 +19,12 @@ file(COPY_FILE ${ROMS}/INVADERS.ROM ${DATA}/INVADERS.ROM)
 file(GLOB SOUND_FILES ${SOUND}/*wav)
 file(COPY ${SOUND_FILES} DESTINATION ${DATA}/sound)
 
+set_property(
+    DIRECTORY
+    APPEND
+    PROPERTY ADDITIONAL_CLEAN_FILES ${RELEASE}
+)
+
 find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
 include_directories(include ${SDL3_INCLUDE_DIR})
 
@@ -75,7 +81,7 @@ target_link_libraries(invaders PRIVATE SDL3::SDL3)
 enable_testing()
 add_test(
     NAME test_pre
-    COMMAND tester ${ROMS}/8080PRE.COM
+    COMMAND $<TARGET_FILE:tester> ${ROMS}/8080PRE.COM
 )
 set_property(
     TEST test_pre
@@ -84,35 +90,27 @@ set_property(
 
 add_test(
     NAME test_lite
-    COMMAND tester ${ROMS}/TEST.COM
+    COMMAND $<TARGET_FILE:tester> ${ROMS}/TEST.COM
 )
 set_property(
     TEST test_lite
     PROPERTY PASS_REGULAR_EXPRESSION "CPU IS OPERATIONAL"
 )
-set_property(
-    TEST test_lite
-    PROPERTY DEPENDS test_pre
-)
 
 add_test(
     NAME test_full
-    COMMAND tester ${ROMS}/8080EX1.COM
+    COMMAND $<TARGET_FILE:tester> ${ROMS}/8080EX1.COM
 )
 set_property(
     TEST test_full
     PROPERTY FAIL_REGULAR_EXPRESSION "ERROR"
-)
-set_property(
-    TEST test_full
-    PROPERTY DEPENDS test_pre
 )
 
 # custom targets
 add_custom_target(
     listing
     DEPENDS disassembler
-    COMMAND disassembler ${ROMS}/INVADERS > ./listing.txt
+    COMMAND $<TARGET_FILE:disassembler> ${ROMS}/INVADERS > ./listing.txt
 )
 set_property(
     TARGET listing
@@ -121,7 +119,7 @@ set_property(
 add_custom_target(
     log_example
     DEPENDS logger
-    COMMAND logger ${ROMS}/8080EX1.COM sample_log.txt 1000
+    COMMAND $<TARGET_FILE:logger> ${ROMS}/8080EX1.COM sample_log.txt 1000
 )
 set_property(
     TARGET log_example
@@ -130,7 +128,6 @@ set_property(
 add_custom_target(
     release
     DEPENDS invaders
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${RELEASE}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE}/data
     COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE}/data/sound
