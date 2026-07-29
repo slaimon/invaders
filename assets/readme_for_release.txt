@@ -23,13 +23,15 @@ Copyright Disclaimer:
 ---------------------
 
 I do not own the Space Invaders ROM or the audio files herein included.
-The copyright belongs to the respective owners and I will comply with
-takedown requests, although I would be very very sad.
+The copyright belongs to the respective owners. I will comply with any
+takedown requests, although they would make me very very sad.
 
 Changelog:
 ----------
 
 Version 0.1 (2026-07-26):
+    - The score from the game in progress is saved, if it's
+      higher than the current high-score.
     - Changed control scheme to accomodate both left-handed
       and right-handed users.
     - Added readme file to release package.
