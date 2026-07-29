@@ -305,13 +305,17 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
     hiscore_load(&cpu, save_path);
 
     // initialize other devices
-    viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332);
-    cleanup_viewer = true;
     sfx_init(&soundplayer, sound_dir);
     SDL_free(sound_dir);
     cleanup_sound = true;
     shift_register_init(&shift);
     gamepad_init(&gamepad);
+    if (viewer_init(&viewer, "Space Invaders", DISPLAY_WIDTH, DISPLAY_HEIGHT, 2, SDL_PIXELFORMAT_RGB332)) {
+        cleanup_viewer = true;
+    } else {
+        SDL_Log("Fatal: cannot start video subsystem. Program will quit.");
+        return SDL_APP_FAILURE;
+    }
 
 
     return SDL_APP_CONTINUE;
