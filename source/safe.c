@@ -38,6 +38,10 @@ void* reallocarray(void *ptr, size_t nmemb, size_t size) {
         errno = ENOMEM;
         return NULL;
     }
+	if (nmemb == 0 || size == 0) {
+		errno = EINVAL;
+		return NULL;
+	}
     return realloc(ptr, nmemb * size);
 }
 
