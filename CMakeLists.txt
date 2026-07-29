@@ -132,6 +132,7 @@ add_custom_target(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE}/data
     COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE}/data/sound
+    COMMAND ${CMAKE_COMMAND} -E remove ${RELEASE}/data/score.bin
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:invaders> ${RELEASE}/invaders.exe
     COMMAND ${CMAKE_COMMAND} -E copy ${ROMS}/INVADERS.ROM ${RELEASE}/data/INVADERS.ROM
     COMMAND ${CMAKE_COMMAND} -E copy ${SOUND_FILES} ${RELEASE}/data/sound
