@@ -52,12 +52,12 @@ static void shift_register_init(shift_register_t* shift) {
 
 // Read out of the shift register.
 static uint16_t shift_register_read(shift_register_t shift) {
-    return ((shift.value >> (8-shift.read_offset)) & 0xFF);
+    return (shift.value >> (8-shift.read_offset)) & 0xFF;
 }
 
 // Push a value to the shift register.
 static void shift_register_push(shift_register_t* shift, uint8_t x) {
-    shift->value = (((uint16_t) x) << 8) | (shift->value >> 8);
+    shift->value = (uint16_t)  (x << 8) | (shift->value >> 8);
 }
 
 // Set the read offset for the shift register.

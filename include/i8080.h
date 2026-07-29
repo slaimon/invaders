@@ -11,8 +11,6 @@
 #define I8080_HALT    -1
 #define I8080_FAIL    -2
 
-//#define SUPPORT_CPM_CALLS
-
 typedef struct {
     // interrupts flip-flop:
     uint8_t interrupts;
@@ -25,7 +23,13 @@ typedef struct {
     unsigned int carryFlag : 1;
 
     // registers:
-    uint8_t A, B, C, D, E, H, L;
+    uint8_t A;
+    uint8_t B;
+    uint8_t C;
+    uint8_t D;
+    uint8_t E;
+    uint8_t H;
+    uint8_t L;
     
     // counters:
     uint16_t stackPointer;

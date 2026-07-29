@@ -3,7 +3,7 @@
 
 const char separator[] = "\n\n--------------------------------------------------\n";
 
-bool handle_cpm_calls_file(i8080_t* machine, FILE* ofp) {
+bool handle_cpm_calls_file(const i8080_t* machine, FILE* ofp) {
     const uint16_t pc = machine->programCounter;
     
     // HLT (terminate)

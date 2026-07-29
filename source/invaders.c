@@ -107,7 +107,7 @@ static void handle_sound(uint8_t curr, bool is_sound1) {
 }
 
 // Reads a value from the port
-static uint16_t handle_IN(uint8_t port) {
+static uint8_t handle_IN(uint8_t port) {
     switch (port) {
         case 0: // never used
             return 0;
@@ -116,7 +116,7 @@ static uint16_t handle_IN(uint8_t port) {
         case 2:
             return gamepad_getInput(gamepad, false);
         case 3:
-            return shift_register_read(shift);
+            return shift_register_read(shift) & 0xff;
         
         default:
             SDL_Log("ERROR! Unexpected instruction IN %02Xh\n", port);
@@ -169,7 +169,7 @@ static uint8_t texture[DISPLAY_HEIGHT * DISPLAY_WIDTH];
 
 // Update the viewer with the machine's state
 static void update_viewer() {
-    uint8_t* vram = &cpu.mem[0x2400];
+    const uint8_t* vram = &cpu.mem[0x2400];
     
     // The video memory is arranged in 224 rows of 32 bytes. in texture space, each byte represents
     // a block 1 pixel wide and 8 pixels tall. We scan the video memory starting from the upper left
@@ -247,10 +247,10 @@ static void sfx_init(soundplayer_t* sp, const char* sound_dir) {
     SDL_free(fpaths_);
 
     // adjust relative sfx volume
-    soundplayer_set_gain(*sp, PLAYER_SHOOT, 0.4);
-    soundplayer_set_gain(*sp, INVADER_DEATH, 0.4);
-    soundplayer_set_gain(*sp, UFO_FLYING, 0.2);
-    soundplayer_set_gain(*sp, UFO_HIT, 0.2);
+    soundplayer_set_gain(*sp, PLAYER_SHOOT, 0.4f);
+    soundplayer_set_gain(*sp, INVADER_DEATH, 0.4f);
+    soundplayer_set_gain(*sp, UFO_FLYING, 0.2f);
+    soundplayer_set_gain(*sp, UFO_HIT, 0.2f);
 }
 
 static void print_usage(const char* program_name) {
@@ -321,8 +321,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char** argv) {
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
     if (event->type == SDL_EVENT_QUIT)
         return SDL_APP_SUCCESS;
-    if (event->type == SDL_EVENT_KEY_UP)
-        if (event->key.key == SDLK_ESCAPE)
+    if (event->type == SDL_EVENT_KEY_UP
+        && event->key.key == SDLK_ESCAPE)
             return SDL_APP_SUCCESS;
     
     if (event->type == SDL_EVENT_KEY_UP || event->type == SDL_EVENT_KEY_DOWN)
@@ -336,7 +336,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 // the Vertical Blank Interrupt (VBI). The MSI generates RST 1 while the VBI generates RST 2.
 SDL_AppResult SDL_AppIterate(void* appstate) {
     // CPU cycles between two interrupts
-    size_t half_frame = 8.333*2000;
+    size_t half_frame = (size_t) 8.333*2000;
 
     // emulate one whole frame
     execute_cycles(half_frame);

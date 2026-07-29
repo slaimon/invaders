@@ -5,7 +5,7 @@
 
 // Tries to load the given sound file and store it at sound_ptr.
 // If the loading process fails, the function returns false and sets sound_ptr to NULL.
-bool load_file(soundplayer_t* sp, const char* fname, sound_t** sound_ptr) {
+bool load_file(const soundplayer_t* sp, const char* fname, sound_t** sound_ptr) {
     SDL_AudioSpec s;
     bool success = true;
     sound_t* sound = SDL_malloc(sizeof(sound_t));
@@ -63,11 +63,11 @@ bool soundplayer_init(soundplayer_t* sp, const char** fnames, size_t num_files) 
 }
 
 #define CHECK_IS_ACTIVE(sp) \
-    if (!sp.active) return;
+    if (!sp.active) return
 
 #define GET_SOUND(sound_id) \
     sp.sound[sound_id];     \
-    if (sound == NULL) return;
+    if (sound == NULL) return
 
 void soundplayer_play(soundplayer_t sp, const int sound_id) {
     CHECK_IS_ACTIVE(sp);

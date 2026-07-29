@@ -11,7 +11,7 @@ FILE* safe_fopen(const char* fname, const char* mode) {
 	
 	if (ptr == NULL) {
 		int err = errno;
-		char msg[] = "failed to open file %s";
+		const char msg[] = "failed to open file %s";
 		char* fmt = safe_malloc(sizeof(msg) + strlen(fname));
 		sprintf(fmt, msg, fname);
 		errno = err;

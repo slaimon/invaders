@@ -1,10 +1,11 @@
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "i8080_debug.h"
 #include "i8080_disassembler.h"
 
 #define PRINTLINE(instr, outfile) \
-    fputs(i8080_instruction_toString(instr, true).string, outfile);
+    fputs(i8080_instruction_toString(instr, true).string, outfile)
 
 #define TO_UPPER_CASE(c) \
 	(c >= 'a' && c <= 'z') ? (c-32) : (c)
@@ -14,7 +15,7 @@ char sectionSeparator[] = "-------------------------------------\n";
 
 
 void i8080_printState (const i8080_t machine, unsigned int numLines, FILE* ofp) {
-	unsigned int i, currentPC;
+	uint16_t currentPC;
 	i8080_instruction_t instruction;
 
 	if( ofp == NULL ) {
@@ -28,12 +29,12 @@ void i8080_printState (const i8080_t machine, unsigned int numLines, FILE* ofp) 
 	instruction = disassemble_instruction(machine.mem, currentPC);
 	
 	fputs(sectionSeparator, ofp);
-	PRINTLINE(instruction, ofp)
+	PRINTLINE(instruction, ofp);
 	fputs(sectionSeparator, ofp);
 
 	currentPC += instruction.instructionLength;
-	for (i = 0; i < numLines; ++i) {
-		instruction = disassemble_instruction(machine.mem, currentPC );
+	for (uint16_t i = 0; i < numLines; ++i) {
+		instruction = disassemble_instruction(machine.mem, currentPC);
 		PRINTLINE(instruction, ofp);
 		currentPC += instruction.instructionLength;
 	}
@@ -71,7 +72,7 @@ int i8080_tuiDebug(i8080_t* machine, const char* customCommandMapping) {
         printf(info, contKey, quitKey);
 
 		// handle user input
-		userInput = getchar();
+		userInput = (char) getchar();
 		userInput = TO_UPPER_CASE(userInput);
     } while (userInput == stepKey);
 

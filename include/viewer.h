@@ -23,11 +23,11 @@ void viewer_init(viewer_t* viewer, const char* title,
                  int pixelformat);
 
 // Render the current frame of the viewer
-void viewer_update(viewer_t* viewer);
+void viewer_update(const viewer_t* viewer);
 
 // Set the viewer's frame to the given pixelmatrix. The matrix must conform to the viewer's pixel
 // format (e.g. SDL_PIXELFORMAT_RGB24)
-void viewer_setFrame(viewer_t* viewer, uint8_t* pixelmatrix);
+void viewer_setFrame(const viewer_t* viewer, const uint8_t* pixelmatrix);
 
 // Dispose of the viewer's resources.
 void viewer_destroy(viewer_t viewer);

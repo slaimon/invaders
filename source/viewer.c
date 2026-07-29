@@ -27,12 +27,12 @@ void viewer_init(viewer_t* viewer, const char* title,
                           SDL_TEXTUREACCESS_STREAMING, width, height);
 }
 
-void viewer_update(viewer_t* viewer) {
+void viewer_update(const viewer_t* viewer) {
     SDL_RenderTexture(viewer->renderer, viewer->texture, NULL, NULL);
     SDL_RenderPresent(viewer->renderer);
 }
 
-void viewer_setFrame(viewer_t* viewer, uint8_t* pixelmatrix) {
+void viewer_setFrame(const viewer_t* viewer, const uint8_t* pixelmatrix) {
     void* pixeldata;
     int pitch;
     // Lock the texture and upload the image to the GPU.
