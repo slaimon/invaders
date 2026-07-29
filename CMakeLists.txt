@@ -152,3 +152,5 @@ else()
         COMMAND ${CMAKE_COMMAND} -E chdir ${RELEASE} tar -zcvf ../invaders-v${INVADERS_RELEASE_VERSION}-linux-x86_64.tar.gz -- .
     )
 endif()
+
+set_property(TARGET invaders PROPERTY C_STANDARD 99)
