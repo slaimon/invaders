@@ -22,9 +22,30 @@
 static const uint16_t HISCORE_LOCATION_ROM = 0x1bf4;
 static const uint16_t HISCORE_LOCATION_RAM = 0x20f4;
 
+// Players' scores for the current game.
+static const uint16_t P1_SCORE_LOCATION_RAM = 0x20f8;
+static const uint16_t P2_SCORE_LOCATION_RAM = 0x20fc;
+
 // Check that the input represents two valid binary-coded decimal digits.
 static bool valid_bcd(uint8_t bcd) {
     return ((bcd & 0x0f) < 0x9) && ((bcd >> 8) < 0x9);
+}
+
+// Decode the 2-byte binary-coded decimal number pointed to by score_ptr.
+// Returns 0 if the pointer is invalid or if the data isn't binary-coded decimals.
+static uint16_t convert_score(const uint8_t* score_ptr) {
+    if (score_ptr == NULL) {
+        return 0;
+    }
+    if (!valid_bcd(score_ptr[0]) || !valid_bcd(score_ptr[1])) {
+        return 0;
+    }
+    uint16_t hiscore = 0;
+    hiscore += 1 * (score_ptr[0] & 0x0F);
+    hiscore += 10 * (score_ptr[0] >> 4);
+    hiscore += 100 *  (score_ptr[1] & 0x0F);
+    hiscore += 1000 * (score_ptr[1] >> 4);
+    return hiscore;
 }
 
 // Load hiscores from a file into the machine's memory.
@@ -51,8 +72,28 @@ static void hiscore_load(i8080_t* cpu, const char* path) {
 
 // Save hiscores from the machine's memory to a file.
 static void hiscore_save(const i8080_t* cpu, const char* path) {
-    const uint8_t* hiscore = &cpu->mem[HISCORE_LOCATION_RAM];
-    if (!SDL_SaveFile(path, hiscore, 2)){
+    const uint8_t* hiscore_ptr = &cpu->mem[HISCORE_LOCATION_RAM];
+    const uint8_t* p1_score_ptr = &cpu->mem[P1_SCORE_LOCATION_RAM];
+    const uint8_t* p2_score_ptr = &cpu->mem[P2_SCORE_LOCATION_RAM];
+
+    uint16_t hiscore = convert_score(hiscore_ptr);
+    uint16_t p1_score = convert_score(p1_score_ptr);
+    uint16_t p2_score = convert_score(p2_score_ptr);
+
+    const uint8_t* result_ptr;
+    uint16_t result;
+    if (hiscore > p2_score) {
+        result_ptr = hiscore_ptr;
+        result = hiscore;
+    } else {
+        result_ptr = p2_score_ptr;
+        result = p2_score;
+    }
+    if (p1_score > result) {
+        result_ptr = p1_score_ptr;
+    }
+
+    if (!SDL_SaveFile(path, result_ptr, 2)){
         SDL_Log("Failed to save high-scores file: %s", SDL_GetError());
     }
 }
