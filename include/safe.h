@@ -27,4 +27,9 @@ void* safe_malloc(size_t bytes);
 
 FILE* safe_fopen(const char* fname, const char* mode);
 
+// Buffer-limited strlen. Will return L + 1, where L is either maxlen or the
+// number of consecutive nonzero bytes starting at the location pointed to by
+// str, whichever is smaller.
+size_t safe_strlen(const char* str, size_t maxlen);
+
 #endif

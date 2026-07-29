@@ -6,14 +6,22 @@
 
 #include "safe.h"
 
+size_t safe_strlen(const char* str, size_t maxlen) {
+	size_t i = 0;
+	while (str[i] != '\0' && i < maxlen) {
+		i++;
+	}
+	return i + 1;
+}
+
 FILE* safe_fopen(const char* fname, const char* mode) {
 	FILE* ptr = fopen(fname, mode);
 	
 	if (ptr == NULL) {
 		int err = errno;
 		const char msg[] = "failed to open file %s";
-		char* fmt = safe_malloc(sizeof(msg) + strlen(fname));
-		sprintf(fmt, msg, fname);
+		char* fmt = safe_malloc(sizeof(msg) + safe_strlen(fname, 256));
+		snprintf(fmt, 256, msg, fname);
 		errno = err;
 		perror(fmt);
 		exit(EXIT_FAILURE);
