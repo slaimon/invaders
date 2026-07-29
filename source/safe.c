@@ -32,26 +32,3 @@ void* safe_malloc(size_t bytes) {
 	
 	return ptr;
 }
-
-void* reallocarray(void *ptr, size_t nmemb, size_t size) {
-    if (nmemb && size > SIZE_MAX / nmemb) {
-        errno = ENOMEM;
-        return NULL;
-    }
-	if (nmemb == 0 || size == 0) {
-		errno = EINVAL;
-		return NULL;
-	}
-    return realloc(ptr, nmemb * size);
-}
-
-void* safe_realloc(void* ptr, size_t nmemb, size_t size) {
-   void* newptr = reallocarray(ptr, nmemb, size);
-   
-   if (newptr == NULL) {
-      perror("reallocarray");
-      exit(EXIT_FAILURE);
-   }
-   
-   return newptr;
-}

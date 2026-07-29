@@ -13,12 +13,6 @@ typedef struct {
 // returns NULL if size is zero
 bytestream_t* bytestream_new(size_t size);
 
-// create a new bytestream containing the specified string
-bytestream_t* bytestream_fromString(const char* string);
-
-// print the bytestream to a string as hex values
-char* bytestream_toString(bytestream_t* stream);
-
 // read the file and return it as a bytestream
 bytestream_t* bytestream_read(FILE* ifp);
 
