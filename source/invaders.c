@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_init.h>
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
@@ -359,8 +360,10 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result) {
     if (cleanup_sound)
         soundplayer_destroy(soundplayer);
 
-    hiscore_save(&cpu, save_path);
-    SDL_free(save_path);
+    if (result == SDL_APP_SUCCESS) {
+        hiscore_save(&cpu, save_path);
+    }
 
+    SDL_free(save_path);
     SDL_Quit();
 }
