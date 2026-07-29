@@ -20,10 +20,8 @@ can also try to edit the savefile (`data/score.bin`) but watch out! Things can g
 
 ## Building
 
-I successfully compiled the game on both Linux (using gcc) and Windows (using mingw-gcc).
-
-Make sure you have SDL3 installed (see the following section). Then, run the following commands
-from the project's root directory:
+Make sure you have [SDL3](https://libsdl.org/) installed. Then, run the following commands from
+the project's root directory. This will create the release package in `build/release`.
 
 ```bash
 mkdir build
@@ -31,21 +29,12 @@ cmake -B build
 cmake --build build --config Release --target release
 ```
 
-This will create the release package in `build/release`.
-
-## Dependencies
-
-The project relies on [SDL3](https://wiki.libsdl.org/SDL3/FrontPage).
-
-At the time of writing this, there are still no pre-built binaries for **Linux**, so you'll need to
-[build it yourself](https://github.com/libsdl-org/SDL/blob/main/INSTALL.md). Do check though, as
-hopefully this has changed in the meantime.
-
-On **Windows**, you can use vcpkg: run `vcpkg install sdl3:x86-windows`, then pass your toolchain
-file to cmake when building, e.g.:
+If you're on Windows, you'll need to install SDL3 via vcpkg:
+run `vcpkg install sdl3:x86-windows`, then pass your toolchain file to cmake when building,
+e.g.:
 
 ```bash
-cmake --build build --config Release --target release -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build build --config Release -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
 
 ## Other Programs  
@@ -61,3 +50,9 @@ The `examples/` folder contains tools to explore and debug ROMs:
   emulator. The target `log_example` will demonstrate this tool by creating a sample log file.  
 
 All these programs are valid targets for cmake.
+
+## Copyright
+
+I do not own the Space Invaders ROM or the audio files herein included. The copyright belongs
+to the respective owners. I will comply with any takedown requests, although they would make me
+very very sad.
