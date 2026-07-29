@@ -1,22 +1,31 @@
 # Space Invaders Emulator  
 
-An emulator for the original *Space Invaders* arcade machine, built around the Intel 8080 processor.  
+An emulator for the original *Space Invaders* arcade machine, built around the Intel 8080
+processor.  
 
 I originally started developing it in 2019 and I've been working on it on and off since then.  
 
-This project is fairly modular and could easily be adapted to other 8080-based machines, like an Altair 8800.
+This project is fairly modular and could easily be adapted to other 8080-based machines, like an
+Altair 8800.
 
-## Playing the Game
+## Features
+
+* full-game emulation with colours and sound
+* high-score permanence to file
+* both right- and left-handed controls
+
+Additionally, the underlying Intel 8080 emulator features:
+
+* full, cycle-accurate emulation
+* automatic tests using original ROM files
+* basic TUI debugger and disassembler
+* endianness-agnostic code (I think!)
+
+## Play the Game
 
 Find the latest release on the [releases page](https://github.com/slaimon/invaders/releases).
 Simply download the right version for your platform, unzip and launch `invaders.exe`.
-
-* Press `C` to insert coins, then press `1` or `2` to start a one- or two-player game.
-* Use the arrow keys or `A-W-D` to play. Press `UP` or `W` to shoot.
-* Press `Del` to tilt the game. **Warning:** instant game over!
-
-Your high-score is saved when you quit the game, so you can try to beat it when you come back. You
-can also try to edit the savefile (`data/score.bin`) but watch out! Things can get weird ;)
+See `readme.txt` in the release package for more info.
 
 ## Building
 
@@ -56,3 +65,12 @@ All these programs are valid targets for cmake.
 I do not own the Space Invaders ROM or the audio files herein included. The copyright belongs
 to the respective owners. I will comply with any takedown requests, although they would make me
 very very sad.
+
+## References
+
+Each of these resources were invaluable and I learned a lot from them.
+
+* [emulator101.com](https://web.archive.org/web/20241010195903/http://www.emulator101.com/)
+* [computerarcheology.com](https://www.computerarcheology.com/)
+* [altairclone.com](https://altairclone.com/)
+* [begoon's i8080 emulator](https://github.com/begoon/i8080-core/)
