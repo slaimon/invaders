@@ -48,7 +48,7 @@ i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction, bool ge
     // binary representation of the instruction (or padding if needed)
     pointer += sprintf(&result[pointer], "%02X", instruction.opcode);
     for(int i = 0; i < instruction.num_inputValues; ++i) {
-        pointer += sprintf(&result[pointer], " %02X", abs(instruction.inputValues[i]));
+        pointer += sprintf(&result[pointer], " %02X", instruction.inputValues[i]);
     }
 
     // the instruction's mnemonic
@@ -72,17 +72,17 @@ i8080_line_t i8080_instruction_toString(i8080_instruction_t instruction, bool ge
     if (instruction.num_inputValues == 2) {
         char prefix = instruction.immediate ? '#' : '$';
         #if I8080_LITTLE_ENDIAN
-            uint8_t first = abs(instruction.inputValues[1]);
-            uint8_t second = abs(instruction.inputValues[0]);
+            uint8_t first = instruction.inputValues[1];
+            uint8_t second = instruction.inputValues[0];
         #else
-            uint8_t first = abs(instruction.inputValues[0]);
-            uint8_t second = abs(instruction.inputValues[1]);
+            uint8_t first = instruction.inputValues[0];
+            uint8_t second = instruction.inputValues[1];
         #endif
         pointer += sprintf(&result[pointer], "%c%02X%02X", prefix, first, second);
     }
     else if (instruction.num_inputValues == 1) {
         char prefix = instruction.immediate ? '#' : '$';
-        pointer += sprintf(&result[pointer], "%c%02X", prefix, abs(instruction.inputValues[0]));
+        pointer += sprintf(&result[pointer], "%c%02X", prefix, instruction.inputValues[0]);
         INSERT_WHITESPACE(2)
     }
 
