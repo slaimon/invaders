@@ -8,6 +8,7 @@ set(SOURCE ${CMAKE_SOURCE_DIR}/source)
 set(EXAMPLES ${CMAKE_SOURCE_DIR}/examples)
 set(ROMS ${CMAKE_SOURCE_DIR}/assets/rom)
 set(SOUND ${CMAKE_SOURCE_DIR}/assets/sound)
+set(README ${CMAKE_SOURCE_DIR}/assets/readme_for_release.txt)
 set(BUILD ${CMAKE_BINARY_DIR})
 set(DATA ${BUILD}/data)
 set(RELEASE ${BUILD}/release)
@@ -134,6 +135,7 @@ add_custom_target(
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:invaders> ${RELEASE}/invaders.exe
     COMMAND ${CMAKE_COMMAND} -E copy ${ROMS}/INVADERS.ROM ${RELEASE}/data/INVADERS.ROM
     COMMAND ${CMAKE_COMMAND} -E copy ${SOUND_FILES} ${RELEASE}/data/sound
+    COMMAND ${CMAKE_COMMAND} -E copy ${README} ${RELEASE}/readme.txt
 )
 if(WIN32)
     add_custom_command(
