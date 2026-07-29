@@ -1,13 +1,14 @@
+#include <SDL3/SDL.h>
+#include <stdbool.h>
 #include "viewer.h"
-#include <SDL3/SDL_render.h>
-#include <stdio.h>
 
-void viewer_init(viewer_t* viewer, const char* title, 
-                 size_t width, size_t height, size_t scale, 
-                 int pixelformat) {
+bool viewer_init(viewer_t* viewer, const char* title, 
+                 uint32_t width, uint32_t height, uint32_t scale, 
+                 int pixelformat)
+{
     if (!SDL_Init(SDL_INIT_VIDEO)) {
-        fprintf(stderr, "ERROR: failed to initialize SDL video\n");
-        exit(EXIT_FAILURE);
+        SDL_Log("Failed to initialize SDL video: %s\n", SDL_GetError());
+        return false;
     }
 
     viewer->width = width;
@@ -25,6 +26,8 @@ void viewer_init(viewer_t* viewer, const char* title,
     // create a texture for streaming access
     viewer->texture = SDL_CreateTexture(viewer->renderer, pixelformat,
                           SDL_TEXTUREACCESS_STREAMING, width, height);
+
+    return true;
 }
 
 void viewer_update(const viewer_t* viewer) {
