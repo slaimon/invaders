@@ -16,7 +16,7 @@ Simply download the right version for your platform, unzip and launch `invaders.
 * Press `Del` to tilt the game. **Warning:** instant game over!
 
 Your high-score is saved when you quit the game, so you can try to beat it when you come back. You
-can also try to edit the savefile (`score.bin`) but watch out! Things can get weird ;)
+can also try to edit the savefile (`data/score.bin`) but watch out! Things can get weird ;)
 
 ## Building
 

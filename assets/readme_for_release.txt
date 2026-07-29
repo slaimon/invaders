@@ -13,10 +13,10 @@ You can also launch it from the command-line with no arguments.
 - Press DEL to tilt the game. WARNING: instant game over!
 
 Your high-score is saved when you quit the game, so you can try to beat it
-when you come back. You can also try to edit the savefile (score.bin), but
-watch out! Things can get weird ;)
+when you come back. You can also try to edit the savefile (data/score.bin)
+but watch out! Things can get weird ;)
 
-Source code and updates on the project page:
+Source code and updates can be found at the project page:
 https://github.com/slaimon/invaders
 
 Copyright Disclaimer:
