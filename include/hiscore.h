@@ -28,7 +28,7 @@ static const uint16_t P2_SCORE_LOCATION_RAM = 0x20fc;
 
 // Check that the input represents two valid binary-coded decimal digits.
 static bool valid_bcd(uint8_t bcd) {
-    return ((bcd & 0x0f) < 0x9) && ((bcd >> 8) < 0x9);
+    return ((bcd & 0x0f) < 9) && ((bcd >> 4) < 9);
 }
 
 // Decode the 2-byte binary-coded decimal number pointed to by score_ptr.
