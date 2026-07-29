@@ -111,7 +111,7 @@ set_property(
 add_custom_target(
     listing
     DEPENDS disassembler
-    COMMAND $<TARGET_FILE:disassembler> ${ROMS}/INVADERS > ./listing.txt
+    COMMAND $<TARGET_FILE:disassembler> ${ROMS}/INVADERS.ROM > ./listing.txt
 )
 set_property(
     TARGET listing
