@@ -1,5 +1,5 @@
-#ifndef __SHIFT_REGISTER_H__
-#define __SHIFT_REGISTER_H__
+#ifndef __INVADERS_SHIFT_REGISTER_H__
+#define __INVADERS_SHIFT_REGISTER_H__
 
 /*
 	HEADER-ONLY

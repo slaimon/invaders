@@ -1,5 +1,5 @@
-#ifndef __GAMEPAD_H__
-#define __GAMEPAD_H__
+#ifndef __INVADERS_GAMEPAD_H__
+#define __INVADERS_GAMEPAD_H__
 
 /*
     HEADER-ONLY

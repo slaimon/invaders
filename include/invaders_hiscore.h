@@ -1,5 +1,5 @@
-#ifndef __HISCORE_H__
-#define __HISCORE_H__
+#ifndef __INVADERS_HISCORE_H__
+#define __INVADERS_HISCORE_H__
 
 /*
     HEADER-ONLY

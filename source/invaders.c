@@ -13,11 +13,11 @@
 #include "soundplayer.h"
 
 // Shift register hardware and player controls
-#include "shift_register.h"
-#include "gamepad.h"
+#include "invaders_shift_register.h"
+#include "invaders_gamepad.h"
 
 // Savefiles
-#include "hiscore.h"
+#include "invaders_hiscore.h"
 static char* save_path;
 
 // Virtual devices
