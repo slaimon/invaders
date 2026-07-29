@@ -3,6 +3,7 @@
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
+#include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
 #include "i8080.h"
@@ -178,10 +179,10 @@ static void update_viewer() {
     // obtain 8 different pixels from it: the one at position (8*i,j) in the texture and the other 7
     // underneath it. We get its value by multiplying its state with the color overlay.
 
-    for (int i = 0; i < 32; ++i) {
-        for(int j = 0; j < DISPLAY_WIDTH; ++j) {
+    for (uint16_t i = 0; i < 32; ++i) {
+        for(uint16_t j = 0; j < DISPLAY_WIDTH; ++j) {
             uint8_t byte = vram[32*j + 31-i];
-            for(int k = 0; k < 8; ++k) {
+            for(uint8_t k = 0; k < 8; ++k) {
                 texture[(8*i+k)*DISPLAY_WIDTH + j] = flag_get(7-k, byte) ? GETCOLOR(i,j) : 0;
             }
         }
