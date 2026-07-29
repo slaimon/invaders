@@ -24,7 +24,7 @@ bytestream_t* bytestream_read(FILE* ifp);
 
 // write the given bytestream to file
 // return -1 on error
-int bytestream_write(bytestream_t* stream, FILE* ofp);
+int bytestream_write(const bytestream_t* stream, FILE* ofp);
 
 // free the bytestream
 void bytestream_destroy(bytestream_t* stream);

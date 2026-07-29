@@ -7,7 +7,7 @@
 size_t fsize(FILE* ifp) {
     int tmp = fseek(ifp, 0, SEEK_CUR);
     fseek(ifp, 0, SEEK_END);
-    int size = ftell(ifp);
+    size_t size = ftell(ifp);
 
     fseek(ifp, tmp, SEEK_SET);
     return size;
@@ -66,7 +66,7 @@ bytestream_t* bytestream_read(FILE* ifp) {
     return stream;
 }
 
-int bytestream_write(bytestream_t* stream, FILE* ofp) {
+int bytestream_write(const bytestream_t* stream, FILE* ofp) {
     if (ofp == NULL) {
         fprintf(stderr,"BYTESTREAM_WRITE ERROR: invalid output file\n");
         return -1;

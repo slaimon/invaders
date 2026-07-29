@@ -90,7 +90,7 @@ static uint8_t gamepad_getInput(gamepad_t gamepad, bool is_input1) {
     return flag;       
 }
 
-static void gamepad_handle_event(gamepad_t* gamepad, SDL_Event* event) {
+static void gamepad_handle_event(gamepad_t* gamepad, const SDL_Event* event) {
     bool new_state;
 
     if (event->type == SDL_EVENT_KEY_DOWN)

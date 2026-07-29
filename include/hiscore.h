@@ -50,8 +50,8 @@ static void hiscore_load(i8080_t* cpu, const char* path) {
 }
 
 // Save hiscores from the machine's memory to a file.
-static void hiscore_save(i8080_t* cpu, const char* path) {
-    uint8_t* hiscore = &cpu->mem[HISCORE_LOCATION_RAM];
+static void hiscore_save(const i8080_t* cpu, const char* path) {
+    const uint8_t* hiscore = &cpu->mem[HISCORE_LOCATION_RAM];
     if (!SDL_SaveFile(path, hiscore, 2)){
         SDL_Log("Failed to save high-scores file: %s", SDL_GetError());
     }
