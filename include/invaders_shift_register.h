@@ -27,11 +27,11 @@
 		xxxxxxxxyyyyyyyy
 		
 		offset 2:
-		rrrrrrrr	result=xxxxxxyy
+		  rrrrrrrr	    result=xxxxxxyy
 		xxxxxxxxyyyyyyyy
 		
 		offset 7:
-			rrrrrrrr	result=xyyyyyyy
+			   rrrrrrrr	result=xyyyyyyy
 		xxxxxxxxyyyyyyyy
 		
 		Reading from port 3 returns said result.
