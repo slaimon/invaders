@@ -8,6 +8,12 @@ I originally started developing it in 2019 and I've been working on it on and of
 This project is fairly modular and could easily be adapted to other 8080-based machines, like an
 Altair 8800.
 
+## Play the Game
+
+Find the latest release on the [releases page](https://github.com/slaimon/invaders/releases).
+Simply download the right version for your platform, unzip and launch `invaders.exe`.
+See `readme.txt` in the release package for more info.
+
 ## Features
 
 * full-game emulation with colours and sound
@@ -20,12 +26,6 @@ Additionally, the underlying Intel 8080 emulator features:
 * automatic tests using original ROM files
 * basic TUI debugger and disassembler
 * endianness-agnostic code (I think!)
-
-## Play the Game
-
-Find the latest release on the [releases page](https://github.com/slaimon/invaders/releases).
-Simply download the right version for your platform, unzip and launch `invaders.exe`.
-See `readme.txt` in the release package for more info.
 
 ## Building
 
