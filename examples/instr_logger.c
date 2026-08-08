@@ -40,6 +40,7 @@ int main(int argc, char** argv) {
     
     i8080_t cpu;
     i8080_init(&cpu);
+    bool inv_mode = false;
 
     // Load program (it's high time we wrote some abstractions for this)
     FILE* ifp = safe_fopen(argv[1], "rb");
@@ -55,6 +56,7 @@ int main(int argc, char** argv) {
         cpu.programCounter = 0x100;
     } else if (strcmp(argv[2], "INV") == 0) {
         i8080_memory_write(&cpu, *program, 0);
+        inv_mode = true;
     } else {
         printf("Please select an execution mode between CPM and INV.\n");
         usage(argv[0]);
@@ -62,6 +64,12 @@ int main(int argc, char** argv) {
     }
     bytestream_destroy(program);
 
+    // stuff for display interrupts
+    size_t half_frame = (size_t) 8.333*2000;
+    size_t frame_counter = 0;
+    uint8_t restart = 1;
+
+    
     size_t num_iter = strtoul(argv[3], NULL, 0);
     bytestream_t* log = bytestream_new(3 * (num_iter + 1) * sizeof(uint8_t));
     for (size_t i = 0; i < num_iter; i++) {
@@ -80,6 +88,14 @@ int main(int argc, char** argv) {
                 "CPU failure"
             );
             break;
+        }
+
+        // if we're in invaders mode, send display interrupts
+        frame_counter += result;
+        if (inv_mode && frame_counter >= half_frame) {
+            i8080_interrupt(&cpu, restart);
+            restart = (restart == 1) ? 2 : 1;
+            frame_counter = 0;
         }
     }
     
