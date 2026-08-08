@@ -18,8 +18,18 @@ void usage(const char* name) {
     printf("\tNUM_ITER number of iterations to execute.\n");
 }
 
-void print_instr(i8080_instruction_t instr, const i8080_t* cpu) {
-    fwrite(&cpu->mem[cpu->programCounter], sizeof(uint8_t), instr.instructionLength, stdout);
+size_t log_pos = 0;
+bool log_append(bytestream_t* log, const i8080_t* cpu, i8080_instruction_t instr) {
+    int instr_size = instr.instructionLength;
+    if (log_pos + instr_size >= log->size) {
+        return false; // log overflow
+    }
+    const uint8_t* ptr = &cpu->mem[instr.position];
+    for (int i = 0; i < instr_size; i++)
+        log->data[log_pos + i] = ptr[i];
+
+    log_pos += instr_size;
+    return true;
 }
 
 int main(int argc, char** argv) {
@@ -27,8 +37,6 @@ int main(int argc, char** argv) {
         usage(argv[0]);
         return -1;
     }
-
-    bool cpm_mode = false;
     
     i8080_t cpu;
     i8080_init(&cpu);
@@ -45,7 +53,6 @@ int main(int argc, char** argv) {
         i8080_memory_write(&cpu, *program, 0x100);
         cpu.mem[5] = 0xC9;
         cpu.programCounter = 0x100;
-        cpm_mode = true;
     } else if (strcmp(argv[2], "INV") == 0) {
         i8080_memory_write(&cpu, *program, 0);
     } else {
@@ -56,21 +63,28 @@ int main(int argc, char** argv) {
     bytestream_destroy(program);
 
     size_t num_iter = strtoul(argv[3], NULL, 0);
+    bytestream_t* log = bytestream_new(3 * (num_iter + 1) * sizeof(uint8_t));
     for (size_t i = 0; i < num_iter; i++) {
         i8080_instruction_t instr = disassemble_instruction(cpu.mem, cpu.programCounter);
-        print_instr(instr, &cpu);
+        if (!log_append(log, &cpu, instr)) {
+            printf("Halting early: log ran out of memory!");
+            break;
+        }
 
         int result = i8080_execute(&cpu);
         if (result < 0) {
             printf(
                 "Halting early due to %s",
                 result == I8080_HALT ?
-                    "HALT instruction" :
-                    "CPU failure"
+                "HALT instruction" :
+                "CPU failure"
             );
             break;
         }
     }
-
+    
+    FILE* ofp = safe_fopen("instr.bin", "wb");
+    fwrite(log->data, sizeof(uint8_t), log_pos, ofp);
+    fclose(ofp);
     return 0;
 }
