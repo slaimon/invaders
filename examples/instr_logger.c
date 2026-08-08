@@ -67,14 +67,14 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < num_iter; i++) {
         i8080_instruction_t instr = disassemble_instruction(cpu.mem, cpu.programCounter);
         if (!log_append(log, &cpu, instr)) {
-            printf("Halting early: log ran out of memory!");
+            printf("Halting early: log ran out of memory!\n");
             break;
         }
 
         int result = i8080_execute(&cpu);
         if (result < 0) {
             printf(
-                "Halting early due to %s",
+                "Halting early due to %s\n",
                 result == I8080_HALT ?
                 "HALT instruction" :
                 "CPU failure"
