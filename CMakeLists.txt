@@ -65,6 +65,14 @@ add_executable(
     ${SOURCE}/bytestream.c
     ${SOURCE}/safe.c
 )
+add_executable(
+    instr_logger
+    ${EXAMPLES}/instr_logger.c
+    ${SOURCE}/i8080_disassembler.c
+    ${SOURCE}/i8080.c
+    ${SOURCE}/bytestream.c
+    ${SOURCE}/safe.c
+)
 
 # space invaders
 add_executable(
