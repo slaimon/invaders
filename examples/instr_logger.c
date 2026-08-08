@@ -10,8 +10,8 @@
 
 
 void usage(const char* name) {
-    printf("Prints to stdout the instructions executed by an i8080 CPU.\n");
-    printf("Redirect them to a file or to an audio device because why not.\n");
+    printf("Records the instructions executed by an i8080 CPU and writes them\n");
+    printf("to a file. The output file is called \"instr.bin\" by default.\n");
     printf("Usage: %s ROM_FILE [CPM|INV] NUM_ITER\n", name);
     printf("\tROM_FILE path to ROM file to execute.\n");
     printf("\tCPM|INV execution mode: either CPM for a CP/M program or INV for Space Invaders.\n");
